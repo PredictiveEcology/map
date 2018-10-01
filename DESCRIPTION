@@ -1,11 +1,43 @@
 Package: map
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Title: Defines a meta class of geographical objects, the 'map' class, and associated tools
+Description: The map class is a collection of map objects (sp, raster, sf), with a 
+    number of metadata additions to enable powerful methods, e.g., 
+    for leaflet, reproducible GIS etc.
+URL: 
+    http://map.predictiveecology.org,
+    https://github.com/PredictiveEcology/map
+Date: 2018-10-01
+Version: 0.0.1
+Authors@R: c(
+    person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
+    role = c("aut", "cre"), comment=c(ORCID = "https://orcid.org/0000-0002-6914-8316")),
+    person("Alex M", "Chubaty", email = "alex.chubaty@gmail.com",
+    role = c("aut"), comment = c(ORCID = "https://orcid.org/0000-0001-7146-8135")),
+    person("Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources Canada",
+    role = "cph")
+    )
+Depends:
+    R (>= 3.3.0)
+Imports:
+    backports,
+    data.table (>= 1.10.4),
+    reproducible,
+    raster,
+    rgeos,
+    sf,
+    sp,
+    testthat
+Suggests:
+    covr
+Remotes:
+    PredictiveEcology/reproducible@development
 Encoding: UTF-8
-LazyData: true
+Language: en-CA
+LinkingTo: Rcpp
+License: GPL-3
+VignetteBuilder: knitr, rmarkdown
+BugReports: https://github.com/PredictiveEcology/map/issues
+ByteCompile: yes
+RoxygenNote: 6.1.0.9000
+
