@@ -332,13 +332,15 @@ spatialPoints <- function(map) {
 
 #' Extract maps from a \code{map} object
 #'
-#' This will extract all objects in or pointed to within the \code{map}
+#' This will extract all objects in or pointed to within the \code{map}.
 #'
 #' @export
 #' @param map A \code{map} class object
 #' @param class If supplied, this will be the class of objects returned. Default
 #'              is \code{NULL} which is "all", meaning all objects in the \code{map}
 #'              object
+#' @return
+#' A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
 maps <- function(map, class = NULL) {
   lsObjs <- ls(ml@maps)
   objs <- mget(lsObjs, ml@maps)
