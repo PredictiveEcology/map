@@ -1,4 +1,4 @@
-#' The \code{mapList} class
+#' The \code{map} class
 #'
 #' Contains a common system for organzing vector and raster
 #' layers, principly for use with leaflet and shiny.
@@ -16,13 +16,13 @@
 #'
 #' @slot analysesData A data.table or data.frame of the results of the analyses
 #'
-#' @aliases mapList
-#' @rdname mapList-class
-#' @exportClass mapList
+#' @aliases map
+#' @rdname map-class
+#' @exportClass map
 #' @importFrom data.table data.table
 #' @importFrom raster crs raster
 setClass(
-  "mapList",
+  "map",
   slots = list(
     metadata = "data.table",
     maps = "environment",
@@ -43,10 +43,9 @@ setClass(
   }
 )
 
-setMethod("initialize", "mapList",
+setMethod("initialize", "map",
           function(.Object, ...) {
             .Object <- callNextMethod()
-            browser()
             .Object@metadata = data.table(layerName = character(), layerType = character(),
                                           sourceURL = character(),
                                           columnNameForLabels = character(),
@@ -61,8 +60,9 @@ setMethod("initialize", "mapList",
             .Object
           })
 
-#' Append a spatial object to mapList
+#' Append a spatial object to map
 #' @export
+#' @rdname mapAdd
 #' @examples
 #' library(sp)
 #' library(raster)
@@ -74,22 +74,23 @@ setMethod("initialize", "mapList",
 #' StudyArea <- SpatialPolygons(list(Srs1), 1L)
 #' crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 #'
-#' ml <- new("mapList")
-#' appendMapList(StudyArea, ml, studyArea = TRUE, layerName = "newPoly")
+#' ml <- new("map")
+#' mapAdd(StudyArea, ml, studyArea = TRUE, layerName = "newPoly")
 #'
-appendMapList <- function(object, mapList, layerName, overwrite = FALSE, ...)
-  UseMethod("appendMapList")
+mapAdd <- function(object, map, layerName, overwrite = FALSE, ...)
+  UseMethod("mapAdd")
 
 #' @export
+#' @rdname mapAdd
 #' @importFrom reproducible prepInputs
-appendMapList.default <- function(object = NULL, mapList = NULL,
+mapAdd.default <- function(object = NULL, map = NULL,
                                   layerName = NULL, overwrite = FALSE,
                                   sourceURL = NULL,
                                   columnNameForLabels = character(),
                                   leafletVisible = TRUE, studyArea = FALSE, ...) {
   browser()
-  if (is.null(mapList)) {
-    mapList <- new("mapList")
+  if (is.null(map)) {
+    map <- new("map")
   }
   if (is.null(object)) {
     if (is.null(sourceURL)) {
@@ -97,73 +98,71 @@ appendMapList.default <- function(object = NULL, mapList = NULL,
     } else {
       object <- prepInputs(url = sourceURL)
     }
-    mapList <- appendMapList(object, mapList = mapList, layerName = layerName,
+    map <- mapAdd(object, map = map, layerName = layerName,
                              overwrite = overwrite,
                              sourceURL = sourceURL, columnNameForLabels = columnNameForLabels,
                              leafletVisible = leafletVisible, studyArea = studyArea)
   }
 
-  mapList
+  map
 }
 
 #' @export
+#' @rdname mapAdd
 #' @importFrom reproducible fixErrors projectInputs postProcess
-#' @importFrom data.table rbindlist
+#' @importFrom data.table rbindlist set
 #' @param ... passed to reproducible::postProcess and reproducible::projectInputs and
 #'            reproducible::fixErrors
-appendMapList.SpatialPolygons <- function(object, mapList = NULL, layerName = NULL,
+mapAdd.SpatialPolygons <- function(object, map = NULL, layerName = NULL,
                                           overwrite = FALSE, sourceURL = NULL,
                                           columnNameForLabels = NULL,
                                           leafletVisible = TRUE, studyArea = NULL, ...) {
   objectName <- deparse(substitute(object))
-  #objectEnv <- pryr::where(objectName)
   objectEnv <- quickPlot::whereInStack(objectName)
 
-  browser()
-  mustOverwrite <- if (isTRUE(layerName %in% ls(mapList@maps))) {
+  mustOverwrite <- if (isTRUE(layerName %in% ls(map@maps))) {
     if (isTRUE(overwrite)) {
-      message(layerName, " already in mapList; overwriting")
+      message(layerName, " already in map; overwriting")
     } else {
-      stop(layerName, " already in mapList; stopping. Want overwrite = TRUE?")
+      stop(layerName, " already in map; stopping. Want overwrite = TRUE?")
     }
     TRUE
   } else {
     FALSE
   }
-  if (is.null(studyArea(mapList))) {
+  if (is.null(studyArea(map))) {
     object <- fixErrors(object, ...)
     if (isFALSE(studyArea)) {
-      message("There is no studyArea in mapList; consider adding one with 'studyArea = TRUE'")
+      message("There is no studyArea in map; consider adding one with 'studyArea = TRUE'")
     }
-    if (is.na(crs(mapList))) {
-      message("No crs already in mapList, so no reprojection")
+    if (is.na(crs(map))) {
+      message("No crs already in map, so no reprojection")
     } else {
-      object <- projectInputs(object, targetCRS = crs(mapList), ...)
+      object <- projectInputs(object, targetCRS = crs(map), ...)
     }
   } else {
-    if (is.na(crs(mapList))) {
-      message("There is no CRS already in mapList; using the studyArea CRS and adding that to mapList")
+    if (is.na(crs(map))) {
+      message("There is no CRS already in map; using the studyArea CRS and adding that to map")
     } else {
-      object <- postProcess(object, studyArea = studyArea(mapList), ...)
+      object <- postProcess(object, studyArea = studyArea(map), ...)
     }
   }
 
   # Put map into map slot
-  browser()
-  assign(layerName, object, envir = mapList@maps) # this overwrites, if same name
+  assign(layerName, object, envir = map@maps) # this overwrites, if same name
   if (mustOverwrite) {
     ln <- layerName
-    mapList@metadata <- mapList@metadata[!(layerName %in% ln)]
+    map@metadata <- map@metadata[!(layerName %in% ln)]
   }
 
   b <- .singleMetadataNAEntry
   if (isTRUE(studyArea)) {
-    if (!is.null(studyArea(mapList))) {
-      message("mapList already has a studyArea; adding another one as study area ",
-              1 + NROW(mapList@metadata[studyArea == TRUE]))
+    if (!is.null(studyArea(map))) {
+      message("map already has a studyArea; adding another one as study area ",
+              1 + NROW(map@metadata[studyArea == TRUE]))
     } else {
-      message("Setting mapList CRS to this layer because it is the (first) studyArea inserted")
-      mapList@CRS <- raster::crs(object)
+      message("Setting map CRS to this layer because it is the (first) studyArea inserted")
+      map@CRS <- raster::crs(object)
     }
     set(b, , "studyArea", TRUE)
   }
@@ -182,41 +181,54 @@ appendMapList.SpatialPolygons <- function(object, mapList = NULL, layerName = NU
   set(b, , "objectEnvironment", list(list(objectEnv)))
   set(b, , "objectName", objectName)
 
-  mapList@metadata <- rbindlist(list(mapList@metadata, b), use.names = TRUE, fill = TRUE)
-  return(mapList)
+  map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
+  return(map)
 }
 
 
 
 #' @export
-removeMap <- function(mapList, layer, ask = TRUE, ...)
-  UseMethod("removeMap")
+#' @rdname mapMethods
+#' @aliases mapRm
+mapRm <- function(map, layer, ask = TRUE, ...)
+  UseMethod("mapRm")
 
-removeMap.default <- function(mapList = NULL,
-                              layer = NULL, ask = TRUE, ...) {
-  if (is.null(mapList)) {
-    stop("Must pass a mapList")
+#' @export
+#' @rdname mapMethods
+mapRm.default <- function(map = NULL,
+                          layer = NULL, ask = TRUE, ...) {
+  if (is.null(map)) {
+    stop("Must pass a map")
   }
   if (is.character(layer))
-    layer <- mapList@metadata[, which(layerName %in% layer) ]
+    layer <- map@metadata[, which(layerName %in% layer) ]
 
   layerName
   browser()
-  layerName <- unique(mapList@metadata[ layer , layerName])
+  layerName <- unique(map@metadata[ layer , layerName])
   if (length(layer > 1))
-    stop("There are more than object in mapList with that layer name, '",
+    stop("There are more than object in map with that layer name, '",
          layerName,"'. Please indicate layer ",
-         "by row number in mapList@metadata")
+         "by row number in map@metadata")
 
   rm(layerName)
 
 }
 
+
+if (!isGeneric("crs")) {
+  setGeneric("crs", function(x, ...) {
+    standardGeneric("crs")
+  })
+}
+
 #' @importMethodsFrom raster crs
 #' @importFrom raster crs
 #' @exportMethod crs
+#' @rdname mapMethods
+#' @aliases crs
 setMethod("crs",
-          signature = "mapList",
+          signature = "map",
           function(x, ...) {
             if (!is.null(x@CRS))
               x@CRS
@@ -224,26 +236,52 @@ setMethod("crs",
               NA
           })
 
+#' Map class methods
+#'
+#' Tools for getting objects and metadata in and out of a \code{map} class.
+#'
 #' @export
-studyAreaName <- function(mapList, layer = 1) {
-  if (sum(mapList@metadata$studyArea)) {
-    mapList@metadata[studyArea == TRUE, layerName][layer]
+#' @rdname mapMethods
+studyAreaName <- function(map, layer)
+  UseMethod("studyAreaName")
+
+
+#' @export
+#' @rdname mapMethods
+#' @aliases studyAreaName
+studyAreaName.map <- function(map, layer = 1) {
+  if (sum(map@metadata$studyArea)) {
+    map@metadata[studyArea == TRUE, layerName][layer]
   } else {
     NULL
   }
 }
 
 #' @export
-studyArea <- function(mapList, layer = 1) {
-  if (sum(mapList@metadata$studyArea)) {
-    get(mapList@metadata[studyArea == TRUE, layerName][layer], mapList@maps)
+#' @rdname mapMethods
+#' @inheritParams map-class
+#' @aliases studyArea
+studyArea <- function(map, layer)
+  UseMethod("studyArea")
+
+#' @export
+#' @rdname mapMethods
+studyArea.map <- function(map, layer = 1) {
+  if (sum(map@metadata$studyArea)) {
+    get(map@metadata[studyArea == TRUE, layerName][layer], map@maps)
   } else {
     NULL
   }
 }
 
 #' @export
-rasters <- function(mapList) {
+#' @rdname mapMethods
+rasters <- function(map)
+  UseMethod("rasters")
+
+#' @export
+#' @rdname mapMethods
+rasters.map <- function(map) {
   lsObjs <- ls(ml@maps)
   logicalRasters <- unlist(lapply(mget(lsObjs, ml@maps), is, "RasterLayer"))
   if (any(logicalRasters)) {
@@ -255,7 +293,7 @@ rasters <- function(mapList) {
 
 
 #' @export
-spatialPolygons <- function(mapList) {
+spatialPolygons <- function(map) {
   lsObjs <- ls(ml@maps)
   logicalRasters <- unlist(lapply(mget(lsObjs, ml@maps), is, "SpatialPolygons"))
   if (any(logicalRasters)) {
@@ -266,7 +304,7 @@ spatialPolygons <- function(mapList) {
 }
 
 #' @export
-spatialPoints <- function(mapList) {
+spatialPoints <- function(map) {
   lsObjs <- ls(ml@maps)
   logicalRasters <- unlist(lapply(mget(lsObjs, ml@maps), is, "SpatialPoints"))
   if (any(logicalRasters)) {
@@ -277,7 +315,7 @@ spatialPoints <- function(mapList) {
 }
 
 #' @export
-maps <- function(mapList) {
+maps <- function(map) {
   lsObjs <- ls(ml@maps)
   mget(lsObjs, ml@maps)
 }
