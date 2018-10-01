@@ -15,11 +15,15 @@ mapAdd(object, map, layerName, overwrite = FALSE, ...)
 
 \method{mapAdd}{SpatialPolygons}(object, map = NULL, layerName = NULL,
   overwrite = FALSE, sourceURL = NULL, columnNameForLabels = NULL,
-  leafletVisible = TRUE, studyArea = NULL, ...)
+  leafletVisible = TRUE, studyArea = NULL, pointToEnvir = NULL, ...)
 }
 \arguments{
 \item{...}{passed to reproducible::postProcess and reproducible::projectInputs and
 reproducible::fixErrors and reproducible::prepInputs}
+
+\item{pointToEnvir}{An optional environment. If supplied, then the object
+will not be placed "into" the maps slot, rather the environment label will
+be placed into the maps slot. Upon re}
 }
 \description{
 Append a spatial object to map
@@ -39,8 +43,9 @@ ml <- new("map")
 ml <- mapAdd(StudyArea, ml, studyArea = TRUE, layerName = "newPoly")
 
 if (requireNamespace("SpaDES.tools")) {
-  smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml, 1e2))
-  ml <- mapAdd(smallStudyArea, ml, studyArea = TRUE) # adds a second studyArea within 1st
+  smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml), 1e2)
+  ml <- mapAdd(smallStudyArea, ml, studyArea = TRUE, filename2 = NULL,
+               envir = .GlobalEnv) # adds a second studyArea within 1st
 }
 
 }

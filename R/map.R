@@ -213,6 +213,7 @@ mapAdd.SpatialPolygons <- function(object, map = NULL, layerName = NULL,
 
 
 
+#' Remove objects from a \code{map}
 #' @export
 #' @family mapMethods
 #' @inheritParams map-class
@@ -251,6 +252,7 @@ if (!isGeneric("crs")) {
   })
 }
 
+#' Extract the crs of a \code{map}
 #' @importMethodsFrom raster crs
 #' @importFrom raster crs
 #' @exportMethod crs
@@ -287,6 +289,7 @@ studyAreaName.map <- function(map, layer = 1) {
   }
 }
 
+#' Extract the studyArea(s) from a \code{map}
 #' @export
 #' @family mapMethods
 #' @inheritParams map-class
@@ -308,24 +311,26 @@ studyArea.map <- function(map, layer = 1) {
 #' Extract rasters in the \code{map} object
 #' @export
 #' @family mapMethods
-#' @rdname rasters
+#' @rdname maps
 rasters <- function(map)
   UseMethod("rasters")
 
 #' @export
 #' @family mapMethods
-#' @rdname rasters
+#' @rdname maps
 rasters.map <- function(map) {
   allObjs <- maps(map, "RasterLayer")
 }
 
 
 #' @export
+#' @rdname maps
 spatialPolygons <- function(map) {
   allObjs <- maps(map, "SpatialPolygons")
 }
 
 #' @export
+#' @rdname maps
 spatialPoints <- function(map) {
   allObjs <- maps(map, "SpatialPoints")
 }
@@ -363,20 +368,14 @@ maps <- function(map, class = NULL) {
 
 
 
-#' Calculate area of (named) objects the \code{map} object
-#' @export
-#' @family mapMethods
-#' @rdname area
-
-
-#' @importMethodsFrom raster area
-#' @importFrom raster area
 if (!isGeneric("area")) {
   setGeneric("area", function(x, ...) {
     standardGeneric("area")
   })
 }
 
+#' Calculate area of (named) objects the \code{map} object
+#'
 #' @export
 #' @importMethodsFrom raster area
 #' @importFrom raster area
