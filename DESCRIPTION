@@ -29,7 +29,8 @@ Imports:
     sp,
     testthat
 Suggests:
-    covr
+    covr,
+    SpaDES.tools
 Remotes:
     PredictiveEcology/reproducible@development
 Encoding: UTF-8

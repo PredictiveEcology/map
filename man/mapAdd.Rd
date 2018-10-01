@@ -19,7 +19,7 @@ mapAdd(object, map, layerName, overwrite = FALSE, ...)
 }
 \arguments{
 \item{...}{passed to reproducible::postProcess and reproducible::projectInputs and
-reproducible::fixErrors}
+reproducible::fixErrors and reproducible::prepInputs}
 }
 \description{
 Append a spatial object to map
@@ -36,6 +36,11 @@ StudyArea <- SpatialPolygons(list(Srs1), 1L)
 crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 
 ml <- new("map")
-mapAdd(StudyArea, ml, studyArea = TRUE, layerName = "newPoly")
+ml <- mapAdd(StudyArea, ml, studyArea = TRUE, layerName = "newPoly")
+
+if (requireNamespace("SpaDES.tools")) {
+  smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml, 1e2))
+  ml <- mapAdd(smallStudyArea, ml, studyArea = TRUE) # adds a second studyArea within 1st
+}
 
 }

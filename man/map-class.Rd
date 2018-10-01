@@ -12,10 +12,12 @@ layers, principly for use with leaflet and shiny.
 \section{Slots}{
 
 \describe{
-\item{\code{metadata}}{List of character names specifying which modules to load.}
+\item{\code{metadata}}{\code{data.table} with columns describing metadata of map objects in
+\code{maps} slot.}
 
-\item{\code{maps}}{Named list of map-type objects (e.g., \code{sf}, \code{Raster*},
-\code{Spatial*}.}
+\item{\code{maps}}{Named environment of map-type objects (e.g., \code{sf}, \code{Raster*},
+\code{Spatial*}. Each entry may also be simply an environment, which
+indicates where to find the object, i.e., via \code{get(layerName, envir = environment)}}
 
 \item{\code{rasterTiles}}{Paths to rasterTiles}
 

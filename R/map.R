@@ -3,10 +3,12 @@
 #' Contains a common system for organzing vector and raster
 #' layers, principly for use with leaflet and shiny.
 #'
-#' @slot metadata    List of character names specifying which modules to load.
+#' @slot metadata  \code{data.table} with columns describing metadata of map objects in
+#'                 \code{maps} slot.
 #'
-#' @slot maps Named list of map-type objects (e.g., \code{sf}, \code{Raster*},
-#'            \code{Spatial*}.
+#' @slot maps Named environment of map-type objects (e.g., \code{sf}, \code{Raster*},
+#'            \code{Spatial*}. Each entry may also be simply an environment, which
+#'            indicates where to find the object, i.e., via \code{get(layerName, envir = environment)}
 #'
 #' @slot rasterTiles Paths to rasterTiles
 #'
@@ -75,7 +77,13 @@ setMethod("initialize", "map",
 #' crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 #'
 #' ml <- new("map")
-#' mapAdd(StudyArea, ml, studyArea = TRUE, layerName = "newPoly")
+#' ml <- mapAdd(StudyArea, ml, studyArea = TRUE, layerName = "newPoly")
+#'
+#' if (requireNamespace("SpaDES.tools")) {
+#'   smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml), 1e2)
+#'   ml <- mapAdd(smallStudyArea, ml, studyArea = TRUE, filename2 = NULL,
+#'                envir = .GlobalEnv) # adds a second studyArea within 1st
+#' }
 #'
 mapAdd <- function(object, map, layerName, overwrite = FALSE, ...)
   UseMethod("mapAdd")
@@ -83,6 +91,8 @@ mapAdd <- function(object, map, layerName, overwrite = FALSE, ...)
 #' @export
 #' @rdname mapAdd
 #' @importFrom reproducible prepInputs
+#' @param ... passed to reproducible::postProcess and reproducible::projectInputs and
+#'            reproducible::fixErrors and reproducible::prepInputs
 mapAdd.default <- function(object = NULL, map = NULL,
                                   layerName = NULL, overwrite = FALSE,
                                   sourceURL = NULL,
@@ -96,7 +106,7 @@ mapAdd.default <- function(object = NULL, map = NULL,
     if (is.null(sourceURL)) {
       stop("Must provide either object or sourceURL")
     } else {
-      object <- prepInputs(url = sourceURL)
+      object <- prepInputs(url = sourceURL, ...)
     }
     map <- mapAdd(object, map = map, layerName = layerName,
                              overwrite = overwrite,
@@ -111,12 +121,15 @@ mapAdd.default <- function(object = NULL, map = NULL,
 #' @rdname mapAdd
 #' @importFrom reproducible fixErrors projectInputs postProcess
 #' @importFrom data.table rbindlist set
-#' @param ... passed to reproducible::postProcess and reproducible::projectInputs and
-#'            reproducible::fixErrors
+#' @param pointToEnvir An optional environment. If supplied, then the object
+#'        will not be placed "into" the maps slot, rather the environment label will
+#'        be placed into the maps slot. Upon re
 mapAdd.SpatialPolygons <- function(object, map = NULL, layerName = NULL,
-                                          overwrite = FALSE, sourceURL = NULL,
-                                          columnNameForLabels = NULL,
-                                          leafletVisible = TRUE, studyArea = NULL, ...) {
+                                   overwrite = FALSE, sourceURL = NULL,
+                                   columnNameForLabels = NULL,
+                                   leafletVisible = TRUE, studyArea = NULL,
+                                   pointToEnvir = NULL, ...) {
+  browser()
   objectName <- deparse(substitute(object))
   objectEnv <- quickPlot::whereInStack(objectName)
 
@@ -148,8 +161,21 @@ mapAdd.SpatialPolygons <- function(object, map = NULL, layerName = NULL,
     }
   }
 
-  # Put map into map slot
-  assign(layerName, object, envir = map@maps) # this overwrites, if same name
+  if (is.null(layerName)) {
+    layerName <- objectName
+  }
+
+  if (is.null(pointToEnvir)) {
+    # Put map into map slot
+    assign(layerName, object, envir = map@maps) # this overwrites, if same name
+  } else {
+
+    if (exists(layerName, envir = pointToEnvir)) {
+      assign(layerName, pointToEnvir, envir = map@maps)
+    } else {
+      stop("object named ", layerName, " does not exist in pointToEnvir: ", pointToEnvir)
+    }
+  }
   if (mustOverwrite) {
     ln <- layerName
     map@metadata <- map@metadata[!(layerName %in% ln)]
@@ -178,7 +204,7 @@ mapAdd.SpatialPolygons <- function(object, map = NULL, layerName = NULL,
   if (isFALSE(leafletVisible))
     set(b, , "leafletVisible", leafletVisible)
 
-  set(b, , "objectEnvironment", list(list(objectEnv)))
+  set(b, , "objectEnvironment", list(list(pointToEnvir)))
   set(b, , "objectName", objectName)
 
   map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
@@ -188,13 +214,16 @@ mapAdd.SpatialPolygons <- function(object, map = NULL, layerName = NULL,
 
 
 #' @export
-#' @rdname mapMethods
-#' @aliases mapRm
+#' @family mapMethods
+#' @inheritParams map-class
+#' @rdname mapRm
 mapRm <- function(map, layer, ask = TRUE, ...)
   UseMethod("mapRm")
 
 #' @export
-#' @rdname mapMethods
+#' @aliases mapRm
+#' @family mapMethods
+#' @rdname mapRm
 mapRm.default <- function(map = NULL,
                           layer = NULL, ask = TRUE, ...) {
   if (is.null(map)) {
@@ -225,8 +254,8 @@ if (!isGeneric("crs")) {
 #' @importMethodsFrom raster crs
 #' @importFrom raster crs
 #' @exportMethod crs
-#' @rdname mapMethods
-#' @aliases crs
+#' @family mapMethods
+#' @rdname crs
 setMethod("crs",
           signature = "map",
           function(x, ...) {
@@ -241,14 +270,15 @@ setMethod("crs",
 #' Tools for getting objects and metadata in and out of a \code{map} class.
 #'
 #' @export
-#' @rdname mapMethods
+#' @family mapMethods
+#' @rdname studyAreaName
 studyAreaName <- function(map, layer)
   UseMethod("studyAreaName")
 
 
 #' @export
-#' @rdname mapMethods
-#' @aliases studyAreaName
+#' @family mapMethods
+#' @rdname studyAreaName
 studyAreaName.map <- function(map, layer = 1) {
   if (sum(map@metadata$studyArea)) {
     map@metadata[studyArea == TRUE, layerName][layer]
@@ -258,14 +288,15 @@ studyAreaName.map <- function(map, layer = 1) {
 }
 
 #' @export
-#' @rdname mapMethods
+#' @family mapMethods
 #' @inheritParams map-class
-#' @aliases studyArea
+#' @rdname studyArea
 studyArea <- function(map, layer)
   UseMethod("studyArea")
 
 #' @export
-#' @rdname mapMethods
+#' @family mapMethods
+#' @rdname studyArea
 studyArea.map <- function(map, layer = 1) {
   if (sum(map@metadata$studyArea)) {
     get(map@metadata[studyArea == TRUE, layerName][layer], map@maps)
@@ -274,50 +305,52 @@ studyArea.map <- function(map, layer = 1) {
   }
 }
 
+#' Extract rasters in the \code{map} object
 #' @export
-#' @rdname mapMethods
+#' @family mapMethods
+#' @rdname rasters
 rasters <- function(map)
   UseMethod("rasters")
 
 #' @export
-#' @rdname mapMethods
+#' @family mapMethods
+#' @rdname rasters
 rasters.map <- function(map) {
-  lsObjs <- ls(ml@maps)
-  logicalRasters <- unlist(lapply(mget(lsObjs, ml@maps), is, "RasterLayer"))
-  if (any(logicalRasters)) {
-    mget(names(logicalRasters)[logicalRasters], ml@maps)
-  } else {
-    NULL
-  }
+  allObjs <- maps(map, "RasterLayer")
 }
 
 
 #' @export
 spatialPolygons <- function(map) {
-  lsObjs <- ls(ml@maps)
-  logicalRasters <- unlist(lapply(mget(lsObjs, ml@maps), is, "SpatialPolygons"))
-  if (any(logicalRasters)) {
-    mget(names(logicalRasters)[logicalRasters], ml@maps)
-  } else {
-    NULL
-  }
+  allObjs <- maps(map, "SpatialPolygons")
 }
 
 #' @export
 spatialPoints <- function(map) {
-  lsObjs <- ls(ml@maps)
-  logicalRasters <- unlist(lapply(mget(lsObjs, ml@maps), is, "SpatialPoints"))
-  if (any(logicalRasters)) {
-    mget(names(logicalRasters)[logicalRasters], ml@maps)
-  } else {
-    NULL
-  }
+  allObjs <- maps(map, "SpatialPoints")
 }
 
+#' Extract maps from a \code{map} object
+#'
+#' This will extract all objects in or pointed to within the \code{map}
+#'
 #' @export
-maps <- function(map) {
+#' @param map A \code{map} class object
+#' @param class If supplied, this will be the class of objects returned. Default
+#'              is \code{NULL} which is "all", meaning all objects in the \code{map}
+#'              object
+maps <- function(map, class = NULL) {
   lsObjs <- ls(ml@maps)
-  mget(lsObjs, ml@maps)
+  objs <- mget(lsObjs, ml@maps)
+  envirs <- unlist(lapply(objs, is.environment))
+  objsInEnvirs <- Map(objs = lsObjs[envirs], envirs = unname(mget(lsObjs[envirs], envir = map@maps)),
+      function(objs, envirs) get(objs, envirs))
+  objs[envirs] <- objsInEnvirs
+  if (!is.null(class)) {
+    logicalMaps <- unlist(lapply(objs, is, class))
+    objs <- objs[logicalMaps]
+  }
+  objs
 }
 
 .singleMetadataNAEntry <-
@@ -327,3 +360,35 @@ maps <- function(map) {
                          leafletVisible = TRUE, studyArea = FALSE)
 
 
+
+#' Calculate area of (named) objects the \code{map} object
+#' @export
+#' @family mapMethods
+#' @rdname area
+
+
+#' @importMethodsFrom raster area
+#' @importFrom raster area
+if (!isGeneric("area")) {
+  setGeneric("area", function(x, ...) {
+    standardGeneric("area")
+  })
+}
+
+#' @export
+#' @importMethodsFrom raster area
+#' @importFrom raster area
+#' @family mapMethods
+#' @rdname area
+setMethod("area",
+          signature = "map",
+          function(x) {
+            browser()
+  lsObjs <- ls(ml@maps)
+  logicalRasters <- unlist(lapply(mget(lsObjs, ml@maps), is, "RasterLayer"))
+  if (any(logicalRasters)) {
+    mget(names(logicalRasters)[logicalRasters], ml@maps)
+  } else {
+    NULL
+  }
+})
