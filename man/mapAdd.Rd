@@ -3,19 +3,19 @@
 \name{mapAdd}
 \alias{mapAdd}
 \alias{mapAdd.default}
-\alias{mapAdd.SpatialPolygons}
+\alias{mapAdd.spatialObjects}
 \title{Append a spatial object to map}
 \usage{
 mapAdd(object, map, layerName, overwrite = FALSE, ...)
 
 \method{mapAdd}{default}(object = NULL, map = NULL, layerName = NULL,
   overwrite = FALSE, sourceURL = NULL,
-  columnNameForLabels = character(), leafletVisible = TRUE,
-  studyArea = FALSE, ...)
+  columnNameForLabels = character(), leaflet = TRUE,
+  isStudyArea = FALSE, ...)
 
-\method{mapAdd}{SpatialPolygons}(object, map = NULL, layerName = NULL,
+\method{mapAdd}{spatialObjects}(object, map = NULL, layerName = NULL,
   overwrite = FALSE, sourceURL = NULL, columnNameForLabels = NULL,
-  leafletVisible = TRUE, studyArea = NULL, pointToEnvir = NULL, ...)
+  leaflet = TRUE, isStudyArea = NULL, pointToEnvir = NULL, ...)
 }
 \arguments{
 \item{...}{passed to reproducible::postProcess and reproducible::projectInputs and
@@ -40,11 +40,11 @@ StudyArea <- SpatialPolygons(list(Srs1), 1L)
 crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 
 ml <- new("map")
-ml <- mapAdd(StudyArea, ml, studyArea = TRUE, layerName = "newPoly")
+ml <- mapAdd(StudyArea, ml, isStudyArea = TRUE, layerName = "newPoly")
 
 if (requireNamespace("SpaDES.tools")) {
   smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml), 1e2)
-  ml <- mapAdd(smallStudyArea, ml, studyArea = TRUE, filename2 = NULL,
+  ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
                envir = .GlobalEnv) # adds a second studyArea within 1st
 }
 

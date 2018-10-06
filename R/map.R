@@ -10,10 +10,8 @@
 #'            \code{Spatial*}. Each entry may also be simply an environment, which
 #'            indicates where to find the object, i.e., via \code{get(layerName, envir = environment)}
 #'
-#' @slot rasterTiles Paths to rasterTiles
-#'
 #' @slot CRS  The common crs of all layers
-#' @slot rasterTemplate The empty raster with all metadata filled
+#' @slot rasterToMatch The empty raster with all metadata filled
 #' @slot analyses    A data.table or data.frame of the types of analyses to perform
 #'
 #' @slot analysesData A data.table or data.frame of the results of the analyses
@@ -28,13 +26,13 @@ setClass(
   slots = list(
     metadata = "data.table",
     maps = "environment",
-    rasterTiles = "character",
     CRS = "CRS",
-    rasterTemplate = "RasterLayer",
+    rasterToMatch = "RasterLayer",
     analyses = "data.table",
     analysesData = "list"
   ),
   validity = function(object) {
+    browser()
     #if (is.na(object@simtimes$end)) {
     #  stop("simulation end time must be specified.")
     #} else {
@@ -51,10 +49,9 @@ setMethod("initialize", "map",
             .Object@metadata = data.table(layerName = character(), layerType = character(),
                                           sourceURL = character(),
                                           columnNameForLabels = character(),
-                                          leafletVisible = logical(), studyArea = logical())
+                                          leaflet = logical(), isStudyArea = logical())
             .Object@maps = new.env()
-            .Object@rasterTiles = character()
-            #.Object@rasterTemplate = NULL
+            #.Object@rasterToMatch = NULL
             .Object@CRS = sp::CRS()
             .Object@analyses = data.table::data.table()
             .Object@analysesData = list()
@@ -77,11 +74,11 @@ setMethod("initialize", "map",
 #' crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 #'
 #' ml <- new("map")
-#' ml <- mapAdd(StudyArea, ml, studyArea = TRUE, layerName = "newPoly")
+#' ml <- mapAdd(StudyArea, ml, isStudyArea = TRUE, layerName = "newPoly")
 #'
 #' if (requireNamespace("SpaDES.tools")) {
 #'   smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml), 1e2)
-#'   ml <- mapAdd(smallStudyArea, ml, studyArea = TRUE, filename2 = NULL,
+#'   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
 #'                envir = .GlobalEnv) # adds a second studyArea within 1st
 #' }
 #'
@@ -90,30 +87,33 @@ mapAdd <- function(object, map, layerName, overwrite = FALSE, ...)
 
 #' @export
 #' @rdname mapAdd
-#' @importFrom reproducible prepInputs
+#' @importFrom reproducible prepInputs preProcess
 #' @param ... passed to reproducible::postProcess and reproducible::projectInputs and
 #'            reproducible::fixErrors and reproducible::prepInputs
 mapAdd.default <- function(object = NULL, map = NULL,
                                   layerName = NULL, overwrite = FALSE,
                                   sourceURL = NULL,
                                   columnNameForLabels = character(),
-                                  leafletVisible = TRUE, studyArea = FALSE, ...) {
-  browser()
+                                  leaflet = TRUE, isStudyArea = FALSE, ...) {
   if (is.null(map)) {
     map <- new("map")
   }
   if (is.null(object)) {
+    dots <- list(...)
     if (is.null(sourceURL)) {
       stop("Must provide either object or sourceURL")
     } else {
-      object <- prepInputs(url = sourceURL, ...)
+      # Don't run preProcess because that will happen in next mapAdd when object is
+      #   in hand
+      forms <- reproducible:::.formalsNotInCurrentDots(preProcess, ...)
+      args <- dots[!(names(dots) %in% forms)]
+      object <- do.call(prepInputs, args = append(list(url = sourceURL), args))
     }
     map <- mapAdd(object, map = map, layerName = layerName,
                              overwrite = overwrite,
                              sourceURL = sourceURL, columnNameForLabels = columnNameForLabels,
-                             leafletVisible = leafletVisible, studyArea = studyArea)
+                             leaflet = leaflet, isStudyArea = isStudyArea, ...)
   }
-
   map
 }
 
@@ -124,12 +124,13 @@ mapAdd.default <- function(object = NULL, map = NULL,
 #' @param pointToEnvir An optional environment. If supplied, then the object
 #'        will not be placed "into" the maps slot, rather the environment label will
 #'        be placed into the maps slot. Upon re
-mapAdd.SpatialPolygons <- function(object, map = NULL, layerName = NULL,
+#'
+mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
                                    overwrite = FALSE, sourceURL = NULL,
                                    columnNameForLabels = NULL,
-                                   leafletVisible = TRUE, studyArea = NULL,
+                                   leaflet = TRUE, isStudyArea = NULL,
                                    pointToEnvir = NULL, ...) {
-  browser()
+  dots <- list(...)
   objectName <- deparse(substitute(object))
   objectEnv <- quickPlot::whereInStack(objectName)
 
@@ -145,19 +146,28 @@ mapAdd.SpatialPolygons <- function(object, map = NULL, layerName = NULL,
   }
   if (is.null(studyArea(map))) {
     object <- fixErrors(object, ...)
-    if (isFALSE(studyArea)) {
+    if (isFALSE(isStudyArea)) {
       message("There is no studyArea in map; consider adding one with 'studyArea = TRUE'")
     }
     if (is.na(crs(map))) {
-      message("No crs already in map, so no reprojection")
+      if (is.null(dots$targetCRS)) { # OK ... user did not pass in targetCRS
+        message("No crs already in map, so no reprojection")
+      }
     } else {
-      object <- projectInputs(object, targetCRS = crs(map), ...)
+      dots[["targetCRS"]] <- crs(map)
     }
+    object <- do.call(projectInputs, append(list(object), dots))
   } else {
     if (is.na(crs(map))) {
       message("There is no CRS already in map; using the studyArea CRS and adding that to map")
     } else {
-      object <- postProcess(object, studyArea = studyArea(map), ...)
+      dots <- list(...)
+      # args <- if (!is.null(dots$studyArea)) {
+      #   dots[!names(dots) %in% "studyArea"]
+      # } else {
+      #   dots
+      # }
+      object <- do.call(postProcess, append(list(object), dots))
     }
   }
 
@@ -182,7 +192,7 @@ mapAdd.SpatialPolygons <- function(object, map = NULL, layerName = NULL,
   }
 
   b <- .singleMetadataNAEntry
-  if (isTRUE(studyArea)) {
+  if (isTRUE(isStudyArea)) {
     if (!is.null(studyArea(map))) {
       message("map already has a studyArea; adding another one as study area ",
               1 + NROW(map@metadata[studyArea == TRUE]))
@@ -201,8 +211,23 @@ mapAdd.SpatialPolygons <- function(object, map = NULL, layerName = NULL,
       set(b, , "columnNameForLabels", columnNameForLabels)
     }
   }
-  if (isFALSE(leafletVisible))
-    set(b, , "leafletVisible", leafletVisible)
+  if (leaflet) {
+    set(b, , "leaflet", leaflet)
+    if (is(object, "Raster")) {
+      object[] <- object[]
+      objectLflt <- projectRaster(object, crs = CRS("+init=epsg:4326"))
+      tmpFile <- tempfile(fileext = ".tif")
+      objectLflt <- writeRaster(objectLflt, tmpFile)
+      dig <- .robustDigest(objectLflt)
+      tilePath <- asPath(paste0("tiles_", layerName, "_", substr(dig, 1,5)))
+      message("Creating tiles")
+      if (isTRUE(getOption("reproducible.useCache", FALSE)) ||
+          getOption("reproducible.useCache", FALSE) == "overwrite") message("  using Cache. To revent this, set options('reproducible.useCache' = FALSE)")
+      Cache(tiler::tile, asPath(tmpFile), tilePath, zoom = "1-10", crs = CRS("+init=epsg:4326"),
+                  format = "tms", useCache = getOption("reproducible.useCache"))
+      set(b, , "leafletTiles", tilePath)
+    }
+  }
 
   set(b, , "objectEnvironment", list(list(pointToEnvir)))
   set(b, , "objectName", objectName)
@@ -210,6 +235,7 @@ mapAdd.SpatialPolygons <- function(object, map = NULL, layerName = NULL,
   map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
   return(map)
 }
+
 
 
 
@@ -234,7 +260,6 @@ mapRm.default <- function(map = NULL,
     layer <- map@metadata[, which(layerName %in% layer) ]
 
   layerName
-  browser()
   layerName <- unique(map@metadata[ layer , layerName])
   if (length(layer > 1))
     stop("There are more than object in map with that layer name, '",
@@ -319,20 +344,20 @@ rasters <- function(map)
 #' @family mapMethods
 #' @rdname maps
 rasters.map <- function(map) {
-  allObjs <- maps(map, "RasterLayer")
+  maps(map, "RasterLayer")
 }
 
 
 #' @export
 #' @rdname maps
 spatialPolygons <- function(map) {
-  allObjs <- maps(map, "SpatialPolygons")
+  maps(map, "SpatialPolygons")
 }
 
 #' @export
 #' @rdname maps
 spatialPoints <- function(map) {
-  allObjs <- maps(map, "SpatialPoints")
+  maps(map, "SpatialPoints")
 }
 
 #' Extract maps from a \code{map} object
@@ -364,7 +389,7 @@ maps <- function(map, class = NULL) {
   data.table::data.table(layerName = NA_character_, layerType = NA_character_,
                          sourceURL = NA_character_,
                          columnNameForLabels = NA_character_,
-                         leafletVisible = TRUE, studyArea = FALSE)
+                         leaflet = TRUE, studyArea = FALSE)
 
 
 
@@ -384,7 +409,6 @@ if (!isGeneric("area")) {
 setMethod("area",
           signature = "map",
           function(x) {
-            browser()
   lsObjs <- ls(ml@maps)
   logicalRasters <- unlist(lapply(mget(lsObjs, ml@maps), is, "RasterLayer"))
   if (any(logicalRasters)) {
