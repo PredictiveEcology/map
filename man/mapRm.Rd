@@ -14,11 +14,13 @@ Remove objects from a \code{map}
 }
 \seealso{
 Other mapMethods: \code{\link{area,map-method}},
-  \code{\link{crs,map-method}}, \code{\link{rasters}},
+  \code{\link{crs,map-method}},
+  \code{\link{rasterToMatch}}, \code{\link{rasters}},
   \code{\link{studyAreaName}}, \code{\link{studyArea}}
 
 Other mapMethods: \code{\link{area,map-method}},
-  \code{\link{crs,map-method}}, \code{\link{rasters}},
+  \code{\link{crs,map-method}},
+  \code{\link{rasterToMatch}}, \code{\link{rasters}},
   \code{\link{studyAreaName}}, \code{\link{studyArea}}
 }
 \concept{mapMethods}

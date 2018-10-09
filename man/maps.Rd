@@ -46,26 +46,32 @@ This will extract all objects in or pointed to within the \code{map}.
 \seealso{
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+  \code{\link{rasterToMatch}}, \code{\link{studyAreaName}},
+  \code{\link{studyArea}}
 
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+  \code{\link{rasterToMatch}}, \code{\link{studyAreaName}},
+  \code{\link{studyArea}}
 
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+  \code{\link{rasterToMatch}}, \code{\link{studyAreaName}},
+  \code{\link{studyArea}}
 
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+  \code{\link{rasterToMatch}}, \code{\link{studyAreaName}},
+  \code{\link{studyArea}}
 
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+  \code{\link{rasterToMatch}}, \code{\link{studyAreaName}},
+  \code{\link{studyArea}}
 
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+  \code{\link{rasterToMatch}}, \code{\link{studyAreaName}},
+  \code{\link{studyArea}}
 }
 \concept{mapMethods}

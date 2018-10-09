@@ -19,14 +19,17 @@ then this will extract the last one added.
 \seealso{
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasters}}, \code{\link{studyAreaName}}
+  \code{\link{rasterToMatch}}, \code{\link{rasters}},
+  \code{\link{studyAreaName}}
 
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasters}}, \code{\link{studyAreaName}}
+  \code{\link{rasterToMatch}}, \code{\link{rasters}},
+  \code{\link{studyAreaName}}
 
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasters}}, \code{\link{studyAreaName}}
+  \code{\link{rasterToMatch}}, \code{\link{rasters}},
+  \code{\link{studyAreaName}}
 }
 \concept{mapMethods}

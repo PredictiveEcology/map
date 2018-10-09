@@ -15,10 +15,12 @@ Tools for getting objects and metadata in and out of a \code{map} class.
 \seealso{
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasters}}, \code{\link{studyArea}}
+  \code{\link{rasterToMatch}}, \code{\link{rasters}},
+  \code{\link{studyArea}}
 
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasters}}, \code{\link{studyArea}}
+  \code{\link{rasterToMatch}}, \code{\link{rasters}},
+  \code{\link{studyArea}}
 }
 \concept{mapMethods}

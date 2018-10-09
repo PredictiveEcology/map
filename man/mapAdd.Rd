@@ -9,12 +9,11 @@
 mapAdd(object, map, layerName, overwrite = FALSE, ...)
 
 \method{mapAdd}{default}(object = NULL, map = NULL, layerName = NULL,
-  overwrite = FALSE, sourceURL = NULL,
-  columnNameForLabels = character(), leaflet = TRUE,
-  isStudyArea = FALSE, ...)
+  overwrite = FALSE, url = NULL, columnNameForLabels = character(),
+  leaflet = TRUE, isStudyArea = FALSE, ...)
 
 \method{mapAdd}{spatialObjects}(object, map = NULL, layerName = NULL,
-  overwrite = FALSE, sourceURL = NULL, columnNameForLabels = NULL,
+  overwrite = FALSE, url = NULL, columnNameForLabels = NULL,
   leaflet = TRUE, isStudyArea = NULL, envir = NULL, ...)
 }
 \arguments{

@@ -12,7 +12,8 @@ Calculate area of (named) objects the \code{map} object
 }
 \seealso{
 Other mapMethods: \code{\link{crs,map-method}},
-  \code{\link{mapRm}}, \code{\link{rasters}},
-  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+  \code{\link{mapRm}}, \code{\link{rasterToMatch}},
+  \code{\link{rasters}}, \code{\link{studyAreaName}},
+  \code{\link{studyArea}}
 }
 \concept{mapMethods}

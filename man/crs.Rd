@@ -12,7 +12,8 @@ Extract the crs of a \code{map}
 }
 \seealso{
 Other mapMethods: \code{\link{area,map-method}},
-  \code{\link{mapRm}}, \code{\link{rasters}},
-  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+  \code{\link{mapRm}}, \code{\link{rasterToMatch}},
+  \code{\link{rasters}}, \code{\link{studyAreaName}},
+  \code{\link{studyArea}}
 }
 \concept{mapMethods}

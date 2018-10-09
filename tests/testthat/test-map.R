@@ -13,7 +13,7 @@ test_that("prepInputs doesn't work", {
                alsoExtract = c("landweb_ltfc_v6.dbf", "landweb_ltfc_v6.prj",
                                "landweb_ltfc_v6.sbn", "landweb_ltfc_v6.sbx", "landweb_ltfc_v6.shx"),
                targetCRS = CRS("+proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0"),
-               sourceURL = "https://drive.google.com/open?id=1JptU0R7qsHOEAEkxybx5MGg650KC98c6",
+               url = "https://drive.google.com/open?id=1JptU0R7qsHOEAEkxybx5MGg650KC98c6",
                columnNameForLabels = "Name", isStudyArea = TRUE
   )
 
@@ -27,12 +27,20 @@ test_that("prepInputs doesn't work", {
                filename1 = NULL, overwrite = TRUE
   )
 
-  ml <- mapAdd(sourceURL = "https://drive.google.com/open?id=1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1",
-               map = ml, leaflet = TRUE, #studyArea = studyArea(ml),
+  ml <- mapAdd(url = "https://drive.google.com/open?id=1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1",
+               map = ml, leaflet = TRUE,
                alsoExtract = c("Age1.tfw", "Age1.tif.aux.xml", "Age1.tif.ovr",
                                "Age1.tif.vat.cpg", "Age1.tif.vat.dbf", "Age1.tif.vat.dbf.xml"),
                targetFile = "Age1.tif", overwrite = TRUE, filename2 = "Age.tif",
                layerName = "Age") # dots include things like method = "ngb" for projectRaster
+
+  # local path
+  ml <- mapAdd(url = file.path(tmpdir, "Age1.tif"),
+               map = ml, leaflet = TRUE,
+               alsoExtract = c("Age1.tfw", "Age1.tif.aux.xml", "Age1.tif.ovr",
+                               "Age1.tif.vat.cpg", "Age1.tif.vat.dbf", "Age1.tif.vat.dbf.xml"),
+               targetFile = "Age1.tif", overwrite = TRUE, filename2 = "Age.tif",
+               layerName = "Age2") # dots include things like method = "ngb" for projectRaster
 
 
 })

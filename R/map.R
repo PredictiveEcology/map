@@ -46,7 +46,7 @@ setMethod("initialize", "map",
           function(.Object, ...) {
             .Object <- callNextMethod()
             .Object@metadata = data.table(layerName = character(), layerType = character(),
-                                          sourceURL = character(),
+                                          url = character(),
                                           columnNameForLabels = character(),
                                           leaflet = logical(), studyArea = numeric(),
                                           rasterToMatch = logical())
@@ -97,10 +97,10 @@ mapAdd <- function(object, map, layerName, overwrite = FALSE, ...)
 #' @param ... passed to reproducible::postProcess and reproducible::projectInputs and
 #'            reproducible::fixErrors and reproducible::prepInputs
 mapAdd.default <- function(object = NULL, map = NULL,
-                                  layerName = NULL, overwrite = FALSE,
-                                  sourceURL = NULL,
-                                  columnNameForLabels = character(),
-                                  leaflet = TRUE, isStudyArea = FALSE, ...) {
+                           layerName = NULL, overwrite = FALSE,
+                           url = NULL,
+                           columnNameForLabels = character(),
+                           leaflet = TRUE, isStudyArea = FALSE, ...) {
   if (is.null(map)) {
     map <- new("map")
     # options("map.current") <- map
@@ -112,18 +112,18 @@ mapAdd.default <- function(object = NULL, map = NULL,
   }
   if (is.null(object)) {
     dots <- list(...)
-    if (is.null(sourceURL)) {
-      stop("Must provide either object or sourceURL")
+    if (is.null(url)) {
+      stop("Must provide either object or url")
     } else {
       # Don't run preProcess because that will happen in next mapAdd when object is
       #   in hand
       forms <- reproducible:::.formalsNotInCurrentDots(preProcess, ...)
       args <- dots[!(names(dots) %in% forms)]
-      object <- do.call(prepInputs, args = append(list(url = sourceURL), args))
+      object <- do.call(prepInputs, args = append(list(url = url), args))
     }
     map <- mapAdd(object, map = map, layerName = layerName,
                              overwrite = overwrite,
-                             sourceURL = sourceURL, columnNameForLabels = columnNameForLabels,
+                             url = url, columnNameForLabels = columnNameForLabels,
                              leaflet = leaflet, isStudyArea = isStudyArea, ...)
   }
   map
@@ -138,7 +138,7 @@ mapAdd.default <- function(object = NULL, map = NULL,
 #'        be placed into the maps slot. Upon re
 #'
 mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
-                                   overwrite = FALSE, sourceURL = NULL,
+                                   overwrite = FALSE, url = NULL,
                                    columnNameForLabels = NULL,
                                    leaflet = TRUE, isStudyArea = NULL,
                                    envir = NULL, ...) {
@@ -157,7 +157,7 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
   } else {
     FALSE
   }
-  if (is.null(studyArea(map))) {
+  if (is.null(studyArea(map)) && is.null(rasterToMatch(map))) {
     object <- fixErrors(object, ...)
     if (isFALSE(isStudyArea)) {
       message("There is no studyArea in map; consider adding one with 'studyArea = TRUE'")
@@ -180,6 +180,12 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
       # } else {
       #   dots
       # }
+      if (!is.null(studyArea(map))) {
+        dots$studyArea <- studyArea(map)
+      }
+      if (!is.null(rasterToMatch(map))) {
+        dots$rasterToMatch <- rasterToMatch(map)
+      }
       object <- do.call(postProcess, append(list(object), dots))
     }
   }
@@ -220,8 +226,8 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
     }
     set(b, , "studyArea", studyAreaNumber)
   }
-  if (!is.null(sourceURL))
-    set(b, , "sourceURL", sourceURL)
+  if (!is.null(url))
+    set(b, , "url", url)
   set(b, , "layerName", layerName)
   set(b, , "layerType", class(object))
   if (!is.null(columnNameForLabels)) {
@@ -232,17 +238,24 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
   if (leaflet) {
     set(b, , "leaflet", leaflet)
     if (is(object, "Raster")) {
-      object[] <- object[]
-      objectLflt <- projectRaster(object, crs = CRS("+init=epsg:4326"))
-      tmpFile <- tempfile(fileext = ".tif")
-      objectLflt <- writeRaster(objectLflt, tmpFile)
-      dig <- .robustDigest(objectLflt)
-      tilePath <- asPath(paste0("tiles_", layerName, "_", substr(dig, 1,5)))
-      message("Creating tiles")
-      if (isTRUE(getOption("reproducible.useCache", FALSE)) ||
-          getOption("reproducible.useCache", FALSE) == "overwrite") message("  using Cache. To revent this, set options('reproducible.useCache' = FALSE)")
-      Cache(tiler::tile, asPath(tmpFile), tilePath, zoom = "1-10", crs = CRS("+init=epsg:4326"),
-                  format = "tms", useCache = getOption("reproducible.useCache"))
+      dig <- .robustDigest(object)
+      tilePath <- asPath(paste0("tiles_", layerName, "_", substr(dig, 1,6)))
+      dirNotExist <- !dir.exists(tilePath)
+
+      if (dirNotExist) {
+        object[] <- object[]
+        objectLflt <- projectRaster(object, crs = CRS("+init=epsg:4326"))
+        tmpFile <- tempfile(fileext = ".tif")
+        objectLflt <- writeRaster(objectLflt, tmpFile)
+        message("  Creating tiles - reprojecting to epsg:4326 (leaflet projection)")
+        message("Creating tiles")
+        if (isTRUE(getOption("reproducible.useCache", FALSE)) ||
+            getOption("reproducible.useCache", FALSE) == "overwrite") message("  using Cache. To prevent this, set options('reproducible.useCache' = FALSE)")
+        tiler::tile(asPath(tmpFile), tilePath, zoom = "1-10", crs = CRS("+init=epsg:4326"),
+                    format = "tms", useCache = getOption("reproducible.useCache"))
+      } else {
+        message("  Tiles - skipping creation - already exist")
+      }
       set(b, , "leafletTiles", tilePath)
     }
   }
@@ -352,7 +365,33 @@ studyArea.map <- function(map, layer = NA) {
     if (isTRUE(is.na(layer))) {
       layer <- max(map@metadata$studyArea, na.rm = TRUE)
     }
-    get(map@metadata[studyArea > 0, layerName][layer], map@.xData)
+    get(map@metadata[studyArea == layer, layerName], map@.xData)
+  } else {
+    NULL
+  }
+}
+
+#' Extract the rasterToMatch(s) from a \code{map}
+#'
+#' If \code{layer} is not provided and there is more than one \code{studyArea},
+#' then this will extract the last one added.
+#'
+#' @export
+#' @family mapMethods
+#' @inheritParams map-class
+#' @rdname rasterToMatch
+rasterToMatch <- function(map, layer)
+  UseMethod("rasterToMatch")
+
+#' @export
+#' @family mapMethods
+#' @rdname rasterToMatch
+rasterToMatch.map <- function(map, layer = NA) {
+  if (sum(map@metadata$rasterToMatch, na.rm = TRUE)) {
+    if (isTRUE(is.na(layer))) {
+      layer <- max(map@metadata$rasterToMatch, na.rm = TRUE)
+    }
+    get(map@metadata[rasterToMatch == layer, layerName], map@.xData)
   } else {
     NULL
   }
@@ -455,7 +494,7 @@ maps <- function(map, class = NULL) {
 
 .singleMetadataNAEntry <-
   data.table::data.table(layerName = NA_character_, layerType = NA_character_,
-                         sourceURL = NA_character_,
+                         url = NA_character_,
                          columnNameForLabels = NA_character_,
                          envir = list(), leaflet = FALSE, studyArea = 0)
 
