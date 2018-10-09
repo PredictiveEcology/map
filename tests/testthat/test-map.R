@@ -28,9 +28,11 @@ test_that("prepInputs doesn't work", {
   )
 
   ml <- mapAdd(sourceURL = "https://drive.google.com/open?id=1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1",
-               map = ml, leaflet = TRUE, studyArea = studyArea(ml, 2),
+               map = ml, leaflet = TRUE, #studyArea = studyArea(ml),
                alsoExtract = c("Age1.tfw", "Age1.tif.aux.xml", "Age1.tif.ovr",
                                "Age1.tif.vat.cpg", "Age1.tif.vat.dbf", "Age1.tif.vat.dbf.xml"),
                targetFile = "Age1.tif", overwrite = TRUE, filename2 = "Age.tif",
                layerName = "Age") # dots include things like method = "ngb" for projectRaster
+
+
 })

@@ -19,11 +19,7 @@ layers, principly for use with leaflet and shiny.
 \code{Spatial*}. Each entry may also be simply an environment, which
 indicates where to find the object, i.e., via \code{get(layerName, envir = environment)}}
 
-\item{\code{rasterTiles}}{Paths to rasterTiles}
-
 \item{\code{CRS}}{The common crs of all layers}
-
-\item{\code{rasterTemplate}}{The empty raster with all metadata filled}
 
 \item{\code{analyses}}{A data.table or data.frame of the types of analyses to perform}
 

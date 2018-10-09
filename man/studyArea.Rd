@@ -3,16 +3,24 @@
 \name{studyArea}
 \alias{studyArea}
 \alias{studyArea.map}
+\alias{studyArea.default}
 \title{Extract the studyArea(s) from a \code{map}}
 \usage{
 studyArea(map, layer)
 
-\method{studyArea}{map}(map, layer = 1)
+\method{studyArea}{map}(map, layer = NA)
+
+\method{studyArea}{default}(map, layer = NA)
 }
 \description{
-Extract the studyArea(s) from a \code{map}
+If \code{layer} is not provided and there is more than one \code{studyArea},
+then this will extract the last one added.
 }
 \seealso{
+Other mapMethods: \code{\link{area,map-method}},
+  \code{\link{crs,map-method}}, \code{\link{mapRm}},
+  \code{\link{rasters}}, \code{\link{studyAreaName}}
+
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
   \code{\link{rasters}}, \code{\link{studyAreaName}}

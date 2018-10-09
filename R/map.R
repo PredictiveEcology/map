@@ -11,7 +11,6 @@
 #'            indicates where to find the object, i.e., via \code{get(layerName, envir = environment)}
 #'
 #' @slot CRS  The common crs of all layers
-#' @slot rasterToMatch The empty raster with all metadata filled
 #' @slot analyses    A data.table or data.frame of the types of analyses to perform
 #'
 #' @slot analysesData A data.table or data.frame of the results of the analyses
@@ -23,11 +22,11 @@
 #' @importFrom raster crs raster
 setClass(
   "map",
+  contains = "environment",
   slots = list(
     metadata = "data.table",
-    maps = "environment",
+    #.Data = "environment",
     CRS = "CRS",
-    rasterToMatch = "RasterLayer",
     analyses = "data.table",
     analysesData = "list"
   ),
@@ -49,9 +48,8 @@ setMethod("initialize", "map",
             .Object@metadata = data.table(layerName = character(), layerType = character(),
                                           sourceURL = character(),
                                           columnNameForLabels = character(),
-                                          leaflet = logical(), isStudyArea = logical())
-            .Object@maps = new.env()
-            #.Object@rasterToMatch = NULL
+                                          leaflet = logical(), studyArea = numeric(),
+                                          rasterToMatch = logical())
             .Object@CRS = sp::CRS()
             .Object@analyses = data.table::data.table()
             .Object@analysesData = list()
@@ -60,6 +58,14 @@ setMethod("initialize", "map",
           })
 
 #' Append a spatial object to map
+#'
+#' @details
+#' If \code{isStudyArea = TRUE}, then several things will be triggered:
+#'
+#' 1. This layer will be added to metadata with \code{studyArea} set to
+#'    \code{max(\code{studyArea(map)}) + 1}
+#' 2. update CRS slot to be the CRS of the study area
+#' 2.
 #' @export
 #' @rdname mapAdd
 #' @examples
@@ -97,6 +103,12 @@ mapAdd.default <- function(object = NULL, map = NULL,
                                   leaflet = TRUE, isStudyArea = FALSE, ...) {
   if (is.null(map)) {
     map <- new("map")
+    # options("map.current") <- map
+    # suppressWarnings(rm("map", envir = as.environment("package:map")))
+    # makeActiveBinding(sym = "map",
+    #                   fun = ".maps",
+    #                   env = as.environment("package:map"))
+    # lockBinding("map", as.environment("package:map"))
   }
   if (is.null(object)) {
     dots <- list(...)
@@ -119,9 +131,9 @@ mapAdd.default <- function(object = NULL, map = NULL,
 
 #' @export
 #' @rdname mapAdd
-#' @importFrom reproducible fixErrors projectInputs postProcess
-#' @importFrom data.table rbindlist set
-#' @param pointToEnvir An optional environment. If supplied, then the object
+#' @importFrom reproducible fixErrors projectInputs postProcess .robustDigest asPath Cache compareNA
+#' @importFrom data.table rbindlist set copy
+#' @param envir An optional environment. If supplied, then the object
 #'        will not be placed "into" the maps slot, rather the environment label will
 #'        be placed into the maps slot. Upon re
 #'
@@ -129,12 +141,13 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
                                    overwrite = FALSE, sourceURL = NULL,
                                    columnNameForLabels = NULL,
                                    leaflet = TRUE, isStudyArea = NULL,
-                                   pointToEnvir = NULL, ...) {
+                                   envir = NULL, ...) {
+
   dots <- list(...)
   objectName <- deparse(substitute(object))
   objectEnv <- quickPlot::whereInStack(objectName)
 
-  mustOverwrite <- if (isTRUE(layerName %in% ls(map@maps))) {
+  mustOverwrite <- if (isTRUE(layerName %in% ls(map@.xData))) {
     if (isTRUE(overwrite)) {
       message(layerName, " already in map; overwriting")
     } else {
@@ -175,15 +188,16 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
     layerName <- objectName
   }
 
-  if (is.null(pointToEnvir)) {
+  if (is.null(envir)) {
+    envir <- map@.xData
     # Put map into map slot
-    assign(layerName, object, envir = map@maps) # this overwrites, if same name
+    assign(layerName, object, envir = map@.xData) # this overwrites, if same name
   } else {
 
-    if (exists(layerName, envir = pointToEnvir)) {
-      assign(layerName, pointToEnvir, envir = map@maps)
+    if (exists(layerName, envir = envir)) {
+      assign(layerName, envir, envir = map@.xData)
     } else {
-      stop("object named ", layerName, " does not exist in pointToEnvir: ", pointToEnvir)
+      stop("object named ", layerName, " does not exist in envir: ", envir)
     }
   }
   if (mustOverwrite) {
@@ -191,16 +205,20 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
     map@metadata <- map@metadata[!(layerName %in% ln)]
   }
 
-  b <- .singleMetadataNAEntry
+  b <- copy(.singleMetadataNAEntry)
+
+  # If it is studyArea
   if (isTRUE(isStudyArea)) {
+    studyAreaNumber <- 1 + NROW(map@metadata[compareNA(studyArea, TRUE) |
+                                               (is.numeric(studyArea) & studyArea > 0)])
     if (!is.null(studyArea(map))) {
       message("map already has a studyArea; adding another one as study area ",
-              1 + NROW(map@metadata[studyArea == TRUE]))
+              studyAreaNumber)
     } else {
       message("Setting map CRS to this layer because it is the (first) studyArea inserted")
       map@CRS <- raster::crs(object)
     }
-    set(b, , "studyArea", TRUE)
+    set(b, , "studyArea", studyAreaNumber)
   }
   if (!is.null(sourceURL))
     set(b, , "sourceURL", sourceURL)
@@ -229,7 +247,7 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
     }
   }
 
-  set(b, , "objectEnvironment", list(list(pointToEnvir)))
+  set(b, , "envir", list(list(envir)))
   set(b, , "objectName", objectName)
 
   map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
@@ -315,6 +333,10 @@ studyAreaName.map <- function(map, layer = 1) {
 }
 
 #' Extract the studyArea(s) from a \code{map}
+#'
+#' If \code{layer} is not provided and there is more than one \code{studyArea},
+#' then this will extract the last one added.
+#'
 #' @export
 #' @family mapMethods
 #' @inheritParams map-class
@@ -325,12 +347,22 @@ studyArea <- function(map, layer)
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-studyArea.map <- function(map, layer = 1) {
-  if (sum(map@metadata$studyArea)) {
-    get(map@metadata[studyArea == TRUE, layerName][layer], map@maps)
+studyArea.map <- function(map, layer = NA) {
+  if (sum(map@metadata$studyArea, na.rm = TRUE)) {
+    if (isTRUE(is.na(layer))) {
+      layer <- max(map@metadata$studyArea, na.rm = TRUE)
+    }
+    get(map@metadata[studyArea > 0, layerName][layer], map@.xData)
   } else {
     NULL
   }
+}
+
+#' @export
+#' @family mapMethods
+#' @rdname studyArea
+studyArea.default <- function(map, layer = NA) {
+  browser()
 }
 
 #' Extract rasters in the \code{map} object
@@ -345,6 +377,34 @@ rasters <- function(map)
 #' @rdname maps
 rasters.map <- function(map) {
   maps(map, "RasterLayer")
+}
+
+#' Extract sp class objects from the \code{map} object
+#' @export
+#' @family mapMethods
+#' @rdname maps
+sp <- function(map)
+  UseMethod("sp")
+
+#' @export
+#' @family mapMethods
+#' @rdname maps
+sp.map <- function(map) {
+  maps(map, "Spatial")
+}
+
+#' Extract \code{sf} class objects from the \code{map} object
+#' @export
+#' @family mapMethods
+#' @rdname maps
+sf <- function(map)
+  UseMethod("sf")
+
+#' @export
+#' @family mapMethods
+#' @rdname maps
+sf.map <- function(map) {
+  maps(map, "sf")
 }
 
 
@@ -372,24 +432,32 @@ spatialPoints <- function(map) {
 #' @return
 #' A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
 maps <- function(map, class = NULL) {
-  lsObjs <- ls(ml@maps)
-  objs <- mget(lsObjs, ml@maps)
-  envirs <- unlist(lapply(objs, is.environment))
-  objsInEnvirs <- Map(objs = lsObjs[envirs], envirs = unname(mget(lsObjs[envirs], envir = map@maps)),
-      function(objs, envirs) get(objs, envirs))
-  objs[envirs] <- objsInEnvirs
+  x <- map@metadata$layerName
+  names(x) <- x
+  envirs <- map@metadata$envir
+  names(envirs) <- x
+  out <- Map(envir = envirs, x = x,
+        get(x, envir = envir, inherits = FALSE)
+  )
   if (!is.null(class)) {
-    logicalMaps <- unlist(lapply(objs, is, class))
-    objs <- objs[logicalMaps]
+    classOnly <- unlist(lapply(out, is, class2 = class))
+    out <- out[classOnly]
   }
-  objs
+
+  out
+}
+
+#' @export
+.maps <- function() {
+  browser()
+  maps(getOption("map.current"))
 }
 
 .singleMetadataNAEntry <-
   data.table::data.table(layerName = NA_character_, layerType = NA_character_,
                          sourceURL = NA_character_,
                          columnNameForLabels = NA_character_,
-                         leaflet = TRUE, studyArea = FALSE)
+                         envir = list(), leaflet = FALSE, studyArea = 0)
 
 
 
@@ -409,11 +477,22 @@ if (!isGeneric("area")) {
 setMethod("area",
           signature = "map",
           function(x) {
-  lsObjs <- ls(ml@maps)
-  logicalRasters <- unlist(lapply(mget(lsObjs, ml@maps), is, "RasterLayer"))
+  lsObjs <- ls(ml@.xData)
+  logicalRasters <- unlist(lapply(mget(lsObjs, ml@.xData), is, "RasterLayer"))
   if (any(logicalRasters)) {
-    mget(names(logicalRasters)[logicalRasters], ml@maps)
+    mget(names(logicalRasters)[logicalRasters], ml@.xData)
   } else {
     NULL
   }
+})
+
+#' Show method for map class objects
+#' @export
+#' @rdname show
+setMethod(
+  "show",
+  signature = "map",
+  definition = function(object) {
+    show(object@metadata)
+
 })

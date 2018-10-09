@@ -15,18 +15,26 @@ mapAdd(object, map, layerName, overwrite = FALSE, ...)
 
 \method{mapAdd}{spatialObjects}(object, map = NULL, layerName = NULL,
   overwrite = FALSE, sourceURL = NULL, columnNameForLabels = NULL,
-  leaflet = TRUE, isStudyArea = NULL, pointToEnvir = NULL, ...)
+  leaflet = TRUE, isStudyArea = NULL, envir = NULL, ...)
 }
 \arguments{
 \item{...}{passed to reproducible::postProcess and reproducible::projectInputs and
 reproducible::fixErrors and reproducible::prepInputs}
 
-\item{pointToEnvir}{An optional environment. If supplied, then the object
+\item{envir}{An optional environment. If supplied, then the object
 will not be placed "into" the maps slot, rather the environment label will
 be placed into the maps slot. Upon re}
 }
 \description{
 Append a spatial object to map
+}
+\details{
+If \code{isStudyArea = TRUE}, then several things will be triggered:
+
+1. This layer will be added to metadata with \code{studyArea} set to
+   \code{max(\code{studyArea(map)}) + 1}
+2. update CRS slot to be the CRS of the study area
+2.
 }
 \examples{
 library(sp)

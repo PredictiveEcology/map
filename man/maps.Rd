@@ -3,6 +3,10 @@
 \name{rasters}
 \alias{rasters}
 \alias{rasters.map}
+\alias{sp}
+\alias{sp.map}
+\alias{sf}
+\alias{sf.map}
 \alias{spatialPolygons}
 \alias{spatialPoints}
 \alias{maps}
@@ -11,6 +15,14 @@
 rasters(map)
 
 \method{rasters}{map}(map)
+
+sp(map)
+
+\method{sp}{map}(map)
+
+sf(map)
+
+\method{sf}{map}(map)
 
 spatialPolygons(map)
 
@@ -32,6 +44,22 @@ A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
 This will extract all objects in or pointed to within the \code{map}.
 }
 \seealso{
+Other mapMethods: \code{\link{area,map-method}},
+  \code{\link{crs,map-method}}, \code{\link{mapRm}},
+  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+
+Other mapMethods: \code{\link{area,map-method}},
+  \code{\link{crs,map-method}}, \code{\link{mapRm}},
+  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+
+Other mapMethods: \code{\link{area,map-method}},
+  \code{\link{crs,map-method}}, \code{\link{mapRm}},
+  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+
+Other mapMethods: \code{\link{area,map-method}},
+  \code{\link{crs,map-method}}, \code{\link{mapRm}},
+  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
   \code{\link{studyAreaName}}, \code{\link{studyArea}}
