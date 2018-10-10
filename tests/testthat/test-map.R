@@ -35,12 +35,14 @@ test_that("prepInputs doesn't work", {
                layerName = "Age") # dots include things like method = "ngb" for projectRaster
 
   # local path
-  ml <- mapAdd(url = file.path(tmpdir, "Age1.tif"),
+  ml <- mapAdd(url = "https://www.albertaparks.ca/media/429607/natural_regions_subregions_of_alberta.zip",
                map = ml, leaflet = TRUE,
-               alsoExtract = c("Age1.tfw", "Age1.tif.aux.xml", "Age1.tif.ovr",
-                               "Age1.tif.vat.cpg", "Age1.tif.vat.dbf", "Age1.tif.vat.dbf.xml"),
-               targetFile = "Age1.tif", overwrite = TRUE, filename2 = "Age.tif",
-               layerName = "Age2") # dots include things like method = "ngb" for projectRaster
+               #alsoExtract = c("Age1.tfw", "Age1.tif.aux.xml", "Age1.tif.ovr",
+              #                 "Age1.tif.vat.cpg", "Age1.tif.vat.dbf", "Age1.tif.vat.dbf.xml"),
+              # targetFile = "Age1.tif",
+               overwrite = TRUE, filename2 = NULL,
+               layerName = "AB Natural Sub Regions") # dots include things like method = "ngb" for projectRaster
+
 
 
 })

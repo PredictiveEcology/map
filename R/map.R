@@ -230,7 +230,7 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
     set(b, , "url", url)
   set(b, , "layerName", layerName)
   set(b, , "layerType", class(object))
-  if (!is.null(columnNameForLabels)) {
+  if (length(columnNameForLabels)>0) {
     if (is(object, "SpatialPolygonsDataFrame")) {
       set(b, , "columnNameForLabels", columnNameForLabels)
     }
@@ -459,6 +459,24 @@ spatialPoints <- function(map) {
   maps(map, "SpatialPoints")
 }
 
+#' Extract leaflet tile paths from a \code{map} object
+#'
+#'
+#' @export
+#' @param map A \code{map} class object
+#' @return
+#' A vector of paths indicating the relative paths. Any layers
+#' that don't have leaflet tiles will return NA.
+leafletTiles <- function(map) {
+  x <- map@metadata$layerName
+  tiles <- map@metadata$leafletTiles
+  names(tiles) <- x
+  tiles
+}
+
+
+
+
 #' Extract maps from a \code{map} object
 #'
 #' This will extract all objects in or pointed to within the \code{map}.
@@ -476,7 +494,8 @@ maps <- function(map, class = NULL) {
   envirs <- map@metadata$envir
   names(envirs) <- x
   out <- Map(envir = envirs, x = x,
-        get(x, envir = envir, inherits = FALSE)
+             function(envir, x)
+               get(x, envir = envir, inherits = FALSE)
   )
   if (!is.null(class)) {
     classOnly <- unlist(lapply(out, is, class2 = class))
@@ -485,6 +504,7 @@ maps <- function(map, class = NULL) {
 
   out
 }
+
 
 #' @export
 .maps <- function() {
