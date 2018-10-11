@@ -2,15 +2,22 @@
 % Please edit documentation in R/map.R
 \name{studyArea}
 \alias{studyArea}
-\alias{studyArea.map}
 \alias{studyArea.default}
+\alias{studyArea.map}
 \title{Extract the studyArea(s) from a \code{map}}
 \usage{
-studyArea(map, layer)
+studyArea(map, layerName, layer)
 
-\method{studyArea}{map}(map, layer = NA)
+\method{studyArea}{default}(map, layerName, layer = NA)
 
-\method{studyArea}{default}(map, layer = NA)
+\method{studyArea}{map}(map, layerName, layer = NA)
+}
+\arguments{
+\item{map}{TODO: document this}
+
+\item{layerName}{TODO: document this}
+
+\item{layer}{TODO: document this}
 }
 \description{
 If \code{layer} is not provided and there is more than one \code{studyArea},

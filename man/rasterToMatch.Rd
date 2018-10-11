@@ -5,9 +5,16 @@
 \alias{rasterToMatch.map}
 \title{Extract the rasterToMatch(s) from a \code{map}}
 \usage{
-rasterToMatch(map, layer)
+rasterToMatch(map, layerName, layer)
 
-\method{rasterToMatch}{map}(map, layer = NA)
+\method{rasterToMatch}{map}(map, layerName, layer = NA)
+}
+\arguments{
+\item{map}{TODO: describe this}
+
+\item{layerName}{TODO: describe this}
+
+\item{layer}{TODO: describe this}
 }
 \description{
 If \code{layer} is not provided and there is more than one \code{studyArea},
