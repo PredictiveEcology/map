@@ -96,12 +96,16 @@ setMethod("initialize", "map",
 #' if (require("SpaDES.tools")) {
 #'   smallStudyArea <- randomPolygon(studyArea(ml), 1e2)
 #'   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
-#'                envir = .GlobalEnv) # adds a second studyArea within 1st
+#'                envir = .GlobalEnv, layerName = "Smaller Study Area") # adds a second studyArea within 1st
 #'
-#'   tsf <- randomPolygons()*100
+#'   tsf <- randomPolygons(raster(extent(studyArea(ml))))*100
+#'   crs(tsf) <- crs(ml)
 #'   vtm <- randomPolygons(tsf, numTypes = 4)
+#'   crs(vtm) <- crs(ml)
+#'   ml <- mapAdd(tsf, ml, filename2 = NULL, layerName = "tsf1", leaflet = FALSE)
+#'   ml <- mapAdd(vtm, ml, filename2 = NULL, layerName = "vtm1", leaflet = FALSE)
 #'
-#'   leadingByStage(tsf, vtm, ml$)
+#'   leadingByStage(tsf, vtm, studyArea(ml))
 #'
 #'
 #'
@@ -184,9 +188,8 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
       }
     } else {
       dots[["targetCRS"]] <- crs(map)
+      object <- do.call(projectInputs, append(list(object), dots))
     }
-    browser()
-    object <- do.call(projectInputs, append(list(object), dots))
   } else {
     if (is.na(crs(map))) {
       message("There is no CRS already in map; using the studyArea CRS and adding that to map")
@@ -220,7 +223,10 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
     if (exists(layerName, envir = envir)) {
       assign(layerName, envir, envir = map@.xData)
     } else {
-      stop("object named ", layerName, " does not exist in envir: ", envir)
+      envir <- map@.xData
+      assign(layerName, object, envir = envir)
+      message("object named ", layerName, " does not exist in envir provided",
+              ". Adding it to map object")
     }
   }
   if (mustOverwrite) {
@@ -411,7 +417,8 @@ studyArea.map <- function(map, layerName, layer = NA) {
     if (isTRUE(is.na(layer))) {
       layer <- max(map@metadata$studyArea, na.rm = TRUE)
     }
-    get(map@metadata[studyArea == layer, layerName], map@.xData)
+    get(map@metadata[studyArea == layer]$layerName,
+        map@metadata[studyArea == layer]$envir[[1]])
   } else {
     NULL
   }
