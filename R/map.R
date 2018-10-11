@@ -79,13 +79,20 @@ setMethod("initialize", "map",
 #' StudyArea <- SpatialPolygons(list(Srs1), 1L)
 #' crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 #'
-#' ml <- new("map")
-#' ml <- mapAdd(StudyArea, ml, isStudyArea = TRUE, layerName = "newPoly")
+#' ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area")
 #'
-#' if (requireNamespace("SpaDES.tools")) {
-#'   smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml), 1e2)
+#' if (require("SpaDES.tools")) {
+#'   smallStudyArea <- randomPolygon(studyArea(ml), 1e2)
 #'   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
 #'                envir = .GlobalEnv) # adds a second studyArea within 1st
+#'
+#'   tsf <- randomPolygons()*100
+#'   vtm <- randomPolygons(tsf, numTypes = 4)
+#'
+#'   leadingByStage(tsf, vtm, ml$)
+#'
+#'
+#'
 #' }
 #'
 mapAdd <- function(object, map, layerName, overwrite = FALSE, ...)
@@ -96,20 +103,11 @@ mapAdd <- function(object, map, layerName, overwrite = FALSE, ...)
 #' @importFrom reproducible prepInputs preProcess
 #' @param ... passed to reproducible::postProcess and reproducible::projectInputs and
 #'            reproducible::fixErrors and reproducible::prepInputs
-mapAdd.default <- function(object = NULL, map = NULL,
+mapAdd.default <- function(object = NULL, map = new("map"),
                            layerName = NULL, overwrite = FALSE,
                            url = NULL,
                            columnNameForLabels = character(),
                            leaflet = TRUE, isStudyArea = FALSE, ...) {
-  if (is.null(map)) {
-    map <- new("map")
-    # options("map.current") <- map
-    # suppressWarnings(rm("map", envir = as.environment("package:map")))
-    # makeActiveBinding(sym = "map",
-    #                   fun = ".maps",
-    #                   env = as.environment("package:map"))
-    # lockBinding("map", as.environment("package:map"))
-  }
   if (is.null(object)) {
     dots <- list(...)
     if (is.null(url)) {
@@ -121,6 +119,7 @@ mapAdd.default <- function(object = NULL, map = NULL,
       args <- dots[!(names(dots) %in% forms)]
       object <- do.call(prepInputs, args = append(list(url = url), args))
     }
+    browser()
     map <- mapAdd(object, map = map, layerName = layerName,
                              overwrite = overwrite,
                              url = url, columnNameForLabels = columnNameForLabels,
@@ -137,7 +136,7 @@ mapAdd.default <- function(object = NULL, map = NULL,
 #'        will not be placed "into" the maps slot, rather the environment label will
 #'        be placed into the maps slot. Upon re
 #'
-mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
+mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
                                    overwrite = FALSE, url = NULL,
                                    columnNameForLabels = NULL,
                                    leaflet = TRUE, isStudyArea = NULL,
@@ -169,6 +168,7 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
     } else {
       dots[["targetCRS"]] <- crs(map)
     }
+    browser()
     object <- do.call(projectInputs, append(list(object), dots))
   } else {
     if (is.na(crs(map))) {
