@@ -9,6 +9,15 @@ mapRm(map, layer, ask = TRUE, ...)
 
 \method{mapRm}{default}(map = NULL, layer = NULL, ask = TRUE, ...)
 }
+\arguments{
+\item{map}{TODO: document this}
+
+\item{layer}{TODO: document this}
+
+\item{ask}{TODO: document this}
+
+\item{...}{TODO: document this}
+}
 \description{
 Remove objects from a \code{map}
 }

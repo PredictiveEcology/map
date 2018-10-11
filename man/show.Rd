@@ -7,6 +7,9 @@
 \usage{
 \S4method{show}{map}(object)
 }
+\arguments{
+\item{object}{TODO: describe this}
+}
 \description{
 Show method for map class objects
 }

@@ -19,23 +19,36 @@ mapAdd(object, map, layerName, overwrite = FALSE, ...)
   envir = NULL, ...)
 }
 \arguments{
+\item{object}{TODO: document this}
+
+\item{map}{TODO: document this}
+
+\item{layerName}{TODO: document this}
+
+\item{overwrite}{TODO: document this}
+
 \item{...}{passed to reproducible::postProcess and reproducible::projectInputs and
 reproducible::fixErrors and reproducible::prepInputs}
+
+\item{url}{TODO: document this}
+
+\item{columnNameForLabels}{TODO: document this}
+
+\item{leaflet}{TODO: document this}
+
+\item{isStudyArea}{TODO: document this}
 
 \item{envir}{An optional environment. If supplied, then the object
 will not be placed "into" the maps slot, rather the environment label will
 be placed into the maps slot. Upon re}
 }
 \description{
-Append a spatial object to map
-}
-\details{
 If \code{isStudyArea = TRUE}, then several things will be triggered:
-
-1. This layer will be added to metadata with \code{studyArea} set to
-   \code{max(\code{studyArea(map)}) + 1}
-2. update CRS slot to be the CRS of the study area
-2.
+\enumerate{
+  \item This layer will be added to metadata with \code{studyArea} set to
+        \code{max(studyArea(map)) + 1}.
+  \item update CRS slot to be the CRS of the study area.
+}
 }
 \examples{
 library(sp)

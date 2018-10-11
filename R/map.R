@@ -1,7 +1,7 @@
 #' The \code{map} class
 #'
-#' Contains a common system for organzing vector and raster
-#' layers, principly for use with leaflet and shiny.
+#' Contains a common system for organzing vector and raster layers,
+#' principally for use with \pkg{leaflet} and \pkg{shiny}.
 #'
 #' @slot metadata  \code{data.table} with columns describing metadata of map objects in
 #'                 \code{maps} slot.
@@ -11,15 +11,18 @@
 #'            indicates where to find the object, i.e., via \code{get(layerName, envir = environment)}
 #'
 #' @slot CRS  The common crs of all layers
-#' @slot analyses    A data.table or data.frame of the types of analyses to perform
 #'
-#' @slot analysesData A data.table or data.frame of the results of the analyses
+#' @slot analyses    A \code{data.table} or \code{data.frame} of the types of analyses to perform.
+#'
+#' @slot analysesData A \code{data.table} or \code{data.frame} of the results of the analyses.
+#'
+#' @slot .xData  TODO: document this inherited slot
 #'
 #' @aliases map
-#' @rdname map-class
 #' @exportClass map
 #' @importFrom data.table data.table
 #' @importFrom raster crs raster
+#' @rdname map-class
 setClass(
   "map",
   contains = "environment",
@@ -55,17 +58,26 @@ setMethod("initialize", "map",
             .Object@analysesData = list()
 
             .Object
-          })
+})
 
 #' Append a spatial object to map
 #'
-#' @details
 #' If \code{isStudyArea = TRUE}, then several things will be triggered:
+#' \enumerate{
+#'   \item This layer will be added to metadata with \code{studyArea} set to
+#'         \code{max(studyArea(map)) + 1}.
+#'   \item update CRS slot to be the CRS of the study area.
+#' }
 #'
-#' 1. This layer will be added to metadata with \code{studyArea} set to
-#'    \code{max(\code{studyArea(map)}) + 1}
-#' 2. update CRS slot to be the CRS of the study area
-#' 2.
+#' @param object    TODO: document this
+#' @param map       TODO: document this
+#' @param layerName TODO: document this
+#' @param overwrite TODO: document this
+#' @param url       TODO: document this
+#' @param columnNameForLabels TODO: document this
+#' @param leaflet TODO: document this
+#' @param isStudyArea TODO: document this
+#'
 #' @export
 #' @rdname mapAdd
 #' @examples
@@ -95,8 +107,9 @@ setMethod("initialize", "map",
 #'
 #' }
 #'
-mapAdd <- function(object, map, layerName, overwrite = FALSE, ...)
+mapAdd <- function(object, map, layerName, overwrite = FALSE, ...) {
   UseMethod("mapAdd")
+}
 
 #' @export
 #' @rdname mapAdd
@@ -128,14 +141,18 @@ mapAdd.default <- function(object = NULL, map = new("map"),
   map
 }
 
-#' @export
-#' @rdname mapAdd
-#' @importFrom reproducible fixErrors projectInputs postProcess .robustDigest asPath Cache compareNA
-#' @importFrom data.table rbindlist set copy
 #' @param envir An optional environment. If supplied, then the object
 #'        will not be placed "into" the maps slot, rather the environment label will
 #'        be placed into the maps slot. Upon re
 #'
+#' @export
+#' @importFrom data.table rbindlist set copy
+#' @importFrom quickPlot whereInStack
+#' @importFrom reproducible fixErrors projectInputs postProcess .robustDigest asPath Cache compareNA
+#' @importFrom raster crs projectRaster writeRaster
+#' @importFrom sp CRS
+#'
+#' @rdname mapAdd
 mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
                                    overwrite = FALSE, url = NULL,
                                    columnNameForLabels = NULL,
@@ -144,7 +161,7 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
 
   dots <- list(...)
   objectName <- deparse(substitute(object))
-  objectEnv <- quickPlot::whereInStack(objectName)
+  objectEnv <- whereInStack(objectName)
 
   mustOverwrite <- if (isTRUE(layerName %in% ls(map@.xData))) {
     if (isTRUE(overwrite)) {
@@ -224,19 +241,19 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
       message("Setting map CRS to this layer because it is the (first) studyArea inserted")
       map@CRS <- raster::crs(object)
     }
-    set(b, , "studyArea", studyAreaNumber)
+    set(b, NULL, "studyArea", studyAreaNumber)
   }
   if (!is.null(url))
-    set(b, , "url", url)
-  set(b, , "layerName", layerName)
-  set(b, , "layerType", class(object))
+    set(b, NULL, "url", url)
+  set(b, NULL, "layerName", layerName)
+  set(b, NULL, "layerType", class(object))
   if (length(columnNameForLabels)>0) {
     if (is(object, "SpatialPolygonsDataFrame")) {
-      set(b, , "columnNameForLabels", columnNameForLabels)
+      set(b, NULL, "columnNameForLabels", columnNameForLabels)
     }
   }
   if (leaflet) {
-    set(b, , "leaflet", leaflet)
+    set(b, NULL, "leaflet", leaflet)
     if (is(object, "Raster")) {
       dig <- .robustDigest(object)
       tilePath <- asPath(paste0("tiles_", layerName, "_", substr(dig, 1,6)))
@@ -256,27 +273,35 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
       } else {
         message("  Tiles - skipping creation - already exist")
       }
-      set(b, , "leafletTiles", tilePath)
+      set(b, NULL, "leafletTiles", tilePath)
     }
   }
 
-  set(b, , "envir", list(list(envir)))
-  set(b, , "objectName", objectName)
+  set(b, NULL, "envir", list(list(envir)))
+  set(b, NULL, "objectName", objectName)
 
   map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
   return(map)
 }
 
-
-
-
 #' Remove objects from a \code{map}
+#'
+#' @inheritParams map-class
+#'
+#' @param map TODO: document this
+#'
+#' @param layer TODO: document this
+#'
+#' @param ask TODO: document this
+#'
+#' @param ... TODO: document this
+#'
 #' @export
 #' @family mapMethods
-#' @inheritParams map-class
 #' @rdname mapRm
-mapRm <- function(map, layer, ask = TRUE, ...)
+mapRm <- function(map, layer, ask = TRUE, ...) {
   UseMethod("mapRm")
+}
 
 #' @export
 #' @aliases mapRm
@@ -301,7 +326,6 @@ mapRm.default <- function(map = NULL,
 
 }
 
-
 if (!isGeneric("crs")) {
   setGeneric("crs", function(x, ...) {
     standardGeneric("crs")
@@ -309,10 +333,13 @@ if (!isGeneric("crs")) {
 }
 
 #' Extract the crs of a \code{map}
-#' @importMethodsFrom raster crs
-#' @importFrom raster crs
+#'
+#' @inheritParams raster crs
+#'
 #' @exportMethod crs
 #' @family mapMethods
+#' @importMethodsFrom raster crs
+#' @importFrom raster crs
 #' @rdname crs
 setMethod("crs",
           signature = "map",
@@ -321,23 +348,29 @@ setMethod("crs",
               x@CRS
             else
               NA
-          })
+})
 
 #' Map class methods
 #'
 #' Tools for getting objects and metadata in and out of a \code{map} class.
 #'
+#' @param map TODO: document this
+#'
+#' @param layerName TODO: document this
+#'
+#' @param layer TODO: document this
+#'
 #' @export
 #' @family mapMethods
 #' @rdname studyAreaName
-studyAreaName <- function(map, layer)
+studyAreaName <- function(map, layerName, layer) {
   UseMethod("studyAreaName")
-
+}
 
 #' @export
 #' @family mapMethods
 #' @rdname studyAreaName
-studyAreaName.map <- function(map, layer = 1) {
+studyAreaName.map <- function(map, layerName, layer = 1) {
   if (sum(map@metadata$studyArea)) {
     map@metadata[studyArea == TRUE, layerName][layer]
   } else {
@@ -350,17 +383,30 @@ studyAreaName.map <- function(map, layer = 1) {
 #' If \code{layer} is not provided and there is more than one \code{studyArea},
 #' then this will extract the last one added.
 #'
+#' @param map TODO: document this
+#'
+#' @param layerName TODO: document this
+#'
+#' @param layer TODO: document this
+#'
 #' @export
 #' @family mapMethods
-#' @inheritParams map-class
 #' @rdname studyArea
-studyArea <- function(map, layer)
+studyArea <- function(map, layerName, layer) {
   UseMethod("studyArea")
+}
 
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-studyArea.map <- function(map, layer = NA) {
+studyArea.default <- function(map, layerName, layer = NA) {
+  browser()
+}
+
+#' @export
+#' @family mapMethods
+#' @rdname studyArea
+studyArea.map <- function(map, layerName, layer = NA) {
   if (sum(map@metadata$studyArea, na.rm = TRUE)) {
     if (isTRUE(is.na(layer))) {
       layer <- max(map@metadata$studyArea, na.rm = TRUE)
@@ -376,17 +422,23 @@ studyArea.map <- function(map, layer = NA) {
 #' If \code{layer} is not provided and there is more than one \code{studyArea},
 #' then this will extract the last one added.
 #'
+#' @param map TODO: describe this
+#'
+#' @param layerName TODO: describe this
+#'
+#' @param layer TODO: describe this
+#'
 #' @export
 #' @family mapMethods
-#' @inheritParams map-class
 #' @rdname rasterToMatch
-rasterToMatch <- function(map, layer)
+rasterToMatch <- function(map, layerName, layer) {
   UseMethod("rasterToMatch")
+}
 
 #' @export
 #' @family mapMethods
 #' @rdname rasterToMatch
-rasterToMatch.map <- function(map, layer = NA) {
+rasterToMatch.map <- function(map, layerName, layer = NA) {
   if (sum(map@metadata$rasterToMatch, na.rm = TRUE)) {
     if (isTRUE(is.na(layer))) {
       layer <- max(map@metadata$rasterToMatch, na.rm = TRUE)
@@ -397,19 +449,13 @@ rasterToMatch.map <- function(map, layer = NA) {
   }
 }
 
-#' @export
-#' @family mapMethods
-#' @rdname studyArea
-studyArea.default <- function(map, layer = NA) {
-  browser()
-}
-
 #' Extract rasters in the \code{map} object
 #' @export
 #' @family mapMethods
 #' @rdname maps
-rasters <- function(map)
+rasters <- function(map) {
   UseMethod("rasters")
+}
 
 #' @export
 #' @family mapMethods
@@ -422,8 +468,9 @@ rasters.map <- function(map) {
 #' @export
 #' @family mapMethods
 #' @rdname maps
-sp <- function(map)
+sp <- function(map) {
   UseMethod("sp")
+}
 
 #' @export
 #' @family mapMethods
@@ -436,8 +483,9 @@ sp.map <- function(map) {
 #' @export
 #' @family mapMethods
 #' @rdname maps
-sf <- function(map)
+sf <- function(map) {
   UseMethod("sf")
+}
 
 #' @export
 #' @family mapMethods
@@ -445,7 +493,6 @@ sf <- function(map)
 sf.map <- function(map) {
   maps(map, "sf")
 }
-
 
 #' @export
 #' @rdname maps
@@ -461,9 +508,9 @@ spatialPoints <- function(map) {
 
 #' Extract leaflet tile paths from a \code{map} object
 #'
+#' @param map A \code{map} class object
 #'
 #' @export
-#' @param map A \code{map} class object
 #' @return
 #' A vector of paths indicating the relative paths. Any layers
 #' that don't have leaflet tiles will return NA.
@@ -474,18 +521,15 @@ leafletTiles <- function(map) {
   tiles
 }
 
-
-
-
 #' Extract maps from a \code{map} object
 #'
 #' This will extract all objects in or pointed to within the \code{map}.
 #'
-#' @export
 #' @param map A \code{map} class object
 #' @param class If supplied, this will be the class of objects returned. Default
 #'              is \code{NULL} which is "all", meaning all objects in the \code{map}
 #'              object
+#' @export
 #' @return
 #' A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
 maps <- function(map, class = NULL) {
@@ -505,20 +549,17 @@ maps <- function(map, class = NULL) {
   out
 }
 
-
 #' @export
 .maps <- function() {
   browser()
   maps(getOption("map.current"))
 }
 
-.singleMetadataNAEntry <-
-  data.table::data.table(layerName = NA_character_, layerType = NA_character_,
-                         url = NA_character_,
-                         columnNameForLabels = NA_character_,
-                         envir = list(), leaflet = FALSE, studyArea = 0)
-
-
+#' @keywords internal
+.singleMetadataNAEntry <- data.table::data.table(
+  layerName = NA_character_, layerType = NA_character_, url = NA_character_,
+  columnNameForLabels = NA_character_, envir = list(), leaflet = FALSE, studyArea = 0
+)
 
 if (!isGeneric("area")) {
   setGeneric("area", function(x, ...) {
@@ -528,24 +569,29 @@ if (!isGeneric("area")) {
 
 #' Calculate area of (named) objects the \code{map} object
 #'
+#' @inheritParams raster area
+#'
 #' @export
+#' @family mapMethods
 #' @importMethodsFrom raster area
 #' @importFrom raster area
-#' @family mapMethods
 #' @rdname area
 setMethod("area",
           signature = "map",
           function(x) {
-  lsObjs <- ls(ml@.xData)
-  logicalRasters <- unlist(lapply(mget(lsObjs, ml@.xData), is, "RasterLayer"))
+  lsObjs <- ls(x@.xData)
+  logicalRasters <- unlist(lapply(mget(lsObjs, x@.xData), is, "RasterLayer"))
   if (any(logicalRasters)) {
-    mget(names(logicalRasters)[logicalRasters], ml@.xData)
+    mget(names(logicalRasters)[logicalRasters], x@.xData)
   } else {
     NULL
   }
 })
 
 #' Show method for map class objects
+#'
+#' @param object TODO: describe this
+#'
 #' @export
 #' @rdname show
 setMethod(
@@ -553,5 +599,4 @@ setMethod(
   signature = "map",
   definition = function(object) {
     show(object@metadata)
-
 })

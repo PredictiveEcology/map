@@ -6,8 +6,8 @@
 \alias{map}
 \title{The \code{map} class}
 \description{
-Contains a common system for organzing vector and raster
-layers, principly for use with leaflet and shiny.
+Contains a common system for organzing vector and raster layers,
+principally for use with \pkg{leaflet} and \pkg{shiny}.
 }
 \section{Slots}{
 
@@ -21,8 +21,10 @@ indicates where to find the object, i.e., via \code{get(layerName, envir = envir
 
 \item{\code{CRS}}{The common crs of all layers}
 
-\item{\code{analyses}}{A data.table or data.frame of the types of analyses to perform}
+\item{\code{analyses}}{A \code{data.table} or \code{data.frame} of the types of analyses to perform.}
 
-\item{\code{analysesData}}{A data.table or data.frame of the results of the analyses}
+\item{\code{analysesData}}{A \code{data.table} or \code{data.frame} of the results of the analyses.}
+
+\item{\code{.xData}}{TODO: document this inherited slot}
 }}
 
