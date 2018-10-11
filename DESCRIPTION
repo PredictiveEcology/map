@@ -22,23 +22,27 @@ Depends:
 Imports:
     backports,
     data.table (>= 1.10.4),
+    methods,
+    quickPlot,
     reproducible,
     raster,
     rgeos,
     sf,
     sp,
-    testthat
+    tiler
 Suggests:
     covr,
-    SpaDES.tools
+    knitr,
+    rmarkdown,
+    SpaDES.tools,
+    testthat
 Remotes:
     PredictiveEcology/reproducible@development
 Encoding: UTF-8
 Language: en-CA
-LinkingTo: Rcpp
 License: GPL-3
 VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/map/issues
 ByteCompile: yes
-RoxygenNote: 6.1.0.9000
+RoxygenNote: 6.1.0
 
