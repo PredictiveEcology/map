@@ -80,18 +80,28 @@ if (require("SpaDES.tools")) {
   crs(vtm) <- crs(ml)
   ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
                tsf = TRUE,
-               analysisUnit = 1, leaflet = FALSE, overwrite = TRUE)
+               analysisGroup = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
   ml <- mapAdd(vtm, ml, filename2 = "vtm1.tif", layerName = "vtm1",
                vtm = TRUE,
-               analysisUnit = 1, leaflet = FALSE, overwrite = TRUE)
+               analysisGroup = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
 
   ageClasses <- c("Young", "Immature", "Mature", "Old")
   ageClassCutOffs <- c(0, 40, 80, 120)
-  mapLeadingByStage(ml, ageClasses = ageClasses,
+  ml <- mapLeadingByStage(ml, ageClasses = ageClasses,
+                    ageClassCutOffs = ageClassCutOffs)
+  ml <- mapLargePatches(ml, ageClasses = ageClasses,
+                    ageClassCutOffs = ageClassCutOffs)
+
+  # Add a second polygon, trigger
+  smallStudyArea2 <- randomPolygon(studyArea(ml), 1e4)
+  smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
+                           data = data.frame(ID = 1, shinyLabel = "zone1"),
+                           match.ID = FALSE)
+  ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
+               envir = .GlobalEnv, layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+  ml <- mapLeadingByStage(ml, ageClasses = ageClasses,
                     ageClassCutOffs = ageClassCutOffs)
 
 
-
 }
-
 }

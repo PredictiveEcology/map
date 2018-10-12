@@ -1,5 +1,5 @@
 mapLargePatches <- function(map, ...) {
-  m <- metadata(map)
+  m <- map@metadata
 
   if (is.null(m$analysisGroup)) {
     stop("Expecting analysisGroup column in map metadata. ",
@@ -8,23 +8,34 @@ mapLargePatches <- function(map, ...) {
   }
   ags <- sort(na.omit(unique(m$analysisGroup)))
   polys <- maps(map, "SpatialPolygons")
-  out <- lapply(polys, function(poly) {
-    browser()
-    out2 <- lapply(au, function(ag) {
-      tsf <- m[tsf==TRUE & analysisGroup==ag, filename2]
-      vtm <- m[vtm==TRUE & analysisGroup==ag, filename2]
-      out3 <- leadingByStage2(tsf, vtm, poly, ...)
-      browse()
-      m[analysisGroup==ag, LeadingDone := TRUE]
-      out3
+  combos <- map@analysesData$.LargePatchesDone
+  if (is.null(combos))
+    combos <- character()
+
+  out <- Map(poly = polys, polyName = names(polys), function(poly, polyName) {
+    out2 <- lapply(ags, function(ag) {
+      comboNew <- paste(ag, polyName, sep = "_")
+      if (!comboNew %in% combos) {
+        tsf <- m[tsf==TRUE & analysisGroup==ag, filename2]
+        vtm <- m[vtm==TRUE & analysisGroup==ag, filename2]
+        message("  Calculating leading by stage for ", comboNew)
+        out3 <- Cache(.largePatchesCalc, tsfFile = asPath(tsf),
+                      vtmFile = asPath(vtm),
+                      byPoly = poly, ...)
+        combos <<- c(combos, comboNew)
+        list(dt = out3)
+      }
     })
   })
+  map@analysesData$.LargePatchesDone <- combos
   map@analysesData[["Leading by stage"]] <- out
   map
 }
 
+#' @importFrom SpaDES.core rasterToMemory
 .largePatchesCalc <- function(tsfFile, vtmFile, byPoly, labelColumn,
                               id, ageClassCutOffs, ageClasses) {
+  browser()
   timeSinceFireFilesRast <- Cache(rasterToMemory, tsfFile)
 
   tsf <- reclassify(timeSinceFireFilesRast,
@@ -120,3 +131,52 @@ mapLargePatches <- function(map, ...) {
 }
 
 
+areaAndPolyValue <- function(ras) {
+  polyIndivSpecies <- gdal_polygonizeR(ras) # 99 seconds with full ras
+  pArea <- as.numeric(sf::st_area(polyIndivSpecies) / 1e4)
+  list(sizeInHa = pArea, polyID = polyIndivSpecies$DN)
+}
+
+#' Polygonize with gdal
+#'
+#' Copied from https://johnbaumgartner.wordpress.com/2012/07/26/getting-rasters-into-shape-from-r/
+#'
+gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile",
+                             pypath = NULL, readpoly = TRUE, quiet = TRUE) {
+  if (isTRUE(readpoly)) require(rgdal)
+  if (is.null(pypath)) {
+    pypath <- Sys.which("gdal_polygonize.py")
+  }
+  if (!file.exists(pypath)) stop("Can't find gdal_polygonize.py on your system.")
+  owd <- getwd()
+  on.exit(setwd(owd))
+  setwd(dirname(pypath))
+  if (is.null(outshape)) {
+    outshape <- tempfile(fileext = ".shp")
+  } else {
+    outshape <- sub("\\.shp$", "", outshape)
+    f.exists <- file.exists(paste(outshape, c("shp", "shx", "dbf"), sep = "."))
+    if (any(f.exists))
+      stop(sprintf("File already exists: %s",
+                   toString(paste(outshape, c("shp", "shx", "dbf"), sep = ".")[f.exists])),
+           call. = FALSE)
+  }
+  if (is(x, "Raster")) {
+    require(raster)
+    f <- tempfile(fileext = ".tif")
+    rastpath <- normalizePath(f, mustWork = FALSE)
+    writeRaster(x, rastpath, datatype = assessDataType(x))
+
+  } else if (is.character(x)) {
+    rastpath <- normalizePath(x)
+  } else stop("x must be a file path (character string), or a Raster object.")
+  system2("python", args = (sprintf('"%1$s" "%2$s" -f "%3$s" "%4$s"',
+                                    pypath, rastpath, gdalformat, outshape)))
+  if (isTRUE(readpoly)) {
+    shp <- sf::read_sf(dsn = dirname(outshape), layer = basename(file_path_sans_ext(outshape)))
+    sf::st_bbox(shp, extent(x))
+    return(shp)
+  } else {
+    return(NULL)
+  }
+}

@@ -242,36 +242,31 @@ mapLeadingByStage <- function(map, ...) {
   # a data.table
   m <- map@metadata
 
-
   if (is.null(m$analysisGroup)) {
     stop("Expecting analysisGroup column in map metadata. ",
          "Please pass in a unique name representing the analysis group, ",
          "i.e., which tsf is associated with which vtm")
   }
-  if (is.null(m$LeadingDone))
-    set(m, , "LeadingDone", list())
   ags <- sort(na.omit(unique(m$analysisGroup)))
   polys <- maps(map, "SpatialPolygons")
+  combos <- map@analysesData$.LeadingDone
+  if (is.null(combos))
+    combos <- character()
+
   out <- Map(poly = polys, polyName = names(polys), function(poly, polyName) {
     out2 <- lapply(ags, function(ag) {
-      combo <- paste(ag, polyName, sep = "_")
-      needRedo <- FALSE
-      if (isTRUE(is.null(m$LeadingDone))) { # if LeadingDone has never been done
-        if (!any(compareNA(m$LeadingDone, combo))) {
-          needRedo <- TRUE
-        }
-      }
-      if (isFALSE(needRedo)) {
+      comboNew <- paste(ag, polyName, sep = "_")
+      if (!comboNew %in% combos) {
         tsf <- m[tsf==TRUE & analysisGroup==ag, filename2]
         vtm <- m[vtm==TRUE & analysisGroup==ag, filename2]
+        message("  Calculating leading by stage for ", comboNew)
         out3 <- Cache(leadingByStage2, asPath(tsf), asPath(vtm), poly, ...)
-        browser()
-        m[analysisGroup==ag, LeadingDone := list(c(LeadingDone, combo))]
-        out3
+        combos <<- c(combos, comboNew)
+        list(dt = out3)
       }
     })
   })
-  browser()
+  map@analysesData$.LeadingDone <- combos
   map@analysesData[["Leading by stage"]] <- out
   map
 }
