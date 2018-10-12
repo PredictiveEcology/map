@@ -119,6 +119,7 @@ mapAdd.default <- function(object = NULL, map = new("map"),
 #' @importFrom reproducible fixErrors projectInputs postProcess .robustDigest asPath Cache compareNA
 #' @importFrom raster crs projectRaster writeRaster
 #' @importFrom sp CRS
+#' @importFrom backports isFALSE
 #'
 #' @rdname mapAdd
 mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,

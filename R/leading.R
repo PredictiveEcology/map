@@ -241,6 +241,7 @@ leadingByStage <- function(tsf, vtm, polygonToSummarizeBy,
 mapLeadingByStage <- function(map, ...) {
   # a data.table
   m <- map@metadata
+  listEntry <- "Leading by stage"
 
   if (is.null(m$analysisGroup)) {
     stop("Expecting analysisGroup column in map metadata. ",
@@ -249,7 +250,7 @@ mapLeadingByStage <- function(map, ...) {
   }
   ags <- sort(na.omit(unique(m$analysisGroup)))
   polys <- maps(map, "SpatialPolygons")
-  combos <- map@analysesData$.LeadingDone
+  combos <- map@analysesData[[listEntry]]$.LeadingDone
   if (is.null(combos))
     combos <- character()
 
@@ -266,8 +267,8 @@ mapLeadingByStage <- function(map, ...) {
       }
     })
   })
-  map@analysesData$.LeadingDone <- combos
-  map@analysesData[["Leading by stage"]] <- out
+  map@analysesData[[listEntry]]$.LeadingDone <- combos
+  map@analysesData[[listEntry]] <- out
   map
 }
 

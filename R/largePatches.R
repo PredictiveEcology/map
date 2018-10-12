@@ -1,6 +1,7 @@
 mapLargePatches <- function(map, ...) {
   m <- map@metadata
 
+  listEntry <- "Large patches"
   if (is.null(m$analysisGroup)) {
     stop("Expecting analysisGroup column in map metadata. ",
          "Please pass in a unique name representing the analysis group, ",
@@ -8,7 +9,7 @@ mapLargePatches <- function(map, ...) {
   }
   ags <- sort(na.omit(unique(m$analysisGroup)))
   polys <- maps(map, "SpatialPolygons")
-  combos <- map@analysesData$.LargePatchesDone
+  combos <- map@analysesData[[listEntry]]$.LargePatchesDone
   if (is.null(combos))
     combos <- character()
 
@@ -18,7 +19,7 @@ mapLargePatches <- function(map, ...) {
       if (!comboNew %in% combos) {
         tsf <- m[tsf==TRUE & analysisGroup==ag, filename2]
         vtm <- m[vtm==TRUE & analysisGroup==ag, filename2]
-        message("  Calculating leading by stage for ", comboNew)
+        message("  Calculating Large Patches for ", comboNew)
         out3 <- Cache(.largePatchesCalc, tsfFile = asPath(tsf),
                       vtmFile = asPath(vtm),
                       byPoly = poly, ...)
@@ -27,8 +28,8 @@ mapLargePatches <- function(map, ...) {
       }
     })
   })
-  map@analysesData$.LargePatchesDone <- combos
-  map@analysesData[["Leading by stage"]] <- out
+  map@analysesData[[listEntry]]$.LargePatchesDone <- combos
+  map@analysesData[[listEntry]] <- out
   map
 }
 
