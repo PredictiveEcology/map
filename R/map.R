@@ -49,7 +49,7 @@ setMethod("initialize", "map",
           function(.Object, ...) {
             .Object <- callNextMethod()
             .Object@metadata = data.table(layerName = character(), layerType = character(),
-                                          url = character(),
+                                          #url = character(),
                                           columnNameForLabels = character(),
                                           leaflet = logical(), studyArea = numeric(),
                                           rasterToMatch = logical())
@@ -73,7 +73,6 @@ setMethod("initialize", "map",
 #' @param map       TODO: document this
 #' @param layerName TODO: document this
 #' @param overwrite TODO: document this
-#' @param url       TODO: document this
 #' @param columnNameForLabels TODO: document this
 #' @param leaflet TODO: document this
 #' @param isStudyArea TODO: document this
@@ -110,7 +109,7 @@ mapAdd <- function(object, map, layerName, overwrite = FALSE, ...)
 #'            reproducible::fixErrors and reproducible::prepInputs
 mapAdd.default <- function(object = NULL, map = NULL,
                            layerName = NULL, overwrite = FALSE,
-                           url = NULL,
+                           #url = NULL,
                            columnNameForLabels = character(),
                            leaflet = TRUE, isStudyArea = FALSE, ...) {
   if (is.null(map)) {
@@ -122,20 +121,19 @@ mapAdd.default <- function(object = NULL, map = NULL,
     #                   env = as.environment("package:map"))
     # lockBinding("map", as.environment("package:map"))
   }
-  if (is.null(object)) {
+  if (is.null(object)) {    # with no object, we get it first, then pass to mapAdd
+
     dots <- list(...)
-    if (is.null(url)) {
-      stop("Must provide either object or url")
-    } else {
-      # Don't run preProcess because that will happen in next mapAdd when object is
-      #   in hand
-      forms <- reproducible:::.formalsNotInCurrentDots(preProcess, ...)
-      args <- dots[!(names(dots) %in% forms)]
-      object <- do.call(prepInputs, args = append(list(url = url), args))
-    }
+    # Don't run preProcess because that will happen in next mapAdd when object is
+    #   in hand
+    forms <- reproducible:::.formalsNotInCurrentDots(preProcess, ...)
+    args <- dots[!(names(dots) %in% forms)]
+    object <- do.call(prepInputs, args = args)
+
     map <- mapAdd(object, map = map, layerName = layerName,
-                             overwrite = overwrite,
-                             url = url, columnNameForLabels = columnNameForLabels,
+                  overwrite = overwrite,
+                  #           url = url,
+                  columnNameForLabels = columnNameForLabels,
                              leaflet = leaflet, isStudyArea = isStudyArea, ...)
   }
   map
@@ -154,7 +152,7 @@ mapAdd.default <- function(object = NULL, map = NULL,
 #'
 #' @rdname mapAdd
 mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
-                                   overwrite = FALSE, url = NULL,
+                                   overwrite = FALSE, #url = NULL,
                                    columnNameForLabels = NULL,
                                    leaflet = TRUE, isStudyArea = NULL,
                                    envir = NULL, ...) {
@@ -242,8 +240,8 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
     }
     set(b, NULL, "studyArea", studyAreaNumber)
   }
-  if (!is.null(url))
-    set(b, NULL, "url", url)
+  if (!is.null(dots$url))
+    set(b, NULL, "url", dots$url)
   set(b, NULL, "layerName", layerName)
   set(b, NULL, "layerType", class(object))
   if (length(columnNameForLabels)>0) {
@@ -278,6 +276,12 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
 
   set(b, NULL, "envir", list(list(envir)))
   set(b, NULL, "objectName", objectName)
+
+  # Add all extra columns to metadata
+  dots <- list(...)
+  columnsToAdd <- dots[!names(dots) %in% .formalsReproducible]
+  Map(cta = columnsToAdd, nta = names(columnsToAdd),
+      function(cta, nta) set(b, , nta, cta))
 
   map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
   return(map)
@@ -531,7 +535,7 @@ maps <- function(map, class = NULL) {
 
 #' @keywords internal
 .singleMetadataNAEntry <- data.table::data.table(
-  layerName = NA_character_, layerType = NA_character_, url = NA_character_,
+  layerName = NA_character_, layerType = NA_character_, #url = NA_character_,
   columnNameForLabels = NA_character_, envir = list(), leaflet = FALSE, studyArea = 0
 )
 
@@ -571,3 +575,10 @@ setMethod(
   definition = function(object) {
     show(object@metadata)
 })
+
+.formalsReproducible <- unique(c(formalArgs(reproducible::preProcess),
+                          formalArgs(reproducible::postProcess),
+                          formalArgs(reproducible:::determineFilename),
+                          formalArgs(reproducible::cropInputs),
+                          formalArgs(reproducible::maskInputs),
+                          formalArgs(reproducible::projectInputs)))
