@@ -12,9 +12,9 @@
 #'
 #' @slot CRS  The common crs of all layers
 #'
-#' @slot analyses    A data.table or data.frame of the types of analyses to perform
+#' @slot analyses    A \code{data.table} or \code{data.frame} of the types of analyses to perform.
 #'
-#' @slot analysesData A data.table or data.frame of the results of the analyses
+#' @slot analysesData A \code{data.table} or \code{data.frame} of the results of the analyses.
 #'
 #' @slot .xData  TODO: document this inherited slot
 #'
@@ -90,37 +90,40 @@ setMethod("initialize", "map",
 #' StudyArea <- SpatialPolygons(list(Srs1), 1L)
 #' crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 #'
-#' ml <- new("map")
-#' ml <- mapAdd(StudyArea, ml, isStudyArea = TRUE, layerName = "newPoly")
+#' ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area")
 #'
-#' if (requireNamespace("SpaDES.tools")) {
-#'   smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml), 1e2)
+#' if (require("SpaDES.tools")) {
+#'   smallStudyArea <- randomPolygon(studyArea(ml), 1e2)
 #'   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
-#'                envir = .GlobalEnv) # adds a second studyArea within 1st
+#'                envir = .GlobalEnv, layerName = "Smaller Study Area") # adds a second studyArea within 1st
+#'
+#'   tsf <- randomPolygons(raster(extent(studyArea(ml))))*100
+#'   crs(tsf) <- crs(ml)
+#'   vtm <- randomPolygons(tsf, numTypes = 4)
+#'   crs(vtm) <- crs(ml)
+#'   ml <- mapAdd(tsf, ml, filename2 = NULL, layerName = "tsf1", leaflet = FALSE)
+#'   ml <- mapAdd(vtm, ml, filename2 = NULL, layerName = "vtm1", leaflet = FALSE)
+#'
+#'   leadingByStage(tsf, vtm, studyArea(ml))
+#'
+#'
+#'
 #' }
 #'
-mapAdd <- function(object, map, layerName, overwrite = FALSE, ...)
+mapAdd <- function(object, map, layerName, overwrite = FALSE, ...) {
   UseMethod("mapAdd")
+}
 
 #' @export
 #' @rdname mapAdd
 #' @importFrom reproducible prepInputs preProcess
 #' @param ... passed to reproducible::postProcess and reproducible::projectInputs and
 #'            reproducible::fixErrors and reproducible::prepInputs
-mapAdd.default <- function(object = NULL, map = NULL,
+mapAdd.default <- function(object = NULL, map = new("map"),
                            layerName = NULL, overwrite = FALSE,
                            #url = NULL,
                            columnNameForLabels = character(),
                            leaflet = TRUE, isStudyArea = FALSE, ...) {
-  if (is.null(map)) {
-    map <- new("map")
-    # options("map.current") <- map
-    # suppressWarnings(rm("map", envir = as.environment("package:map")))
-    # makeActiveBinding(sym = "map",
-    #                   fun = ".maps",
-    #                   env = as.environment("package:map"))
-    # lockBinding("map", as.environment("package:map"))
-  }
   if (is.null(object)) {    # with no object, we get it first, then pass to mapAdd
 
     dots <- list(...)
@@ -151,7 +154,7 @@ mapAdd.default <- function(object = NULL, map = NULL,
 #' @importFrom sp CRS
 #'
 #' @rdname mapAdd
-mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
+mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
                                    overwrite = FALSE, #url = NULL,
                                    columnNameForLabels = NULL,
                                    leaflet = TRUE, isStudyArea = NULL,
@@ -182,8 +185,8 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
       }
     } else {
       dots[["targetCRS"]] <- crs(map)
+      object <- do.call(projectInputs, append(list(object), dots))
     }
-    object <- do.call(projectInputs, append(list(object), dots))
   } else {
     if (is.na(crs(map))) {
       message("There is no CRS already in map; using the studyArea CRS and adding that to map")
@@ -217,7 +220,10 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
     if (exists(layerName, envir = envir)) {
       assign(layerName, envir, envir = map@.xData)
     } else {
-      stop("object named ", layerName, " does not exist in envir: ", envir)
+      envir <- map@.xData
+      assign(layerName, object, envir = envir)
+      message("object named ", layerName, " does not exist in envir provided",
+              ". Adding it to map object")
     }
   }
   if (mustOverwrite) {
@@ -291,11 +297,20 @@ mapAdd.spatialObjects <- function(object, map = NULL, layerName = NULL,
 #'
 #' @inheritParams map-class
 #'
+#' @param map TODO: document this
+#'
+#' @param layer TODO: document this
+#'
+#' @param ask TODO: document this
+#'
+#' @param ... TODO: document this
+#'
 #' @export
 #' @family mapMethods
 #' @rdname mapRm
-mapRm <- function(map, layer, ask = TRUE, ...)
+mapRm <- function(map, layer, ask = TRUE, ...) {
   UseMethod("mapRm")
+}
 
 #' @export
 #' @aliases mapRm
@@ -348,17 +363,23 @@ setMethod("crs",
 #'
 #' Tools for getting objects and metadata in and out of a \code{map} class.
 #'
+#' @param map TODO: document this
+#'
+#' @param layerName TODO: document this
+#'
+#' @param layer TODO: document this
+#'
 #' @export
 #' @family mapMethods
 #' @rdname studyAreaName
-studyAreaName <- function(map, layer) {
+studyAreaName <- function(map, layerName, layer) {
   UseMethod("studyAreaName")
 }
 
 #' @export
 #' @family mapMethods
 #' @rdname studyAreaName
-studyAreaName.map <- function(map, layer = 1) {
+studyAreaName.map <- function(map, layerName, layer = 1) {
   if (sum(map@metadata$studyArea)) {
     map@metadata[studyArea == TRUE, layerName][layer]
   } else {
@@ -371,22 +392,36 @@ studyAreaName.map <- function(map, layer = 1) {
 #' If \code{layer} is not provided and there is more than one \code{studyArea},
 #' then this will extract the last one added.
 #'
+#' @param map TODO: document this
+#'
+#' @param layerName TODO: document this
+#'
+#' @param layer TODO: document this
+#'
 #' @export
 #' @family mapMethods
-#' @inheritParams map-class
 #' @rdname studyArea
-studyArea <- function(map, layer)
+studyArea <- function(map, layerName, layer) {
   UseMethod("studyArea")
+}
 
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-studyArea.map <- function(map, layer = NA) {
+studyArea.default <- function(map, layerName, layer = NA) {
+  browser()
+}
+
+#' @export
+#' @family mapMethods
+#' @rdname studyArea
+studyArea.map <- function(map, layerName, layer = NA) {
   if (sum(map@metadata$studyArea, na.rm = TRUE)) {
     if (isTRUE(is.na(layer))) {
       layer <- max(map@metadata$studyArea, na.rm = TRUE)
     }
-    get(map@metadata[studyArea == layer, layerName], map@.xData)
+    get(map@metadata[studyArea == layer]$layerName,
+        map@metadata[studyArea == layer]$envir[[1]])
   } else {
     NULL
   }
@@ -397,17 +432,23 @@ studyArea.map <- function(map, layer = NA) {
 #' If \code{layer} is not provided and there is more than one \code{studyArea},
 #' then this will extract the last one added.
 #'
+#' @param map TODO: describe this
+#'
+#' @param layerName TODO: describe this
+#'
+#' @param layer TODO: describe this
+#'
 #' @export
 #' @family mapMethods
-#' @inheritParams map-class
 #' @rdname rasterToMatch
-rasterToMatch <- function(map, layer)
+rasterToMatch <- function(map, layerName, layer) {
   UseMethod("rasterToMatch")
+}
 
 #' @export
 #' @family mapMethods
 #' @rdname rasterToMatch
-rasterToMatch.map <- function(map, layer = NA) {
+rasterToMatch.map <- function(map, layerName, layer = NA) {
   if (sum(map@metadata$rasterToMatch, na.rm = TRUE)) {
     if (isTRUE(is.na(layer))) {
       layer <- max(map@metadata$rasterToMatch, na.rm = TRUE)
@@ -418,19 +459,13 @@ rasterToMatch.map <- function(map, layer = NA) {
   }
 }
 
-#' @export
-#' @family mapMethods
-#' @rdname studyArea
-studyArea.default <- function(map, layer = NA) {
-  browser()
-}
-
 #' Extract rasters in the \code{map} object
 #' @export
 #' @family mapMethods
 #' @rdname maps
-rasters <- function(map)
+rasters <- function(map) {
   UseMethod("rasters")
+}
 
 #' @export
 #' @family mapMethods
@@ -443,8 +478,9 @@ rasters.map <- function(map) {
 #' @export
 #' @family mapMethods
 #' @rdname maps
-sp <- function(map)
+sp <- function(map) {
   UseMethod("sp")
+}
 
 #' @export
 #' @family mapMethods
@@ -457,8 +493,9 @@ sp.map <- function(map) {
 #' @export
 #' @family mapMethods
 #' @rdname maps
-sf <- function(map)
+sf <- function(map) {
   UseMethod("sf")
+}
 
 #' @export
 #' @family mapMethods
@@ -466,7 +503,6 @@ sf <- function(map)
 sf.map <- function(map) {
   maps(map, "sf")
 }
-
 
 #' @export
 #' @rdname maps
@@ -482,9 +518,9 @@ spatialPoints <- function(map) {
 
 #' Extract leaflet tile paths from a \code{map} object
 #'
+#' @param map A \code{map} class object
 #'
 #' @export
-#' @param map A \code{map} class object
 #' @return
 #' A vector of paths indicating the relative paths. Any layers
 #' that don't have leaflet tiles will return NA.
@@ -495,18 +531,15 @@ leafletTiles <- function(map) {
   tiles
 }
 
-
-
-
 #' Extract maps from a \code{map} object
 #'
 #' This will extract all objects in or pointed to within the \code{map}.
 #'
-#' @export
 #' @param map A \code{map} class object
 #' @param class If supplied, this will be the class of objects returned. Default
 #'              is \code{NULL} which is "all", meaning all objects in the \code{map}
 #'              object
+#' @export
 #' @return
 #' A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
 maps <- function(map, class = NULL) {
@@ -525,7 +558,6 @@ maps <- function(map, class = NULL) {
 
   out
 }
-
 
 #' @export
 .maps <- function() {
@@ -557,16 +589,19 @@ if (!isGeneric("area")) {
 setMethod("area",
           signature = "map",
           function(x) {
-  lsObjs <- ls(ml@.xData)
-  logicalRasters <- unlist(lapply(mget(lsObjs, ml@.xData), is, "RasterLayer"))
+  lsObjs <- ls(x@.xData)
+  logicalRasters <- unlist(lapply(mget(lsObjs, x@.xData), is, "RasterLayer"))
   if (any(logicalRasters)) {
-    mget(names(logicalRasters)[logicalRasters], ml@.xData)
+    mget(names(logicalRasters)[logicalRasters], x@.xData)
   } else {
     NULL
   }
 })
 
 #' Show method for map class objects
+#'
+#' @param object TODO: describe this
+#'
 #' @export
 #' @rdname show
 setMethod(

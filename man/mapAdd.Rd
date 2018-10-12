@@ -8,13 +8,15 @@
 \usage{
 mapAdd(object, map, layerName, overwrite = FALSE, ...)
 
-\method{mapAdd}{default}(object = NULL, map = NULL, layerName = NULL,
-  overwrite = FALSE, url = NULL, columnNameForLabels = character(),
-  leaflet = TRUE, isStudyArea = FALSE, ...)
+\method{mapAdd}{default}(object = NULL, map = new("map"),
+  layerName = NULL, overwrite = FALSE, url = NULL,
+  columnNameForLabels = character(), leaflet = TRUE,
+  isStudyArea = FALSE, ...)
 
-\method{mapAdd}{spatialObjects}(object, map = NULL, layerName = NULL,
-  overwrite = FALSE, url = NULL, columnNameForLabels = NULL,
-  leaflet = TRUE, isStudyArea = NULL, envir = NULL, ...)
+\method{mapAdd}{spatialObjects}(object, map = new("map"),
+  layerName = NULL, overwrite = FALSE, url = NULL,
+  columnNameForLabels = NULL, leaflet = TRUE, isStudyArea = NULL,
+  envir = NULL, ...)
 }
 \arguments{
 \item{object}{TODO: document this}
@@ -59,13 +61,20 @@ Srs1 <- Polygons(list(Sr1), "s1")
 StudyArea <- SpatialPolygons(list(Srs1), 1L)
 crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 
-ml <- new("map")
-ml <- mapAdd(StudyArea, ml, isStudyArea = TRUE, layerName = "newPoly")
+ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area")
 
-if (requireNamespace("SpaDES.tools")) {
-  smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml), 1e2)
+if (require("SpaDES.tools")) {
+  smallStudyArea <- randomPolygon(studyArea(ml), 1e2)
   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
                envir = .GlobalEnv) # adds a second studyArea within 1st
+
+  tsf <- randomPolygons()*100
+  vtm <- randomPolygons(tsf, numTypes = 4)
+
+  leadingByStage(tsf, vtm, ml$)
+
+
+
 }
 
 }

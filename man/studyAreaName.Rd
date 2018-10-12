@@ -5,9 +5,16 @@
 \alias{studyAreaName.map}
 \title{Map class methods}
 \usage{
-studyAreaName(map, layer)
+studyAreaName(map, layerName, layer)
 
-\method{studyAreaName}{map}(map, layer = 1)
+\method{studyAreaName}{map}(map, layerName, layer = 1)
+}
+\arguments{
+\item{map}{TODO: document this}
+
+\item{layerName}{TODO: document this}
+
+\item{layer}{TODO: document this}
 }
 \description{
 Tools for getting objects and metadata in and out of a \code{map} class.
