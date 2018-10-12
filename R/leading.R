@@ -239,24 +239,47 @@ leadingByStage <- function(tsf, vtm, polygonToSummarizeBy,
 }
 
 mapLeadingByStage <- function(map, ...) {
-  m <- metadata(map)
+  # a data.table
+  m <- map@metadata
 
-  au <- sort(na.omit(unique(m$analysisUnit)))
+
+  if (is.null(m$analysisGroup)) {
+    stop("Expecting analysisGroup column in map metadata. ",
+         "Please pass in a unique name representing the analysis group, ",
+         "i.e., which tsf is associated with which vtm")
+  }
+  if (is.null(m$LeadingDone))
+    set(m, , "LeadingDone", list())
+  ags <- sort(na.omit(unique(m$analysisGroup)))
   polys <- maps(map, "SpatialPolygons")
-  out <- lapply(polys, function(poly) {
-    out2 <- lapply(au, function(analysisIndex) {
-      tsf <- m[tsf==TRUE & analysisUnit==analysisIndex, filename2]
-      vtm <- m[vtm==TRUE & analysisUnit==analysisIndex, filename2]
-      leadingByStage2(tsf, vtm, poly, ...)
+  out <- Map(poly = polys, polyName = names(polys), function(poly, polyName) {
+    out2 <- lapply(ags, function(ag) {
+      combo <- paste(ag, polyName, sep = "_")
+      needRedo <- FALSE
+      if (isTRUE(is.null(m$LeadingDone))) { # if LeadingDone has never been done
+        if (!any(compareNA(m$LeadingDone, combo))) {
+          needRedo <- TRUE
+        }
+      }
+      if (isFALSE(needRedo)) {
+        tsf <- m[tsf==TRUE & analysisGroup==ag, filename2]
+        vtm <- m[vtm==TRUE & analysisGroup==ag, filename2]
+        out3 <- Cache(leadingByStage2, asPath(tsf), asPath(vtm), poly, ...)
+        browser()
+        m[analysisGroup==ag, LeadingDone := list(c(LeadingDone, combo))]
+        out3
+      }
     })
   })
-
-
+  browser()
+  map@analysesData[["Leading by stage"]] <- out
+  map
 }
 
 leadingByStage2 <- function(tsf, vtm, polygonToSummarizeBy,
-                            ageClassCutOffs,  ageClasses, objName = NULL, ...) {
+                            ageClassCutOffs,  ageClasses, ...) {
   # main function code
+  startTime <- Sys.time()
   if (tail(ageClassCutOffs, 1) != Inf)
     ageClassCutOffs <- c(ageClassCutOffs, Inf)
 
@@ -280,7 +303,6 @@ leadingByStage2 <- function(tsf, vtm, polygonToSummarizeBy,
   levels(rasTsf) <- data.frame(ID = seq_along(ageClasses), Factor = ageClasses)
 
   # prepare vtm rasters
-  browser()
   rasVeg <- raster(vtm[1])
   rasVeg[] <- rasVeg[] # 3 seconds
 
@@ -307,7 +329,6 @@ leadingByStage2 <- function(tsf, vtm, polygonToSummarizeBy,
   levels(ras) <- data.frame(eTable, ageClass = types[, 1], vegCover = types[, 2])
 
   # prepare polygonToSummarizeBy factor raster
-  browser()
   if (is(polygonToSummarizeBy, "SpatialPolygons")) {
     if (!"shinyLabel" %in% colnames(polygonToSummarizeBy@data))
       stop("polygonToSummarizeBy must have a column 'shinyLabel'")
@@ -330,43 +351,46 @@ leadingByStage2 <- function(tsf, vtm, polygonToSummarizeBy,
     polygonID = facVals$polygonNum,
     cell = seq_len(ncell(ras))
   )
-  #bb <- na.omit(bb)
 
   # add age and vegCover by reference
   bb[, c("ageClass", "vegCover") := factorValues(ras, ras[][bb$cell], att = c("ageClass", "vegCover"))]
   bb <- na.omit(bb)
 
-  #set(bb, , "zone", polygonToSummarizeBy$shinyLabel[as.numeric(bb$polygonNum)])
-  tabulated <- bb[, list(N1 = .N), by = c("zone", "polygonID", "ageClass", "vegCover")]
-  tabulated[, proportion := round(N1 / sum(N1), 4), by = c("zone", "ageClass")]
+  # One species at a time
+  tabulated <- bb[, list(NPixels = .N), by = c("zone", "polygonID", "ageClass", "vegCover")]
+  tabulated[, proportion := round(NPixels / sum(NPixels), 4), by = c("zone", "vegCover")]
+
+  # All species
+  tabulated2 <- bb[, list(NPixels = .N), by = c("zone", "polygonID", "ageClass")]
+  tabulated2[, proportion := round(NPixels / sum(NPixels), 4), by = c("zone")]
+  set(tabulated2, , "vegCover", "All species")
+
+  tabulated <- rbindlist(list(tabulated, tabulated2), use.names = TRUE, fill = TRUE)
 
   allCombos <- expand.grid(
     ageClass = ageClasses,
     stringsAsFactors = FALSE,
     vegCover = raster::levels(rasVeg)[[1]]$Factor,
-    zone = levs$shinyLabel# factorValues(polygonToSummarizeBy, 1:5)$shinyLabel
+    zone = levs$shinyLabel
   )
   allCombos$polygonID <- match(allCombos$zone, levs$shinyLabel)
-  #allCombos$proportion <- 0
   data.table::setDT(allCombos)
 
-  #allCombos[tabulated, on = c("zone", "vegCover", "ageClass")]
-
-  browser()
   tabulated <- merge(
     tabulated,
     allCombos,
     by = c("zone", "vegCover", "ageClass", "polygonID"),
     all.y = TRUE
   )
+  # fill in zeros where there is no value
   tabulated[is.na(proportion), proportion := 0]
-  set(tabulated, , "N1", NULL)
   set(tabulated,
       ,
       "label",
       paste(
         tabulated$ageClass,
-        paste(basename(dirname(tsf)), basename(tsf), sep = "_"),
+        paste(gsub(basename(dirname(tsf)), pattern = "\\.", replacement = ""),
+              basename(tsf), sep = "_"),
         sep = "."
       ))
 

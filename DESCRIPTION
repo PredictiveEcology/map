@@ -44,5 +44,9 @@ License: GPL-3
 VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/map/issues
 ByteCompile: yes
-RoxygenNote: 6.1.0
-
+RoxygenNote: 6.1.0.9000
+Collate: 
+    'leading.R'
+    'map-class.R'
+    'map-package.R'
+    'map.R'

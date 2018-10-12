@@ -1,65 +1,3 @@
-#' The \code{map} class
-#'
-#' Contains a common system for organzing vector and raster layers,
-#' principally for use with \pkg{leaflet} and \pkg{shiny}.
-#'
-#' @slot metadata  \code{data.table} with columns describing metadata of map objects in
-#'                 \code{maps} slot.
-#'
-#' @slot maps Named environment of map-type objects (e.g., \code{sf}, \code{Raster*},
-#'            \code{Spatial*}. Each entry may also be simply an environment, which
-#'            indicates where to find the object, i.e., via \code{get(layerName, envir = environment)}
-#'
-#' @slot CRS  The common crs of all layers
-#'
-#' @slot analyses    A \code{data.table} or \code{data.frame} of the types of analyses to perform.
-#'
-#' @slot analysesData A \code{data.table} or \code{data.frame} of the results of the analyses.
-#'
-#' @slot .xData  TODO: document this inherited slot
-#'
-#' @aliases map
-#' @exportClass map
-#' @importFrom data.table data.table
-#' @importFrom raster crs raster
-#' @rdname map-class
-setClass(
-  "map",
-  contains = "environment",
-  slots = list(
-    metadata = "data.table",
-    #.Data = "environment",
-    CRS = "CRS",
-    analyses = "data.table",
-    analysesData = "list"
-  ),
-  validity = function(object) {
-    browser()
-    #if (is.na(object@simtimes$end)) {
-    #  stop("simulation end time must be specified.")
-    #} else {
-    #  if (object@simtimes$start > object@simtimes$end) {
-    #    stop("simulation end time cannot be before start time.")
-    #  }
-    #}
-  }
-)
-
-setMethod("initialize", "map",
-          function(.Object, ...) {
-            .Object <- callNextMethod()
-            .Object@metadata = data.table(layerName = character(), layerType = character(),
-                                          #url = character(),
-                                          columnNameForLabels = character(),
-                                          leaflet = logical(), studyArea = numeric(),
-                                          rasterToMatch = logical())
-            .Object@CRS = sp::CRS()
-            .Object@analyses = data.table::data.table()
-            .Object@analysesData = list()
-
-            .Object
-})
-
 #' Append a spatial object to map
 #'
 #' If \code{isStudyArea = TRUE}, then several things will be triggered:
@@ -69,16 +7,6 @@ setMethod("initialize", "map",
 #'   \item update CRS slot to be the CRS of the study area.
 #' }
 #'
-#' @param object    TODO: document this
-#' @param map       TODO: document this
-#' @param layerName TODO: document this
-#' @param overwrite TODO: document this
-#' @param columnNameForLabels TODO: document this
-#' @param leaflet TODO: document this
-#' @param isStudyArea TODO: document this
-#'
-#' @export
-#' @rdname mapAdd
 #' @examples
 #' library(sp)
 #' library(raster)
@@ -112,19 +40,30 @@ setMethod("initialize", "map",
 #'   crs(vtm) <- crs(ml)
 #'   ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
 #'                tsf = TRUE,
-#'                analysisUnit = 1, leaflet = FALSE, overwrite = TRUE)
+#'                analysisGroup = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
 #'   ml <- mapAdd(vtm, ml, filename2 = "vtm1.tif", layerName = "vtm1",
 #'                vtm = TRUE,
-#'                analysisUnit = 1, leaflet = FALSE, overwrite = TRUE)
+#'                analysisGroup = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
 #'
 #'   ageClasses <- c("Young", "Immature", "Mature", "Old")
 #'   ageClassCutOffs <- c(0, 40, 80, 120)
-#'   mapLeadingByStage(ml, ageClasses = ageClasses,
+#'   ml <- mapLeadingByStage(ml, ageClasses = ageClasses,
 #'                     ageClassCutOffs = ageClassCutOffs)
 #'
 #'
 #'
 #' }
+#' @param object    TODO: document this
+#' @param map       TODO: document this
+#' @param layerName TODO: document this
+#' @param overwrite TODO: document this
+#' @param columnNameForLabels TODO: document this
+#' @param leaflet TODO: document this
+#' @param isStudyArea TODO: document this
+#' @include map-class.R
+#'
+#' @export
+#' @rdname mapAdd
 #'
 mapAdd <- function(object, map, layerName, overwrite = FALSE, ...) {
   UseMethod("mapAdd")
@@ -219,7 +158,6 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
       if (!is.null(rasterToMatch(map))) {
         dots$rasterToMatch <- rasterToMatch(map)
       }
-      browser()
       object <- do.call(postProcess, append(list(object), dots))
     }
   }
@@ -302,6 +240,18 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
 
   # Add all extra columns to metadata
   dots <- list(...)
+  if (length(dots)) {
+    dots <- dots[!unlist(lapply(dots, is.null))] # remove NULL because that isn't added to data.table anyway
+    if (!is.null(dots$filename2)) {
+      if (inherits(object, "RasterLayer")) {
+        if (endsWith(dots$filename2, suffix = "tif")) {
+          if (raster::is.factor(object)) {
+            dots$filename2 <- basename(filename(object))
+          }
+        }
+      }
+    }
+  }
   columnsToAdd <- dots#[!names(dots) %in% .formalsReproducible]
   Map(cta = columnsToAdd, nta = names(columnsToAdd),
       function(cta, nta) set(b, , nta, cta))
@@ -634,3 +584,27 @@ setMethod(
                           formalArgs(reproducible::cropInputs),
                           formalArgs(reproducible::maskInputs),
                           formalArgs(reproducible::projectInputs)))
+
+
+################################################################################
+#' Extract the metadata object
+#'
+#' Methods for specific classes exist.
+#'
+#' @export
+#' @rdname metadata
+metadata <- function(x) UseMethod("metadata")
+
+#' @importFrom raster metadata
+#' @export
+#' @rdname metadata
+metadata.Raster <- function(x) {
+  raster::metadata(x)
+}
+
+#' @export
+#' @rdname metadata
+metadata.map <- function(x) {
+  x@metadata
+}
+

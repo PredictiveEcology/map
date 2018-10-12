@@ -57,11 +57,17 @@ Sr1 <- Polygon(coords)
 Srs1 <- Polygons(list(Sr1), "s1")
 StudyArea <- SpatialPolygons(list(Srs1), 1L)
 crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+StudyArea <- SpatialPolygonsDataFrame(StudyArea,
+                           data = data.frame(ID = 1, shinyLabel = "zone2"),
+                           match.ID = FALSE)
 
 ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area")
 
 if (require("SpaDES.tools")) {
   smallStudyArea <- randomPolygon(studyArea(ml), 1e4)
+  smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,
+                           data = data.frame(ID = 1, shinyLabel = "zone1"),
+                           match.ID = FALSE)
   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
                envir = .GlobalEnv, layerName = "Smaller Study Area") # adds a second studyArea within 1st
 
