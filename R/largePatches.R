@@ -142,13 +142,22 @@ areaAndPolyValue <- function(ras) {
 #' Copied from https://johnbaumgartner.wordpress.com/2012/07/26/getting-rasters-into-shape-from-r/
 #'
 #' @importFrom reproducible assessDataType
+#' @importFrom tools file_path_sans_ext
+#' @importFrom sf st_bbox read_sf
 gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile",
                              pypath = NULL, readpoly = TRUE, quiet = TRUE) {
   if (isTRUE(readpoly)) require(rgdal)
   if (is.null(pypath)) {
-    gdalUtils::gdal_setInstallation()
-    o <- options()
-    pypath <- file.path(o$gdalUtils_gdalPath[[2]]$path, "gdal_polygonize.py")
+    pypath <- Sys.which("gdal_polygonize.py")
+    if (!nzchar(pypath)) {
+      browser()
+      gdalUtils::gdal_setInstallation()
+      o <- options()
+      pypath <- file.path(o$gdalUtils_gdalPath[[2]]$path, "gdal_polygonize.py")
+      if (!nzchar(pypath)) {
+        stop("Need gdal_polygonize.py")
+      }
+    }
   }
   if (!file.exists(pypath)) stop("Can't find gdal_polygonize.py on your system.")
   owd <- getwd()

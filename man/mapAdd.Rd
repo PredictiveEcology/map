@@ -50,6 +50,7 @@ If \code{isStudyArea = TRUE}, then several things will be triggered:
 \examples{
 library(sp)
 library(raster)
+setwd(tempdir())
 coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98,
                       59.9, 65.73, 63.58, 54.79, 59.9),
                     .Dim = c(5L, 2L))
@@ -89,7 +90,7 @@ if (require("SpaDES.tools")) {
   ageClassCutOffs <- c(0, 40, 80, 120)
   ml <- mapLeadingByStage(ml, ageClasses = ageClasses,
                     ageClassCutOffs = ageClassCutOffs)
-  ml <- mapLargePatches(ml, ageClasses = ageClasses,
+  ml <- mapLargePatches(ml, ageClasses = ageClasses, id = "1", labelColumn = "shinyLabel",
                     ageClassCutOffs = ageClassCutOffs)
 
   # Add a second polygon, trigger
