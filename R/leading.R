@@ -19,7 +19,6 @@
 #'
 leadingByStage <- function(tsf, vtm, polygonToSummarizeBy,
                            ageClassCutOffs,  ageClasses, objName = NULL, ...) {
-  browser()
   if (!is.null(tsf)) {
     if (is.list(polygonToSummarizeBy)) {
       if (!is.null(objName)) {
@@ -240,20 +239,28 @@ leadingByStage <- function(tsf, vtm, polygonToSummarizeBy,
 }
 
 mapLeadingByStage <- function(map, ...) {
-  browser()
   m <- metadata(map)
+
   au <- sort(na.omit(unique(m$analysisUnit)))
+  polys <- maps(map, "SpatialPolygons")
+  out <- lapply(polys, function(poly) {
+    out2 <- lapply(au, function(analysisIndex) {
+      tsf <- m[tsf==TRUE & analysisUnit==analysisIndex, filename2]
+      vtm <- m[vtm==TRUE & analysisUnit==analysisIndex, filename2]
+      leadingByStage2(tsf, vtm, poly, ...)
+    })
+  })
 
 
 }
 
 leadingByStage2 <- function(tsf, vtm, polygonToSummarizeBy,
                             ageClassCutOffs,  ageClasses, objName = NULL, ...) {
-  browser()
   # main function code
   if (tail(ageClassCutOffs, 1) != Inf)
     ageClassCutOffs <- c(ageClassCutOffs, Inf)
 
+  # prepare tsf rasters
   timeSinceFireFilesRast <- raster(tsf[1])
   timeSinceFireFilesRast[] <- timeSinceFireFilesRast[]
 
@@ -272,6 +279,8 @@ leadingByStage2 <- function(tsf, vtm, polygonToSummarizeBy,
 
   levels(rasTsf) <- data.frame(ID = seq_along(ageClasses), Factor = ageClasses)
 
+  # prepare vtm rasters
+  browser()
   rasVeg <- raster(vtm[1])
   rasVeg[] <- rasVeg[] # 3 seconds
 
@@ -297,6 +306,14 @@ leadingByStage2 <- function(tsf, vtm, polygonToSummarizeBy,
 
   levels(ras) <- data.frame(eTable, ageClass = types[, 1], vegCover = types[, 2])
 
+  # prepare polygonToSummarizeBy factor raster
+  browser()
+  if (is(polygonToSummarizeBy, "SpatialPolygons")) {
+    if (!"shinyLabel" %in% colnames(polygonToSummarizeBy@data))
+      stop("polygonToSummarizeBy must have a column 'shinyLabel'")
+    polygonToSummarizeBy <- Cache(fasterize2, rasTsf, polygonToSummarizeBy,
+                 field = "polygonNum")
+  }
   levs <- raster::levels(polygonToSummarizeBy)[[1]]
 
   # this is same, if all values present: e.g., 1, 2, 3, 4, 5 ...,
@@ -305,7 +322,7 @@ leadingByStage2 <- function(tsf, vtm, polygonToSummarizeBy,
   facVals <- factorValues(
     polygonToSummarizeBy,
     polygonToSummarizeBy[],
-    att = c("shinyLabel", "polygonNum") ## TODO: these don't exist in the raster; causes error
+    att = c("shinyLabel", "polygonNum")
   )
 
   bb <- data.table(
@@ -335,6 +352,7 @@ leadingByStage2 <- function(tsf, vtm, polygonToSummarizeBy,
 
   #allCombos[tabulated, on = c("zone", "vegCover", "ageClass")]
 
+  browser()
   tabulated <- merge(
     tabulated,
     allCombos,
@@ -368,12 +386,13 @@ leadingByStage2 <- function(tsf, vtm, polygonToSummarizeBy,
 #'        will be cropped first if
 #'        \code{extent(emptyRaster) < extent(polygonToFasterize)}
 #' @param field passed to fasterize
+#' @importFrom reproducible cropInputs projectInputs
 fasterize2 <- function(emptyRaster, polygonToFasterize, field) {
   ras <- raster(emptyRaster)
   if (extent(polygonToFasterize) > extent(ras)) {
-    polygonToFasterize <- Cache(crop, polygonToFasterize, ras)
+    polygonToFasterize <- Cache(cropInputs, polygonToFasterize, rasterToMatch = ras)
   }
-  thePoly <- spTransform(polygonToFasterize, CRSobj = crs(ras))
+  thePoly <- projectInputs(polygonToFasterize, targetCRS = crs(ras))
   thePoly$polygonNum <- seq_along(thePoly)
   if (!is.factor(thePoly[[field]])) {
     thePoly[[field]] <- factor(thePoly[[field]])

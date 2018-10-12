@@ -9,14 +9,13 @@
 mapAdd(object, map, layerName, overwrite = FALSE, ...)
 
 \method{mapAdd}{default}(object = NULL, map = new("map"),
-  layerName = NULL, overwrite = FALSE, url = NULL,
+  layerName = NULL, overwrite = FALSE,
   columnNameForLabels = character(), leaflet = TRUE,
   isStudyArea = FALSE, ...)
 
 \method{mapAdd}{spatialObjects}(object, map = new("map"),
-  layerName = NULL, overwrite = FALSE, url = NULL,
-  columnNameForLabels = NULL, leaflet = TRUE, isStudyArea = NULL,
-  envir = NULL, ...)
+  layerName = NULL, overwrite = FALSE, columnNameForLabels = NULL,
+  leaflet = TRUE, isStudyArea = NULL, envir = NULL, ...)
 }
 \arguments{
 \item{object}{TODO: document this}
@@ -29,8 +28,6 @@ mapAdd(object, map, layerName, overwrite = FALSE, ...)
 
 \item{...}{passed to reproducible::postProcess and reproducible::projectInputs and
 reproducible::fixErrors and reproducible::prepInputs}
-
-\item{url}{TODO: document this}
 
 \item{columnNameForLabels}{TODO: document this}
 
@@ -64,14 +61,28 @@ crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WG
 ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area")
 
 if (require("SpaDES.tools")) {
-  smallStudyArea <- randomPolygon(studyArea(ml), 1e2)
+  smallStudyArea <- randomPolygon(studyArea(ml), 1e4)
   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
-               envir = .GlobalEnv) # adds a second studyArea within 1st
+               envir = .GlobalEnv, layerName = "Smaller Study Area") # adds a second studyArea within 1st
 
-  tsf <- randomPolygons()*100
+  rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
+  tsf <- randomPolygons(rasTemplate, numTypes = 3)*80
+  crs(tsf) <- crs(ml)
   vtm <- randomPolygons(tsf, numTypes = 4)
+  levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
+                            Factor = c("black spruce", "white spruce", "aspen", "fir"))
+  crs(vtm) <- crs(ml)
+  ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
+               tsf = TRUE,
+               analysisUnit = 1, leaflet = FALSE, overwrite = TRUE)
+  ml <- mapAdd(vtm, ml, filename2 = "vtm1.tif", layerName = "vtm1",
+               vtm = TRUE,
+               analysisUnit = 1, leaflet = FALSE, overwrite = TRUE)
 
-  leadingByStage(tsf, vtm, ml$)
+  ageClasses <- c("Young", "Immature", "Mature", "Old")
+  ageClassCutOffs <- c(0, 40, 80, 120)
+  mapLeadingByStage(ml, ageClasses = ageClasses,
+                    ageClassCutOffs = ageClassCutOffs)
 
 
 

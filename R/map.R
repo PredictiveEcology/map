@@ -89,26 +89,38 @@ setMethod("initialize", "map",
 #' Srs1 <- Polygons(list(Sr1), "s1")
 #' StudyArea <- SpatialPolygons(list(Srs1), 1L)
 #' crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+#' StudyArea <- SpatialPolygonsDataFrame(StudyArea,
+#'                            data = data.frame(ID = 1, shinyLabel = "zone2"),
+#'                            match.ID = FALSE)
 #'
 #' ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area")
 #'
 #' if (require("SpaDES.tools")) {
-#'   smallStudyArea <- randomPolygon(studyArea(ml), 1e2)
+#'   smallStudyArea <- randomPolygon(studyArea(ml), 1e4)
+#'   smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,
+#'                            data = data.frame(ID = 1, shinyLabel = "zone1"),
+#'                            match.ID = FALSE)
 #'   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
 #'                envir = .GlobalEnv, layerName = "Smaller Study Area") # adds a second studyArea within 1st
 #'
-#'   tsf <- randomPolygons(raster(extent(studyArea(ml))))*100
+#'   rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
+#'   tsf <- randomPolygons(rasTemplate, numTypes = 3)*80
 #'   crs(tsf) <- crs(ml)
 #'   vtm <- randomPolygons(tsf, numTypes = 4)
+#'   levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
+#'                             Factor = c("black spruce", "white spruce", "aspen", "fir"))
 #'   crs(vtm) <- crs(ml)
 #'   ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
+#'                tsf = TRUE,
 #'                analysisUnit = 1, leaflet = FALSE, overwrite = TRUE)
 #'   ml <- mapAdd(vtm, ml, filename2 = "vtm1.tif", layerName = "vtm1",
+#'                vtm = TRUE,
 #'                analysisUnit = 1, leaflet = FALSE, overwrite = TRUE)
 #'
 #'   ageClasses <- c("Young", "Immature", "Mature", "Old")
 #'   ageClassCutOffs <- c(0, 40, 80, 120)
-#'   mapLeadingByStage(ml, ageClasses, ageClassCutOffs, )
+#'   mapLeadingByStage(ml, ageClasses = ageClasses,
+#'                     ageClassCutOffs = ageClassCutOffs)
 #'
 #'
 #'
@@ -207,6 +219,7 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
       if (!is.null(rasterToMatch(map))) {
         dots$rasterToMatch <- rasterToMatch(map)
       }
+      browser()
       object <- do.call(postProcess, append(list(object), dots))
     }
   }
@@ -289,7 +302,7 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
 
   # Add all extra columns to metadata
   dots <- list(...)
-  columnsToAdd <- dots[!names(dots) %in% .formalsReproducible]
+  columnsToAdd <- dots#[!names(dots) %in% .formalsReproducible]
   Map(cta = columnsToAdd, nta = names(columnsToAdd),
       function(cta, nta) set(b, , nta, cta))
 
