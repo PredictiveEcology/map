@@ -101,10 +101,14 @@ setMethod("initialize", "map",
 #'   crs(tsf) <- crs(ml)
 #'   vtm <- randomPolygons(tsf, numTypes = 4)
 #'   crs(vtm) <- crs(ml)
-#'   ml <- mapAdd(tsf, ml, filename2 = NULL, layerName = "tsf1", leaflet = FALSE)
-#'   ml <- mapAdd(vtm, ml, filename2 = NULL, layerName = "vtm1", leaflet = FALSE)
+#'   ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
+#'                analysisUnit = 1, leaflet = FALSE, overwrite = TRUE)
+#'   ml <- mapAdd(vtm, ml, filename2 = "vtm1.tif", layerName = "vtm1",
+#'                analysisUnit = 1, leaflet = FALSE, overwrite = TRUE)
 #'
-#'   leadingByStage(tsf, vtm, studyArea(ml))
+#'   ageClasses <- c("Young", "Immature", "Mature", "Old")
+#'   ageClassCutOffs <- c(0, 40, 80, 120)
+#'   mapLeadingByStage(ml, ageClasses, ageClassCutOffs, )
 #'
 #'
 #'
