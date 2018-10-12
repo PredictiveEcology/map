@@ -28,15 +28,14 @@ mapLargePatches <- function(map, ...) {
       }
     })
   })
-  map@analysesData[[listEntry]]$.LargePatchesDone <- combos
   map@analysesData[[listEntry]] <- out
+  map@analysesData[[listEntry]]$.LargePatchesDone <- combos
   map
 }
 
 #' @importFrom SpaDES.core rasterToMemory
 .largePatchesCalc <- function(tsfFile, vtmFile, byPoly, labelColumn,
                               id, ageClassCutOffs, ageClasses) {
-  browser()
   timeSinceFireFilesRast <- Cache(rasterToMemory, tsfFile)
 
   tsf <- reclassify(timeSinceFireFilesRast,

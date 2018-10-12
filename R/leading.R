@@ -267,8 +267,8 @@ mapLeadingByStage <- function(map, ...) {
       }
     })
   })
-  map@analysesData[[listEntry]]$.LeadingDone <- combos
   map@analysesData[[listEntry]] <- out
+  map@analysesData[[listEntry]]$.LeadingDone <- combos
   map
 }
 
