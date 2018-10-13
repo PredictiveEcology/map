@@ -14,40 +14,33 @@ mapAnalysis <- function(map, label = NULL, ...) {
   ags <- sort(na.omit(unique(m$analysisGroup)))
   polys <- maps(map, "SpatialPolygons")
   combosCompleted <- map@analysesData[[label]]$.Completed
-  # if (is.null(combos))
-  #   combos <- character()
 
-  if (is.null(combosCompleted)) {
+  #if (is.null(combosCompleted)) {
     if (length(polys) || length(ags)) {
       combosAll <- expand.grid(polygonName = names(polys),
                          analysisGroup = ags, stringsAsFactors = FALSE)
       combosAll$all <- paste(combosAll$analysisGroup, combosAll$polygonName, sep = "_")
     }
-  }
+  #}
   combosToDo <- combosAll[!combosAll$all %in% combosCompleted,]
+  if (NROW(combosToDo)) {
+    out <- by(combosToDo, combosAll$all, simplify = FALSE,
+              function(combo) {
+                polyName = combo$polygonName
+                ag = combo$analysisGroup
+                tsf <- m[tsf==TRUE & analysisGroup==ag, filename2]
+                vtm <- m[vtm==TRUE & analysisGroup==ag, filename2]
+                message("  Calculating Large Patches for ", combo$all)
+                fnOut <- Cache(.largePatchesCalc, tsfFile = asPath(tsf),
+                               vtmFile = asPath(vtm),
+                               byPoly = map[[polyName]], ...)
+                combosCompleted <<- c(combosCompleted, combo$all)
+                list(dt = fnOut)
+              })
 
-  out <- by(combosToDo, 1:nrow(combosToDo), simplify = FALSE,
-            function(combo) {
-              browser()
-    polyName = combo$polygonName
-    ag = combo$analysisGroup
-    tsf <- m[tsf==TRUE & analysisGroup==ag, filename2]
-    vtm <- m[vtm==TRUE & analysisGroup==ag, filename2]
-    message("  Calculating Large Patches for ", combo$all)
-    fnOut <- Cache(.largePatchesCalc, tsfFile = asPath(tsf),
-                  vtmFile = asPath(vtm),
-                  byPoly = map[[polyName]], ...)
-    combosCompleted <<- c(combosCompleted, combo$all)
-    list(dt = fnOut)
-  })
-
-  out <- lapply(combosToDo,
-                function(combo) {
-                  browser()
-             })
-  browser()
-  map@analysesData[[label]][names(out)] <- out
-  map@analysesData[[label]]$.Completed <- combos
+    map@analysesData[[label]][names(out)] <- out
+    map@analysesData[[label]]$.Completed <- combosCompleted
+  }
   map
 }
 
