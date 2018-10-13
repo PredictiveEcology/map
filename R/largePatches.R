@@ -1,3 +1,57 @@
+
+mapAnalysis <- function(map, label = NULL, ...) {
+  m <- map@metadata
+
+  if (is.null(label)) {
+    stop("Each analysis must have a label")
+  }
+  label <- "Large patches"
+  if (is.null(m$analysisGroup)) {
+    stop("Expecting analysisGroup column in map metadata. ",
+         "Please pass in a unique name representing the analysis group, ",
+         "i.e., which tsf is associated with which vtm")
+  }
+  ags <- sort(na.omit(unique(m$analysisGroup)))
+  polys <- maps(map, "SpatialPolygons")
+  combosCompleted <- map@analysesData[[label]]$.Completed
+  # if (is.null(combos))
+  #   combos <- character()
+
+  if (is.null(combosCompleted)) {
+    if (length(polys) || length(ags)) {
+      combosAll <- expand.grid(polygonName = names(polys),
+                         analysisGroup = ags, stringsAsFactors = FALSE)
+      combosAll$all <- paste(combosAll$analysisGroup, combosAll$polygonName, sep = "_")
+    }
+  }
+  combosToDo <- combosAll[!combosAll$all %in% combosCompleted,]
+
+  out <- by(combosToDo, 1:nrow(combosToDo), simplify = FALSE,
+            function(combo) {
+              browser()
+    polyName = combo$polygonName
+    ag = combo$analysisGroup
+    tsf <- m[tsf==TRUE & analysisGroup==ag, filename2]
+    vtm <- m[vtm==TRUE & analysisGroup==ag, filename2]
+    message("  Calculating Large Patches for ", combo$all)
+    fnOut <- Cache(.largePatchesCalc, tsfFile = asPath(tsf),
+                  vtmFile = asPath(vtm),
+                  byPoly = map[[polyName]], ...)
+    combosCompleted <<- c(combosCompleted, combo$all)
+    list(dt = fnOut)
+  })
+
+  out <- lapply(combosToDo,
+                function(combo) {
+                  browser()
+             })
+  browser()
+  map@analysesData[[label]][names(out)] <- out
+  map@analysesData[[label]]$.Completed <- combos
+  map
+}
+
+
 mapLargePatches <- function(map, ...) {
   m <- map@metadata
 
@@ -9,7 +63,7 @@ mapLargePatches <- function(map, ...) {
   }
   ags <- sort(na.omit(unique(m$analysisGroup)))
   polys <- maps(map, "SpatialPolygons")
-  combos <- map@analysesData[[listEntry]]$.LargePatchesDone
+  combos <- map@analysesData[[listEntry]]$.Completed
   if (is.null(combos))
     combos <- character()
 
@@ -28,8 +82,9 @@ mapLargePatches <- function(map, ...) {
       }
     })
   })
-  map@analysesData[[listEntry]] <- out
-  map@analysesData[[listEntry]]$.LargePatchesDone <- combos
+  browser()
+  map@analysesData[[listEntry]][names(out)] <- out
+  map@analysesData[[listEntry]]$.Completed <- combos
   map
 }
 
@@ -191,4 +246,25 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile",
   } else {
     return(NULL)
   }
+}
+
+flattenNames <- function(l, currentLevel = 1) {
+  theCol <- paste0("names", currentLevel)
+  if (is.list(l)) {
+    dt2 <- lapply(l, function(fn) {
+      if (is.list(fn)) {
+        flattenNames(fn, currentLevel = currentLevel + 1)
+      } else {
+        dt <- data.table(a = 1)
+        dt <- dt[, empty := NA]
+        set(dt, NULL, "a", NULL)
+      }
+    })
+    dt <- rbindlist(dt2, idcol = theCol, fill = TRUE)
+    if (isTRUE(any(grepl("empty", colnames(dt)))))
+      set(dt, NULL, "empty", NULL)
+  } else {
+    dt <- NA
+  }
+  return(dt)
 }

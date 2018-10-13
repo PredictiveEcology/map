@@ -50,6 +50,8 @@
 #'   ageClassCutOffs <- c(0, 40, 80, 120)
 #'   ml <- mapLeadingByStage(ml, ageClasses = ageClasses,
 #'                     ageClassCutOffs = ageClassCutOffs)
+#'   ml <- mapAnalysis(ml, label = "Large patches", ageClasses = ageClasses, id = "1", labelColumn = "shinyLabel",
+#'                     ageClassCutOffs = ageClassCutOffs)
 #'   ml <- mapLargePatches(ml, ageClasses = ageClasses, id = "1", labelColumn = "shinyLabel",
 #'                     ageClassCutOffs = ageClassCutOffs)
 #'
