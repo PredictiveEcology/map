@@ -1,11 +1,11 @@
 
-mapAnalysis <- function(map, label = NULL, ...) {
+mapAnalysis <- function(map, functionName = NULL, quotedAnalysis, ...) {
   m <- map@metadata
 
-  if (is.null(label)) {
-    stop("Each analysis must have a label")
+  if (is.null(functionName)) {
+    stop("Each analysis must have a functionName")
   }
-  label <- "Large patches"
+  #label <- "Large patches"
   if (is.null(m$analysisGroup)) {
     stop("Expecting analysisGroup column in map metadata. ",
          "Please pass in a unique name representing the analysis group, ",
@@ -13,7 +13,7 @@ mapAnalysis <- function(map, label = NULL, ...) {
   }
   ags <- sort(na.omit(unique(m$analysisGroup)))
   polys <- maps(map, "SpatialPolygons")
-  combosCompleted <- map@analysesData[[label]]$.Completed
+  combosCompleted <- map@analysesData[[functionName]]$.Completed
 
   #if (is.null(combosCompleted)) {
     if (length(polys) || length(ags)) {
@@ -28,18 +28,17 @@ mapAnalysis <- function(map, label = NULL, ...) {
               function(combo) {
                 polyName = combo$polygonName
                 ag = combo$analysisGroup
-                tsf <- m[tsf==TRUE & analysisGroup==ag, filename2]
-                vtm <- m[vtm==TRUE & analysisGroup==ag, filename2]
+                tsf <- asPath(m[tsf==TRUE & analysisGroup==ag, filename2])
+                vtm <- asPath(m[vtm==TRUE & analysisGroup==ag, filename2])
+                poly <- map[[polyName]]
                 message("  Calculating Large Patches for ", combo$all)
-                fnOut <- Cache(.largePatchesCalc, tsfFile = asPath(tsf),
-                               vtmFile = asPath(vtm),
-                               byPoly = map[[polyName]], ...)
+                fnOut <- eval(quotedAnalysis)
                 combosCompleted <<- c(combosCompleted, combo$all)
                 list(dt = fnOut)
               })
 
-    map@analysesData[[label]][names(out)] <- out
-    map@analysesData[[label]]$.Completed <- combosCompleted
+    map@analysesData[[functionName]][names(out)] <- out
+    map@analysesData[[functionName]]$.Completed <- combosCompleted
   }
   map
 }
@@ -67,8 +66,8 @@ mapLargePatches <- function(map, ...) {
         tsf <- m[tsf==TRUE & analysisGroup==ag, filename2]
         vtm <- m[vtm==TRUE & analysisGroup==ag, filename2]
         message("  Calculating Large Patches for ", comboNew)
-        out3 <- Cache(.largePatchesCalc, tsfFile = asPath(tsf),
-                      vtmFile = asPath(vtm),
+        out3 <- Cache(LargePatches, tsf = tsf,
+                      vtm = vtm,
                       byPoly = poly, ...)
         combos <<- c(combos, comboNew)
         list(dt = out3)
@@ -82,9 +81,9 @@ mapLargePatches <- function(map, ...) {
 }
 
 #' @importFrom SpaDES.core rasterToMemory
-.largePatchesCalc <- function(tsfFile, vtmFile, byPoly, labelColumn,
+LargePatches <- function(tsf, vtm, byPoly, labelColumn,
                               id, ageClassCutOffs, ageClasses) {
-  timeSinceFireFilesRast <- Cache(rasterToMemory, tsfFile)
+  timeSinceFireFilesRast <- Cache(rasterToMemory, tsf)
 
   tsf <- reclassify(timeSinceFireFilesRast,
                     cbind(from = ageClassCutOffs - 0.1,
@@ -106,7 +105,7 @@ mapLargePatches <- function(map, ...) {
   #              Factor = levels(byPoly$tmp))
 
   # 3rd raster
-  rasVeg <- Cache(rasterToMemory, vtmFile)#,
+  rasVeg <- Cache(rasterToMemory, vtm)#,
 
   splitVal <- paste0("_", 75757575, "_") # unlikely to occur for any other reason
 
@@ -125,7 +124,7 @@ mapLargePatches <- function(map, ...) {
     name3 <- as.character(byPoly$tmp)[rasRepPoly[][!nas]]
 
     if (!identical(length(name1), length(name2)) || !identical(length(name1), length(name3)))
-      stop("There is something wrong with tsf or rasVeg or rasRepPoly inside .largePatchesCalc")
+      stop("There is something wrong with tsf or rasVeg or rasRepPoly inside LargePatches")
 
     ff <- paste(name1, name2, name3, sep = splitVal) # 4 seconds
     ras <- raster(rasVeg)
