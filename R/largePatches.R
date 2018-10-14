@@ -1,41 +1,5 @@
 
 
-mapLargePatches <- function(map, ...) {
-  m <- map@metadata
-
-  listEntry <- "Large patches"
-  if (is.null(m$analysisGroup)) {
-    stop("Expecting analysisGroup column in map metadata. ",
-         "Please pass in a unique name representing the analysis group, ",
-         "i.e., which tsf is associated with which vtm")
-  }
-  ags <- sort(na.omit(unique(m$analysisGroup)))
-  polys <- maps(map, "SpatialPolygons")
-  combos <- map@analysesData[[listEntry]]$.Completed
-  if (is.null(combos))
-    combos <- character()
-
-  out <- Map(poly = polys, polyName = names(polys), function(poly, polyName) {
-    out2 <- lapply(ags, function(ag) {
-      comboNew <- paste(ag, polyName, sep = "_")
-      if (!comboNew %in% combos) {
-        tsf <- m[tsf==TRUE & analysisGroup==ag, filename2]
-        vtm <- m[vtm==TRUE & analysisGroup==ag, filename2]
-        message("  Calculating Large Patches for ", comboNew)
-        out3 <- Cache(LargePatches, tsf = tsf,
-                      vtm = vtm,
-                      byPoly = poly, ...)
-        combos <<- c(combos, comboNew)
-        list(dt = out3)
-      }
-    })
-  })
-  browser()
-  map@analysesData[[listEntry]][names(out)] <- out
-  map@analysesData[[listEntry]]$.Completed <- combos
-  map
-}
-
 #' @importFrom SpaDES.core rasterToMemory
 LargePatches <- function(tsf, vtm, poly, labelColumn,
                               id, ageClassCutOffs, ageClasses) {
@@ -196,23 +160,3 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile",
   }
 }
 
-flattenNames <- function(l, currentLevel = 1) {
-  theCol <- paste0("names", currentLevel)
-  if (is.list(l)) {
-    dt2 <- lapply(l, function(fn) {
-      if (is.list(fn)) {
-        flattenNames(fn, currentLevel = currentLevel + 1)
-      } else {
-        dt <- data.table(a = 1)
-        dt <- dt[, empty := NA]
-        set(dt, NULL, "a", NULL)
-      }
-    })
-    dt <- rbindlist(dt2, idcol = theCol, fill = TRUE)
-    if (isTRUE(any(grepl("empty", colnames(dt)))))
-      set(dt, NULL, "empty", NULL)
-  } else {
-    dt <- NA
-  }
-  return(dt)
-}

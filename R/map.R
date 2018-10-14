@@ -25,7 +25,8 @@
 #' ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area",
 #'                poly = TRUE, analysisGroup2 = "Small Study Area")
 #'
-#' if (require("SpaDES.tools")) {
+#'# if (require("SpaDES.tools")) {
+#' require("SpaDES.tools")
 #'   smallStudyArea <- randomPolygon(studyArea(ml), 1e4)
 #'   smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,
 #'                            data = data.frame(ID = 1, shinyLabel = "zone1"),
@@ -73,14 +74,14 @@
 #'                analysisGroup2 = "Smaller Study Area 2",
 #'                poly = TRUE,
 #'                layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
-#'   ml <- mapAnalysis(ml, functionName = "leadingByStage2", ageClasses = ageClasses,
-#'                     ageClassCutOffs = ageClassCutOffs)
-#'   ml <- mapAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
-#'                     id = "1", labelColumn = "shinyLabel",
-#'                     ageClassCutOffs = ageClassCutOffs)
+#'#   ml <- mapAnalysis(ml, functionName = "leadingByStage2", ageClasses = ageClasses,
+#'#                     ageClassCutOffs = ageClassCutOffs)
+#'#   ml <- mapAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
+#'#                     id = "1", labelColumn = "shinyLabel",
+#'#                     ageClassCutOffs = ageClassCutOffs)
 #'
 #'
-#' }
+#' #}
 #' @param object    TODO: document this
 #' @param map       TODO: document this
 #' @param layerName TODO: document this
@@ -288,13 +289,13 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
   map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
 
   if (NROW(map@analyses)) {
+    #map@analysesData <- .runMapAnalysis(map@analyses)
     out <- by(map@analyses, map@analyses$functionName,
              function(x) {
                ma <- mapAnalysis(map = map, functionName = x$functionName)
-               #browser()
-               ma@analysesData
+               ma@analysesData[[x$functionName]]
              })
-    map@analysesData <- lapply(out, function(x) x)
+    map@analysesData[names(out)] <- lapply(out, function(x) x)
   }
 
   return(map)
@@ -566,11 +567,6 @@ maps <- function(map, class = NULL) {
   out
 }
 
-#' @export
-.maps <- function() {
-  browser()
-  maps(getOption("map.current"))
-}
 
 #' @keywords internal
 .singleMetadataNAEntry <- data.table::data.table(

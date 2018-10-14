@@ -27,23 +27,23 @@ mapAnalysis <- function(map, functionName = NULL, ...) {
   #}
   combosToDo <- combosAll[!combosAll$all %in% combosCompleted,]
 
-  # Get the expand.grid arguments
-  formalsInFunction <- formalArgs(functionName)[formalArgs(functionName) %in% colnames(m)]
-  names(formalsInFunction) <- formalsInFunction
-
-  # Get the fixed arguments
-  otherFormalsInFunction <- formalArgs(functionName)[formalArgs(functionName) %in% colnames(map@analyses)]
-  if (length(otherFormalsInFunction)) {
-    names(otherFormalsInFunction) <- otherFormalsInFunction
-
-    # Override dots from this function call
-    dots <- lapply(otherFormalsInFunction, function(form) {
-      fn <- functionName
-      assign(form, map@analyses[functionName == fn, get(form)][[1]])
-    })
-  }
-
   if (NROW(combosToDo)) {
+    # Get the expand.grid arguments
+    formalsInFunction <- formalArgs(functionName)[formalArgs(functionName) %in% colnames(m)]
+    names(formalsInFunction) <- formalsInFunction
+
+    # Get the fixed arguments
+    otherFormalsInFunction <- formalArgs(functionName)[formalArgs(functionName) %in% colnames(map@analyses)]
+    if (length(otherFormalsInFunction)) {
+      names(otherFormalsInFunction) <- otherFormalsInFunction
+
+      # Override dots from this function call
+      dots <- lapply(otherFormalsInFunction, function(form) {
+        fn <- functionName
+        assign(form, map@analyses[functionName == fn, get(form)][[1]])
+      })
+    }
+
     out <- by(combosToDo, combosToDo$all, simplify = FALSE,
               function(combo) {
 
@@ -69,7 +69,7 @@ mapAnalysis <- function(map, functionName = NULL, ...) {
                 list(dt = fnOut)
               })
 
-    map@analysesData[[functionName]][names(out)] <- out
+    map@analysesData[[functionName]][names(out)] <- unname(lapply(out, function(x) x))
     map@analysesData[[functionName]]$.Completed <- combosCompleted
   }
   map
@@ -91,14 +91,28 @@ mapAddAnalysis <- function(map, functionName, ...) {
   map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
 
   if (NROW(map@analyses)) {
+    #browser()
+    #map@analysesData <- .runMapAnalysis(map@analyses)
+
     out <- by(map@analyses, map@analyses$functionName,
               function(x) {
                 ma <- mapAnalysis(map = map, functionName = x$functionName)
-                ma@analysesData
+                ma@analysesData[[x$functionName]]
               })
-    map@analysesData <- lapply(out, function(x) x)
+    map@analysesData[names(out)] <- lapply(out, function(x) x)
+    #map@analysesData <- lapply(out, function(x) x)
   }
 
   map
 
+}
+
+
+.runMapAnalysis <- function(analyses) {
+  out <- by(analyses, analyses$functionName,
+            function(x) {
+              ma <- mapAnalysis(map = map, functionName = x$functionName)
+              ma@analysesData[[x$functionName]]
+            })
+  lapply(out, function(x) x)
 }
