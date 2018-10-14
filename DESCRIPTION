@@ -48,6 +48,7 @@ RoxygenNote: 6.1.0.9000
 Collate: 
     'largePatches.R'
     'leading.R'
+    'map-analysis.R'
     'map-class.R'
     'map-package.R'
     'map.R'

@@ -51,8 +51,13 @@
 #'
 #'   ageClasses <- c("Young", "Immature", "Mature", "Old")
 #'   ageClassCutOffs <- c(0, 40, 80, 120)
-#'#   ml <- mapLeadingByStage(ml, ageClasses = ageClasses,
-#'#                    ageClassCutOffs = ageClassCutOffs)
+#'
+#'   ml <- mapAddAnalysis(ml, functionName ="leadingByStage2",
+#'                         ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
+#'   ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
+#'                     id = "1", labelColumn = "shinyLabel",
+#'                     ageClassCutOffs = ageClassCutOffs)
+#'
 #'   ml <- mapAnalysis(ml, functionName = "leadingByStage2", ageClasses = ageClasses,
 #'                     ageClassCutOffs = ageClassCutOffs)
 #'   ml <- mapAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
@@ -281,6 +286,16 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
       function(cta, nta) set(b, , nta, cta))
 
   map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
+
+  if (NROW(map@analyses)) {
+    out <- by(map@analyses, map@analyses$functionName,
+             function(x) {
+               ma <- mapAnalysis(map = ml, functionName = x$functionName)
+               ma@analysesData
+             })
+    map@analysesData <- lapply(out, function(x) x)
+  }
+
   return(map)
 }
 

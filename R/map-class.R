@@ -54,7 +54,7 @@ setMethod("initialize", "map",
                                           leaflet = logical(), studyArea = numeric(),
                                           rasterToMatch = logical())
             .Object@CRS = sp::CRS()
-            .Object@analyses = data.table::data.table()
+            .Object@analyses = data.table::data.table(functionName = character(), quotedFn = character())
             .Object@analysesData = list()
 
             .Object

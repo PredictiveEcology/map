@@ -3,6 +3,7 @@
 #'
 mapAnalysis <- function(map, functionName = NULL, ...) {
   m <- map@metadata
+  dots <- list(...)
 
   if (is.null(functionName)) {
     stop("Each analysis must have a functionName")
@@ -25,8 +26,22 @@ mapAnalysis <- function(map, functionName = NULL, ...) {
   }
   #}
   combosToDo <- combosAll[!combosAll$all %in% combosCompleted,]
+
+  # Get the expand.grid arguments
   formalsInFunction <- formalArgs(functionName)[formalArgs(functionName) %in% colnames(m)]
   names(formalsInFunction) <- formalsInFunction
+
+  # Get the fixed arguments
+  otherFormalsInFunction <- formalArgs(functionName)[formalArgs(functionName) %in% colnames(map@analyses)]
+  if (length(otherFormalsInFunction)) {
+    names(otherFormalsInFunction) <- otherFormalsInFunction
+
+    # Override dots from this function call
+    dots <- lapply(otherFormalsInFunction, function(form) {
+      fn <- functionName
+      assign(form, map@analyses[functionName == fn, get(form)][[1]])
+    })
+  }
 
   if (NROW(combosToDo)) {
     out <- by(combosToDo, combosToDo$all, simplify = FALSE,
@@ -49,7 +64,7 @@ mapAnalysis <- function(map, functionName = NULL, ...) {
                 })
                 args <- unlist(unname(args), recursive = FALSE)
                 message("  Calculating ", functionName, " for ", combo$all)
-                fnOut <- do.call(Cache, args = c(list(get(functionName)), args, list(...)))
+                fnOut <- do.call(Cache, args = c(list(get(functionName)), args, dots))
                 combosCompleted <<- c(combosCompleted, combo$all)
                 list(dt = fnOut)
               })
@@ -60,4 +75,19 @@ mapAnalysis <- function(map, functionName = NULL, ...) {
   map
 }
 
-mapAddAnalysis <- function(functionName)
+mapAddAnalysis <- function(map, functionName, ...) {
+  dots <- list(...)
+  b <- data.table(functionName = functionName,
+                  quotedFn = "mapAnalysis(map, functionName = functionName, ...)",
+                  t(dots))
+  prevEntry <- map@analyses$functionName==functionName
+  if (sum(prevEntry)){
+    message("An analysis called ", functionName, " already added to map object; ",
+            " Overwriting it")
+    map@analyses <- map@analyses[!prevEntry]
+  }
+
+  map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
+  map
+
+}
