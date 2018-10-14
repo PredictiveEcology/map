@@ -272,8 +272,7 @@ mapLeadingByStage <- function(map, ...) {
   map
 }
 
-leadingByStage2 <- function(tsf, vtm, polygonToSummarizeBy,
-                            ageClassCutOffs,  ageClasses, ...) {
+leadingByStage2 <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasses) {
   # main function code
   startTime <- Sys.time()
   if (tail(ageClassCutOffs, 1) != Inf)
@@ -324,21 +323,21 @@ leadingByStage2 <- function(tsf, vtm, polygonToSummarizeBy,
 
   levels(ras) <- data.frame(eTable, ageClass = types[, 1], vegCover = types[, 2])
 
-  # prepare polygonToSummarizeBy factor raster
-  if (is(polygonToSummarizeBy, "SpatialPolygons")) {
-    if (!"shinyLabel" %in% colnames(polygonToSummarizeBy@data))
-      stop("polygonToSummarizeBy must have a column 'shinyLabel'")
-    polygonToSummarizeBy <- Cache(fasterize2, rasTsf, polygonToSummarizeBy,
+  # prepare poly factor raster
+  if (is(poly, "SpatialPolygons")) {
+    if (!"shinyLabel" %in% colnames(poly@data))
+      stop("poly must have a column 'shinyLabel'")
+    poly <- Cache(fasterize2, rasTsf, poly,
                  field = "polygonNum")
   }
-  levs <- raster::levels(polygonToSummarizeBy)[[1]]
+  levs <- raster::levels(poly)[[1]]
 
   # this is same, if all values present: e.g., 1, 2, 3, 4, 5 ...,
   # but not if missing: e.g., 1, 2, 3, 5
-  levs <- factorValues(polygonToSummarizeBy, levs$ID)
+  levs <- factorValues(poly, levs$ID)
   facVals <- factorValues(
-    polygonToSummarizeBy,
-    polygonToSummarizeBy[],
+    poly,
+    poly[],
     att = c("shinyLabel", "polygonNum")
   )
 

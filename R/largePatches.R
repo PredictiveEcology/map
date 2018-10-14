@@ -1,38 +1,56 @@
 
-mapAnalysis <- function(map, functionName = NULL, quotedAnalysis, ...) {
+#' Generic analysis for map objects
+#'
+#'
+mapAnalysis <- function(map, functionName = NULL, ...) {
   m <- map@metadata
 
   if (is.null(functionName)) {
     stop("Each analysis must have a functionName")
   }
-  #label <- "Large patches"
-  if (is.null(m$analysisGroup)) {
-    stop("Expecting analysisGroup column in map metadata. ",
+  if (is.null(m$analysisGroup1)) {
+    stop("Expecting analysisGroup1 column in map metadata. ",
          "Please pass in a unique name representing the analysis group, ",
          "i.e., which tsf is associated with which vtm")
   }
-  ags <- sort(na.omit(unique(m$analysisGroup)))
-  polys <- maps(map, "SpatialPolygons")
+  AGs <- sort(unique(colnames(m)[startsWith(colnames(m), "analysisGroup")]))
+  names(AGs) <- AGs
+  ags <- lapply(AGs, function(AG) sort(na.omit(unique(m[[AG]]))))
   combosCompleted <- map@analysesData[[functionName]]$.Completed
 
   #if (is.null(combosCompleted)) {
-    if (length(polys) || length(ags)) {
-      combosAll <- expand.grid(polygonName = names(polys),
-                         analysisGroup = ags, stringsAsFactors = FALSE)
-      combosAll$all <- paste(combosAll$analysisGroup, combosAll$polygonName, sep = "_")
+    if (any(unlist(lapply(ags, function(x) length(x>0))))) {
+      combosAll <- do.call(expand.grid, args = append(list(stringsAsFactors = FALSE),
+                                                      lapply(ags, function(x) x)))
+      combosAll$all <- apply(combosAll, 1, paste, collapse = "._.")
     }
   #}
   combosToDo <- combosAll[!combosAll$all %in% combosCompleted,]
+  formalsInFunction <- formalArgs(functionName)[formalArgs(functionName) %in% colnames(m)]
+  names(formalsInFunction) <- formalsInFunction
+
   if (NROW(combosToDo)) {
-    out <- by(combosToDo, combosAll$all, simplify = FALSE,
+    out <- by(combosToDo, combosToDo$all, simplify = FALSE,
               function(combo) {
-                polyName = combo$polygonName
-                ag = combo$analysisGroup
-                tsf <- asPath(m[tsf==TRUE & analysisGroup==ag, filename2])
-                vtm <- asPath(m[vtm==TRUE & analysisGroup==ag, filename2])
-                poly <- map[[polyName]]
-                message("  Calculating Large Patches for ", combo$all)
-                fnOut <- eval(quotedAnalysis)
+
+                # Cycle through for each analysisGroup, get each argument
+                args <- lapply(AGs, function(AG) {
+                  args <- lapply(formalsInFunction, function(arg) {
+                    val <- na.omit(m[get(AG) == combo[[AG]], ][[arg]])
+                    if (isTRUE(val)) {
+                      val <- get(m[get(AG) == combo[[AG]], layerName],
+                                 envir = m[get(AG) == combo[[AG]], envir][[1]])
+                    }
+                    if (length(val)>0)
+                      assign(arg, val)
+                    else
+                      NULL
+                  })
+                  args[!sapply(args, is.null)]
+                })
+                args <- unlist(unname(args), recursive = FALSE)
+                message("  Calculating ", functionName, " for ", combo$all)
+                fnOut <- do.call(Cache, args = c(list(get(functionName)), args, list(...)))
                 combosCompleted <<- c(combosCompleted, combo$all)
                 list(dt = fnOut)
               })
@@ -81,7 +99,7 @@ mapLargePatches <- function(map, ...) {
 }
 
 #' @importFrom SpaDES.core rasterToMemory
-LargePatches <- function(tsf, vtm, byPoly, labelColumn,
+LargePatches <- function(tsf, vtm, poly, labelColumn,
                               id, ageClassCutOffs, ageClasses) {
   timeSinceFireFilesRast <- Cache(rasterToMemory, tsf)
 
@@ -91,18 +109,18 @@ LargePatches <- function(tsf, vtm, byPoly, labelColumn,
                           seq_along(ageClasses)))
   levels(tsf) <- data.frame(ID = seq_along(ageClasses), Factor = ageClasses)
 
-  byPoly$tmp <- factor(byPoly[[labelColumn]])
+  poly$tmp <- factor(poly[[labelColumn]])
   rasRepPoly <- Cache(
     fasterize2,
-    byPoly,
+    poly,
     emptyRaster = raster(timeSinceFireFilesRast), # doesn't need to the data -- makes Caching more effective
     field = "tmp"
   )
-  # rasRepPoly2 <- fasterize::fasterize(sf::st_as_sf(byPoly),
+  # rasRepPoly2 <- fasterize::fasterize(sf::st_as_sf(poly),
   #                                    raster = timeSinceFireFilesRast, field = "tmp")
   # levels(rasRepPoly2) <-
-  #   data.frame(ID = seq_len(nlevels(byPoly$tmp)),
-  #              Factor = levels(byPoly$tmp))
+  #   data.frame(ID = seq_len(nlevels(poly$tmp)),
+  #              Factor = levels(poly$tmp))
 
   # 3rd raster
   rasVeg <- Cache(rasterToMemory, vtm)#,
@@ -119,9 +137,9 @@ LargePatches <- function(tsf, vtm, byPoly, labelColumn,
     name1 <- as.character(raster::levels(tsf)[[1]]$Factor)[tsf[][!nas]]
     name2 <- as.character(raster::levels(rasVeg)[[1]]$Factor)[rasVeg[][!nas]]
 
-    # rasRepPoly will have the numeric values of the *factor* in byPoly$tmp, NOT
+    # rasRepPoly will have the numeric values of the *factor* in poly$tmp, NOT
     #   the raster::levels(rasRepPoly)[[1]])
-    name3 <- as.character(byPoly$tmp)[rasRepPoly[][!nas]]
+    name3 <- as.character(poly$tmp)[rasRepPoly[][!nas]]
 
     if (!identical(length(name1), length(name2)) || !identical(length(name1), length(name3)))
       stop("There is something wrong with tsf or rasVeg or rasRepPoly inside LargePatches")

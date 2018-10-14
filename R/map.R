@@ -22,7 +22,8 @@
 #'                            data = data.frame(ID = 1, shinyLabel = "zone2"),
 #'                            match.ID = FALSE)
 #'
-#' ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area")
+#' ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area",
+#'                poly = TRUE, analysisGroup2 = "Small Study Area")
 #'
 #' if (require("SpaDES.tools")) {
 #'   smallStudyArea <- randomPolygon(studyArea(ml), 1e4)
@@ -30,7 +31,9 @@
 #'                            data = data.frame(ID = 1, shinyLabel = "zone1"),
 #'                            match.ID = FALSE)
 #'   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
-#'                envir = .GlobalEnv, layerName = "Smaller Study Area") # adds a second studyArea within 1st
+#'                analysisGroup2 = "Smaller Study Area",
+#'                poly = TRUE,
+#'                layerName = "Smaller Study Area") # adds a second studyArea within 1st
 #'
 #'   rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
 #'   tsf <- randomPolygons(rasTemplate, numTypes = 3)*80
@@ -40,20 +43,21 @@
 #'                             Factor = c("black spruce", "white spruce", "aspen", "fir"))
 #'   crs(vtm) <- crs(ml)
 #'   ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
-#'                tsf = TRUE,
-#'                analysisGroup = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
-#'   ml <- mapAdd(vtm, ml, filename2 = "vtm1.tif", layerName = "vtm1",
-#'                vtm = TRUE,
-#'                analysisGroup = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
+#'                tsf = "tsf1.tif",
+#'                analysisGroup1 = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
+#'   ml <- mapAdd(vtm, ml, filename2 = "vtm1.grd", layerName = "vtm1",
+#'                vtm = "vtm1.grd",
+#'                analysisGroup1 = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
 #'
 #'   ageClasses <- c("Young", "Immature", "Mature", "Old")
 #'   ageClassCutOffs <- c(0, 40, 80, 120)
-#'   ml <- mapLeadingByStage(ml, ageClasses = ageClasses,
+#'#   ml <- mapLeadingByStage(ml, ageClasses = ageClasses,
+#'#                    ageClassCutOffs = ageClassCutOffs)
+#'   ml <- mapAnalysis(ml, functionName = "leadingByStage2", ageClasses = ageClasses,
 #'                     ageClassCutOffs = ageClassCutOffs)
-#'   ml <- mapAnalysis(ml, functionName = "Large patches", ageClasses = ageClasses, id = "1", labelColumn = "shinyLabel",
-#'                     ageClassCutOffs = ageClassCutOffs,
-#'                     quotedAnalysis = quote(Cache(.largePatchesCalc, tsfFile = tsf,
-#'                       vtmFile = vtm, byPoly = poly, ...)))
+#'   ml <- mapAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
+#'                     id = "1", labelColumn = "shinyLabel",
+#'                     ageClassCutOffs = ageClassCutOffs)
 #'
 #'   # Add a second polygon, trigger
 #'   smallStudyArea2 <- randomPolygon(studyArea(ml), 1e4)
@@ -61,8 +65,13 @@
 #'                            data = data.frame(ID = 1, shinyLabel = "zone1"),
 #'                            match.ID = FALSE)
 #'   ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
-#'                envir = .GlobalEnv, layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
-#'   ml <- mapLeadingByStage(ml, ageClasses = ageClasses,
+#'                analysisGroup2 = "Smaller Study Area 2",
+#'                poly = TRUE,
+#'                layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+#'   ml <- mapAnalysis(ml, functionName = "leadingByStage2", ageClasses = ageClasses,
+#'                     ageClassCutOffs = ageClassCutOffs)
+#'   ml <- mapAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
+#'                     id = "1", labelColumn = "shinyLabel",
 #'                     ageClassCutOffs = ageClassCutOffs)
 #'
 #'
