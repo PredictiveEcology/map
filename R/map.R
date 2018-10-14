@@ -58,11 +58,11 @@
 #'                     id = "1", labelColumn = "shinyLabel",
 #'                     ageClassCutOffs = ageClassCutOffs)
 #'
-#'   ml <- mapAnalysis(ml, functionName = "leadingByStage2", ageClasses = ageClasses,
-#'                     ageClassCutOffs = ageClassCutOffs)
-#'   ml <- mapAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
-#'                     id = "1", labelColumn = "shinyLabel",
-#'                     ageClassCutOffs = ageClassCutOffs)
+#'#   ml <- mapAnalysis(ml, functionName = "leadingByStage2", ageClasses = ageClasses,
+#'#                     ageClassCutOffs = ageClassCutOffs)
+#'#   ml <- mapAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
+#'#                     id = "1", labelColumn = "shinyLabel",
+#'#                     ageClassCutOffs = ageClassCutOffs)
 #'
 #'   # Add a second polygon, trigger
 #'   smallStudyArea2 <- randomPolygon(studyArea(ml), 1e4)
@@ -288,9 +288,11 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
   map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
 
   if (NROW(map@analyses)) {
+    #browser()
     out <- by(map@analyses, map@analyses$functionName,
              function(x) {
-               ma <- mapAnalysis(map = ml, functionName = x$functionName)
+               ma <- mapAnalysis(map = map, functionName = x$functionName)
+               #browser()
                ma@analysesData
              })
     map@analysesData <- lapply(out, function(x) x)
