@@ -36,7 +36,7 @@
 #'                layerName = "Smaller Study Area") # adds a second studyArea within 1st
 #'
 #'   rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
-#'   tsf <- randomPolygons(rasTemplate, numTypes = 3)*80
+#'   tsf <- randomPolygons(rasTemplate, numTypes = 8)*30
 #'   crs(tsf) <- crs(ml)
 #'   vtm <- randomPolygons(tsf, numTypes = 4)
 #'   levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
