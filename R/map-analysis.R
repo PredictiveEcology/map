@@ -75,6 +75,7 @@ mapAnalysis <- function(map, functionName = NULL, ...) {
   map
 }
 
+#' @export
 mapAddAnalysis <- function(map, functionName, ...) {
   dots <- list(...)
   b <- data.table(functionName = functionName,
@@ -88,6 +89,16 @@ mapAddAnalysis <- function(map, functionName, ...) {
   }
 
   map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
+
+  if (NROW(map@analyses)) {
+    out <- by(map@analyses, map@analyses$functionName,
+              function(x) {
+                ma <- mapAnalysis(map = map, functionName = x$functionName)
+                ma@analysesData
+              })
+    map@analysesData <- lapply(out, function(x) x)
+  }
+
   map
 
 }

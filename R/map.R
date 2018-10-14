@@ -288,7 +288,6 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
   map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
 
   if (NROW(map@analyses)) {
-    #browser()
     out <- by(map@analyses, map@analyses$functionName,
              function(x) {
                ma <- mapAnalysis(map = map, functionName = x$functionName)
