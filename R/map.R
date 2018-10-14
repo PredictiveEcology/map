@@ -53,12 +53,18 @@
 #'   ageClasses <- c("Young", "Immature", "Mature", "Old")
 #'   ageClassCutOffs <- c(0, 40, 80, 120)
 #'
+#'   # add an analysis -- this will trigger analyses because there are already objects in the map
+#'   #    THis will trigger 2 analyses ... leadingByStage2 on each raster x polygon combo (only 1 currently)
+#'   #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
 #'   ml <- mapAddAnalysis(ml, functionName ="leadingByStage2",
 #'                         ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
+#'   # add an analysis -- this will trigger analyses because there are already objects in the map
+#'   #    THis will trigger 2 more analyses ... largePatches on each raster x polygon combo (only 1 currently)
+#'   #    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
 #'   ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
 #'                     id = "1", labelColumn = "shinyLabel",
 #'                     ageClassCutOffs = ageClassCutOffs)
-#'
+#' # These are now superceded by internal triggering
 #'#   ml <- mapAnalysis(ml, functionName = "leadingByStage2", ageClasses = ageClasses,
 #'#                     ageClassCutOffs = ageClassCutOffs)
 #'#   ml <- mapAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
@@ -70,6 +76,9 @@
 #'   smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
 #'                            data = data.frame(ID = 1, shinyLabel = "zone1"),
 #'                            match.ID = FALSE)
+#'   # add a new layer -- this will trigger analyses because there are already analyese in the map
+#'   #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
+#'   #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
 #'   ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
 #'                analysisGroup2 = "Smaller Study Area 2",
 #'                poly = TRUE,
