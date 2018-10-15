@@ -18,11 +18,6 @@ LargePatches <- function(tsf, vtm, poly, labelColumn,
     emptyRaster = raster(timeSinceFireFilesRast), # doesn't need to the data -- makes Caching more effective
     field = "tmp"
   )
-  # rasRepPoly2 <- fasterize::fasterize(sf::st_as_sf(poly),
-  #                                    raster = timeSinceFireFilesRast, field = "tmp")
-  # levels(rasRepPoly2) <-
-  #   data.frame(ID = seq_len(nlevels(poly$tmp)),
-  #              Factor = levels(poly$tmp))
 
   # 3rd raster
   rasVeg <- Cache(rasterToMemory, vtm)#,
