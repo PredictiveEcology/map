@@ -83,12 +83,12 @@ mapAddAnalysis <- function(map, functionName, ...) {
                   t(dots))
   prevEntry <- map@analyses$functionName==functionName
   if (sum(prevEntry)){
-    message("An analysis called ", functionName, " already added to map object; ",
-            " Overwriting it")
-    map@analyses <- map@analyses[!prevEntry]
+      message("An analysis called ", functionName, " already added to map object; ",
+              " Overwriting it")
+      map@analyses <- map@analyses[!prevEntry]
   }
 
-  map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
+    map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
 
   if (NROW(map@analyses)) {
     out <- by(map@analyses, map@analyses$functionName,
@@ -97,10 +97,62 @@ mapAddAnalysis <- function(map, functionName, ...) {
                 ma@analysesData[[x$functionName]]
               })
     map@analysesData[names(out)] <- lapply(out, function(x) x)
+
+
+#' Add a post hoc analysis function to a map object
+#'
+#' @inheritParams mapAdd
+#' @param functionName A function that is designed for post hoc analysis of
+#'   map class objects, e.g., \code{rbindlistAG}
+#' @param postHocAnalysisGroups Character string with one
+#'   \code{analysisGroups} i.e., \code{"analysisGroup1"} or \code{"analysisGroup2"}
+#' @param postHocAnalyses Character vector with \code{"all"},
+#'   (which will do all analysisGroups) the default,
+#'   or 1 or more of the the \code{functionName}s that are in the analyses slot.
+#' @param ... Optional arguments to pass into \code{functionName}
+#' @rdname postHoc
+#' @aliases mapAddPostHocAnalysis
+mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NULL,
+                                  postHocAnalyses = "all", ...) {
+  dots <- list(...)
+
+  if (is.null(postHocAnalysisGroups))
+    stop("postHocAnalysisGroups cannot be NULL. It should be one of the column names ",
+         "in metadata(map) that starts with 'analysisGroup'")
+  b <- if (length(dots)) {
+    data.table(functionName = functionName, t(dots))
+  } else {
+    data.table(functionName = functionName, postHocAnalysisGroups = postHocAnalysisGroups,
+               postHocAnalyses = postHocAnalyses, postHoc = TRUE)
+  }
+  prevEntry <- map@analyses$functionName==functionName
+  purgeAnalyses <- NULL # Set default as NULL
+  newDigest <- fastdigest::fastdigest(
+    c(.robustDigest(get(b[, functionName])),
+      .robustDigest(b[, !"functionName"]))
+  )
+  set(b, NULL, "argHash", newDigest)
+  doRbindlist <- TRUE
+  if (sum(prevEntry)){
+    if (!isTRUE(newDigest %in% map@analyses[prevEntry, ]$argHash)) {
+      message("An analysis called ", functionName, " already added to map object; ",
+              " Overwriting it")
+      purgeAnalyses <- functionName
+      map@analyses <- map@analyses[!prevEntry]
+    } else {
+      doRbindlist <- FALSE
+      message("An analysis called, ", functionName, " with identical function and ",
+              "arguments already added and run. Skipping reruns.")
+    }
   }
 
+  if (doRbindlist)
+    map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
+
+  map <- runMapAnalyses(map, purgeAnalyses)
   map
 
 }
 
 
+}
