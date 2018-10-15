@@ -1,5 +1,4 @@
 
-
 LargePatches <- function(tsf, vtm, poly, labelColumn,
                               id, ageClassCutOffs, ageClasses) {
   timeSinceFireFilesRast <- Cache(.rasterToMemory, tsf)
@@ -154,7 +153,7 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile",
   }
 }
 
-.rasterToMemory <- function(x) {
+.rasterToMemory <- function(x, ...) {
   r <- raster(x, ...)
   r <- setValues(r, getValues(r))
   return(r)
