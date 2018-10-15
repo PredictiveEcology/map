@@ -12,14 +12,15 @@
 #'            Can be any format that \code{raster} can use.
 #' @param poly A single \code{SpatialPolygonsDataFrame} object or a factor \code{RasterLayer}.
 #'             This layer MUST have a column labelled \code{shinyLabel}
-#' @param ageClasses TODO
+#' @param ageClasses A character vector with labels for age classes to bin the \code{tsf} times,
+#'                   e.g., \code{c("Young", "Immature", "Mature", "Old")}
 #' @param ageClassCutOffs A numeric vector with the endpoints for the \code{ageClasses}.
 #'                        Should be \code{length(ageClasses) + 1}
 #'
 #' @return A \code{data.table} with proportion of the pixels in each vegetation class,
 #'         for each given age class within each polygon.
 #'
-leadingByStage2 <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasses) {
+LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasses) {
   # main function code
   startTime <- Sys.time()
   if (tail(ageClassCutOffs, 1) != Inf)

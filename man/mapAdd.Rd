@@ -18,22 +18,34 @@ mapAdd(object, map, layerName, overwrite = FALSE, ...)
   leaflet = TRUE, isStudyArea = NULL, envir = NULL, ...)
 }
 \arguments{
-\item{object}{TODO: document this}
+\item{object}{Optional spatial object, currently \code{RasterLayer},
+\code{SpatialPolygons}}
 
-\item{map}{TODO: document this}
+\item{map}{Optional map object. If not provided, then one will be
+created. If provided, then the present \code{object} or options passed to
+prepInputs e.g., \code{url}, will be appended to this \code{map}}
 
-\item{layerName}{TODO: document this}
+\item{layerName}{Required. A label for this map layer. This can be the same as
+the object name.}
 
-\item{overwrite}{TODO: document this}
+\item{overwrite}{Logical. If \code{TRUE} and this \code{layerName} exists in
+the \code{map}, then it will replace the existing object.}
 
 \item{...}{passed to reproducible::postProcess and reproducible::projectInputs and
 reproducible::fixErrors and reproducible::prepInputs}
 
-\item{columnNameForLabels}{TODO: document this}
+\item{columnNameForLabels}{A character string indicating which column to use
+for labels. This is currently only used if the object is a
+\code{SpatialPolygonsDataFram}.}
 
-\item{leaflet}{TODO: document this}
+\item{leaflet}{Logical. If \code{TRUE}, then this layer will be added to a
+leaflet map. For \code{RasterLayer} object, this will trigger a call to
+\code{gdal2tiles}, making tiles. The tile base file path will be the
+\code{paste0(layerName, "_", rndstr(1,6))}}
 
-\item{isStudyArea}{TODO: document this}
+\item{isStudyArea}{Logical. If \code{TRUE}, this will be assigned the label,
+"StudyArea", and will be passed into \code{prepInputs} for any future layers
+added.}
 
 \item{envir}{An optional environment. If supplied, then the object
 will not be placed "into" the maps slot, rather the environment label will
@@ -41,11 +53,9 @@ be placed into the maps slot. Upon re}
 }
 \description{
 If \code{isStudyArea = TRUE}, then several things will be triggered:
-\enumerate{
-  \item This layer will be added to metadata with \code{studyArea} set to
-        \code{max(studyArea(map)) + 1}.
-  \item update CRS slot to be the CRS of the study area.
-}
+\enumerate{ \item This layer will be added to metadata with \code{studyArea}
+set to \code{max(studyArea(map)) + 1}. \item update CRS slot to be the CRS of
+the study area. }
 }
 \examples{
 library(sp)
@@ -94,9 +104,9 @@ require("SpaDES.tools")
   ageClassCutOffs <- c(0, 40, 80, 120)
 
   # add an analysis -- this will trigger analyses because there are already objects in the map
-  #    THis will trigger 2 analyses ... leadingByStage2 on each raster x polygon combo (only 1 currently)
+  #    THis will trigger 2 analyses ... LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
   #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
-  ml <- mapAddAnalysis(ml, functionName ="leadingByStage2",
+  ml <- mapAddAnalysis(ml, functionName ="LeadingVegTypeByAgeClass",
                         ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
   # add an analysis -- this will trigger analyses because there are already objects in the map
   #    THis will trigger 2 more analyses ... largePatches on each raster x polygon combo (only 1 currently)
@@ -104,12 +114,6 @@ require("SpaDES.tools")
   ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
                     id = "1", labelColumn = "shinyLabel",
                     ageClassCutOffs = ageClassCutOffs)
-# These are now superceded by internal triggering
-#   ml <- mapAnalysis(ml, functionName = "leadingByStage2", ageClasses = ageClasses,
-#                     ageClassCutOffs = ageClassCutOffs)
-#   ml <- mapAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
-#                     id = "1", labelColumn = "shinyLabel",
-#                     ageClassCutOffs = ageClassCutOffs)
 
   # Add a second polygon, trigger
   smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
@@ -123,12 +127,6 @@ require("SpaDES.tools")
                analysisGroup2 = "Smaller Study Area 2",
                poly = TRUE,
                layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
-#   ml <- mapAnalysis(ml, functionName = "leadingByStage2", ageClasses = ageClasses,
-#                     ageClassCutOffs = ageClassCutOffs)
-#   ml <- mapAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
-#                     id = "1", labelColumn = "shinyLabel",
-#                     ageClassCutOffs = ageClassCutOffs)
-
 
 #}
 }
