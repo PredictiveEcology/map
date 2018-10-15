@@ -1,5 +1,5 @@
 testInit <- function(libraries, ask = FALSE, verbose = FALSE, tmpFileExt = "",
-                     opts = NULL) {
+                     opts = NULL, needGoogle = FALSE) {
   optsAsk <- if (!ask)
     options("reproducible.ask" = ask)
   else
@@ -12,9 +12,10 @@ testInit <- function(libraries, ask = FALSE, verbose = FALSE, tmpFileExt = "",
   if (missing(libraries)) libraries <- list()
   unlist(lapply(libraries, require, character.only = TRUE))
   require("testthat")
-  tmpdir <- reproducible::normPath(file.path(tempdir(), reproducible:::rndstr(1,6)))
+  tmpdir <- reproducible::normPath(file.path(tempdir(),
+                                             reproducible:::rndstr(1,6)))
 
-  if (interactive()) {
+  if (interactive() && isTRUE(needGoogle)) {
     if (file.exists("~/.httr-oauth")) {
       reproducible::linkOrCopy("~/.httr-oauth", to = file.path(tmpdir, ".httr-oauth"))
     } else {
@@ -38,8 +39,8 @@ testInit <- function(libraries, ask = FALSE, verbose = FALSE, tmpFileExt = "",
     tmpfile <- reproducible::normPath(tmpfile)
   }
 
-  try(clearCache(tmpdir, ask = FALSE), silent = TRUE)
-  try(clearCache(tmpCache, ask = FALSE), silent = TRUE)
+  try(reproducible::clearCache(tmpdir, ask = FALSE), silent = TRUE)
+  try(reproducible::clearCache(tmpCache, ask = FALSE), silent = TRUE)
 
   outList <- list(tmpdir = tmpdir, origDir = origDir, libs = libraries,
                   tmpCache = tmpCache, optsAsk = optsAsk,
