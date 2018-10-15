@@ -7,7 +7,7 @@ Description: The map class is a collection of map objects (sp, raster, sf), with
 URL: 
     http://map.predictiveecology.org,
     https://github.com/PredictiveEcology/map
-Date: 2018-10-01
+Date: 2018-10-15
 Version: 0.0.1
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
@@ -29,6 +29,7 @@ Imports:
     rgeos,
     sf,
     sp,
+    SpaDES.core,
     tiler
 Suggests:
     covr,
@@ -44,7 +45,7 @@ License: GPL-3
 VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/map/issues
 ByteCompile: yes
-RoxygenNote: 6.1.0.9000
+RoxygenNote: 6.1.0
 Collate: 
     'largePatches.R'
     'leading.R'
@@ -52,3 +53,4 @@ Collate:
     'map-class.R'
     'map-package.R'
     'map.R'
+    'zzz.R'
