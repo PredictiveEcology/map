@@ -7,19 +7,19 @@
 leadingByStage2(tsf, vtm, poly, ageClassCutOffs, ageClasses)
 }
 \arguments{
-\item{tsf}{TODO}
+\item{tsf}{A single filename, relative or absolute, pointing to a Time Since Fire raster.
+Can be any format that \code{raster} can use.}
 
-\item{vtm}{TODO}
+\item{vtm}{A single filename, relative or absolute, pointing to a Vegetation Type Map raster.
+Can be any format that \code{raster} can use.}
 
-\item{ageClassCutOffs}{TODO}
+\item{poly}{A single \code{SpatialPolygonsDataFrame} object or a factor \code{RasterLayer}.
+This layer MUST have a column labelled \code{shinyLabel}}
+
+\item{ageClassCutOffs}{A numeric vector with the endpoints for the \code{ageClasses}.
+Should be \code{length(ageClasses) + 1}}
 
 \item{ageClasses}{TODO}
-
-\item{polygonToSummarizeBy}{TODO}
-
-\item{objName}{TODO}
-
-\item{...}{TODO}
 }
 \value{
 A \code{data.table} with proportion of the pixels in each vegetation class,
@@ -27,8 +27,8 @@ A \code{data.table} with proportion of the pixels in each vegetation class,
 }
 \description{
 This function is recursive.
-If \code{polygonToSummarizeBy} is a \code{SpatialPolygon}, then the function
+If \code{poly} is a \code{SpatialPolygon}, then the function
 will enter once, and convert this to a fasterized version, and pass that into
-the function replacing \code{polygonToSummarizeBy}.
+the function replacing \code{poly}.
 It is also recursive of passed a vector of filenames for \code{tsf} and \code{vtm}.
 }

@@ -1,18 +1,20 @@
 #' Calculate proportion of landscape occupied by each vegetation class
 #'
 #' This function is recursive.
-#' If \code{polygonToSummarizeBy} is a \code{SpatialPolygon}, then the function
+#' If \code{poly} is a \code{SpatialPolygon}, then the function
 #' will enter once, and convert this to a fasterized version, and pass that into
-#' the function replacing \code{polygonToSummarizeBy}.
+#' the function replacing \code{poly}.
 #' It is also recursive of passed a vector of filenames for \code{tsf} and \code{vtm}.
 #'
-#' @param tsf TODO
-#' @param vtm TODO
-#' @param polygonToSummarizeBy TODO
-#' @param ageClassCutOffs TODO
+#' @param tsf A single filename, relative or absolute, pointing to a Time Since Fire raster.
+#'            Can be any format that \code{raster} can use.
+#' @param vtm A single filename, relative or absolute, pointing to a Vegetation Type Map raster.
+#'            Can be any format that \code{raster} can use.
+#' @param poly A single \code{SpatialPolygonsDataFrame} object or a factor \code{RasterLayer}.
+#'             This layer MUST have a column labelled \code{shinyLabel}
 #' @param ageClasses TODO
-#' @param objName TODO
-#' @param ... TODO
+#' @param ageClassCutOffs A numeric vector with the endpoints for the \code{ageClasses}.
+#'                        Should be \code{length(ageClasses) + 1}
 #'
 #' @return A \code{data.table} with proportion of the pixels in each vegetation class,
 #'         for each given age class within each polygon.
@@ -223,26 +225,3 @@ makeOptimalCluster <- function(useParallel = FALSE, MBper = 5e3,
     NULL
   }
 }
-
-################################################################################
-#' Extract the metadata object
-#'
-#' Methods for specific classes exist.
-#'
-#' @export
-#' @rdname metadata
-metadata <- function(x) UseMethod("metadata")
-
-#' @importFrom raster metadata
-#' @export
-#' @rdname metadata
-metadata.Raster <- function(x) {
-  raster::metadata(x)
-}
-
-#' @export
-#' @rdname metadata
-metadata.map <- function(x) {
-  x@metadata
-}
-
