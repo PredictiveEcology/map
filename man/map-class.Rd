@@ -15,7 +15,7 @@ principally for use with \pkg{leaflet} and \pkg{shiny}.
 \item{\code{metadata}}{\code{data.table} with columns describing metadata of map objects in
 \code{maps} slot.}
 
-\item{\code{maps}}{Named environment of map-type objects (e.g., \code{sf}, \code{Raster*},
+\item{\code{.xData}}{Named environment of map-type objects (e.g., \code{sf}, \code{Raster*},
 \code{Spatial*}. Each entry may also be simply an environment, which
 indicates where to find the object, i.e., via \code{get(layerName, envir = environment)}}
 
@@ -24,7 +24,5 @@ indicates where to find the object, i.e., via \code{get(layerName, envir = envir
 \item{\code{analyses}}{A \code{data.table} or \code{data.frame} of the types of analyses to perform.}
 
 \item{\code{analysesData}}{A \code{data.table} or \code{data.frame} of the results of the analyses.}
-
-\item{\code{.xData}}{TODO: document this inherited slot}
 }}
 

@@ -256,7 +256,8 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
         message("  Creating tiles - reprojecting to epsg:4326 (leaflet projection)")
         message("Creating tiles")
         if (isTRUE(getOption("reproducible.useCache", FALSE)) ||
-            getOption("reproducible.useCache", FALSE) == "overwrite") message("  using Cache. To prevent this, set options('reproducible.useCache' = FALSE)")
+            getOption("reproducible.useCache", FALSE) == "overwrite")
+          message("  using Cache. To prevent this, set options('reproducible.useCache' = FALSE)")
         tiler::tile(asPath(tmpFile), tilePath, zoom = "1-10", crs = CRS("+init=epsg:4326"),
                     format = "tms", useCache = getOption("reproducible.useCache"))
       } else {
@@ -285,7 +286,7 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
   }
   columnsToAdd <- dots#[!names(dots) %in% .formalsReproducible]
   Map(cta = columnsToAdd, nta = names(columnsToAdd),
-      function(cta, nta) set(b, , nta, cta))
+      function(cta, nta) set(b, NULL, nta, cta))
 
   map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
 
@@ -325,7 +326,6 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
 #'        area = 1e5)
 #'   m <- mapAdd(p, layerName = "p")
 #'   mapRm(m, "p")
-#'
 #' }
 mapRm <- function(map, layer, ask = TRUE, ...) {
   UseMethod("mapRm")
@@ -348,11 +348,9 @@ mapRm.default <- function(map = NULL,
   layerName <- unique(map@metadata[ layer , layerName])
   if (length(layer > 1))
     stop("There are more than object in map with that layer name, '",
-         layerName,"'. Please indicate layer ",
-         "by row number in map@metadata")
+         layerName,"'. Please indicate layer by row number in map@metadata.")
 
   rm(layerName)
-
 }
 
 if (!isGeneric("crs")) {
@@ -627,12 +625,11 @@ setMethod(
 })
 
 .formalsReproducible <- unique(c(formalArgs(reproducible::preProcess),
-                          formalArgs(reproducible::postProcess),
-                          formalArgs(reproducible:::determineFilename),
-                          formalArgs(reproducible::cropInputs),
-                          formalArgs(reproducible::maskInputs),
-                          formalArgs(reproducible::projectInputs)))
-
+                                 formalArgs(reproducible::postProcess),
+                                 formalArgs(reproducible:::determineFilename),
+                                 formalArgs(reproducible::cropInputs),
+                                 formalArgs(reproducible::maskInputs),
+                                 formalArgs(reproducible::projectInputs)))
 
 ################################################################################
 #' Extract the metadata object
@@ -655,5 +652,3 @@ metadata.Raster <- function(x) {
 metadata.map <- function(x) {
   x@metadata
 }
-
-

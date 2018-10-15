@@ -21,6 +21,16 @@ mapRm(map, layer, ask = TRUE, ...)
 \description{
 Remove objects from a \code{map}
 }
+\examples{
+if (require("SpaDES.tools")) {
+  library(sp)
+  longLatCRS <- CRS("+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+  p <- randomPolygon(SpatialPoints(cbind(-120, 60), proj4string = longLatCRS),
+       area = 1e5)
+  m <- mapAdd(p, layerName = "p")
+  mapRm(m, "p")
+}
+}
 \seealso{
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}},
