@@ -6,7 +6,7 @@
 #' @slot metadata  \code{data.table} with columns describing metadata of map objects in
 #'                 \code{maps} slot.
 #'
-#' @slot maps Named environment of map-type objects (e.g., \code{sf}, \code{Raster*},
+#' @slot .xData Named environment of map-type objects (e.g., \code{sf}, \code{Raster*},
 #'            \code{Spatial*}. Each entry may also be simply an environment, which
 #'            indicates where to find the object, i.e., via \code{get(layerName, envir = environment)}
 #'
@@ -15,8 +15,6 @@
 #' @slot analyses    A \code{data.table} or \code{data.frame} of the types of analyses to perform.
 #'
 #' @slot analysesData A \code{data.table} or \code{data.frame} of the results of the analyses.
-#'
-#' @slot .xData  TODO: document this inherited slot
 #'
 #' @aliases map
 #' @exportClass map

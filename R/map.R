@@ -184,11 +184,6 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
       message("There is no CRS already in map; using the studyArea CRS and adding that to map")
     } else {
       dots <- list(...)
-      # args <- if (!is.null(dots$studyArea)) {
-      #   dots[!names(dots) %in% "studyArea"]
-      # } else {
-      #   dots
-      # }
       if (!is.null(studyArea(map))) {
         dots$studyArea <- studyArea(map)
       }
@@ -204,7 +199,7 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
   }
 
   if (is.null(envir)) {
-    envir <- map@.xData
+    envir <- map@.xData # keep envir for later
     # Put map into map slot
     assign(layerName, object, envir = map@.xData) # this overwrites, if same name
   } else {
@@ -323,6 +318,16 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
 #' @export
 #' @family mapMethods
 #' @rdname mapRm
+#' @examples
+#' if (require("SpaDES.tools")) {
+#'   library(sp)
+#'   longLatCRS <- CRS("+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+#'   p <- randomPolygon(SpatialPoints(cbind(-120, 60), proj4string = longLatCRS),
+#'        area = 1e5)
+#'   m <- mapAdd(p, layerName = "p")
+#'   mapRm(m, "p")
+#'
+#' }
 mapRm <- function(map, layer, ask = TRUE, ...) {
   UseMethod("mapRm")
 }
@@ -333,6 +338,7 @@ mapRm <- function(map, layer, ask = TRUE, ...) {
 #' @rdname mapRm
 mapRm.default <- function(map = NULL,
                           layer = NULL, ask = TRUE, ...) {
+  browser()
   if (is.null(map)) {
     stop("Must pass a map")
   }
