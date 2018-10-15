@@ -29,7 +29,6 @@ if (require("SpaDES.tools")) {
        area = 1e5)
   m <- mapAdd(p, layerName = "p")
   mapRm(m, "p")
-
 }
 }
 \seealso{
