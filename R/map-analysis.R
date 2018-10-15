@@ -1,7 +1,27 @@
 #' Generic analysis for map objects
 #'
+#' This is the workhorse function that runs any analyses described in
+#' \code{map@analyses}. It uses hashing, and will not rerun any analysis that
+#' already ran on identical inputs.
 #'
-mapAnalysis <- function(map, functionName = NULL, ...) {
+#' @inheritParams mapAdd
+#' @param functionName A function name that will be run on combinations of
+#'   inputs in the map object. See details.
+#' @param purgeAnalysis A character string indicating which analysis group
+#'   combination or part thereof (e.g., the name entered into the row under
+#'   \code{analysisGroup2} column of the map@metadata or a \code{functionName}.
+#'
+#' @details
+#' This function will do a sequence of things. First, it will run \code{expand.grid}
+#' on any columns whose names start with \code{analysisGroup}, creating a factorial
+#' set of analyses as described by these columns. Then it will assess if any of
+#' these has already been run. For those that have not been run, it will then
+#' run the \code{functionName} on arguments that it finds in the \code{metadata}
+#' slot of the map object, as well as any arguments passed in here in the \code{...}.
+#' In general, the arguments being passed in here should be fixed across all analyses,
+#' while any that vary by analysis should be entered into the metadata table at the
+#' time of adding the layer to the map, via \code{mapAdd}
+mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL, ...) {
   m <- map@metadata
   dots <- list(...)
 

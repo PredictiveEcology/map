@@ -95,10 +95,10 @@ require("SpaDES.tools")
   crs(vtm) <- crs(ml)
   ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
                tsf = "tsf1.tif",
-               analysisGroup1 = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
+               analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)
   ml <- mapAdd(vtm, ml, filename2 = "vtm1.grd", layerName = "vtm1",
                vtm = "vtm1.grd",
-               analysisGroup1 = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
+               analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)
 
   ageClasses <- c("Young", "Immature", "Mature", "Old")
   ageClassCutOffs <- c(0, 40, 80, 120)
@@ -127,6 +127,40 @@ require("SpaDES.tools")
                analysisGroup2 = "Smaller Study Area 2",
                poly = TRUE,
                layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+
+  # Add a *different* second polygon, via overwrite. This should trigger new analyses
+  smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
+  smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
+                           data = data.frame(ID = 1, shinyLabel = "zone1"),
+                           match.ID = FALSE)
+  # add a new layer -- this will trigger analyses because there are already analyese in the map
+  #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
+  #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
+  ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
+               analysisGroup2 = "Smaller Study Area 2",
+               poly = TRUE,
+               layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+
+  # Add a 2nd pair of rasters
+  rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
+  tsf2 <- randomPolygons(rasTemplate, numTypes = 8)*30
+  crs(tsf2) <- crs(ml)
+  vtm2 <- randomPolygons(tsf2, numTypes = 4)
+  levels(vtm2) <- data.frame(ID = sort(unique(vtm2[])),
+                            Factor = c("black spruce", "white spruce", "aspen", "fir"))
+  crs(vtm2) <- crs(ml)
+  ml <- mapAdd(tsf2, ml, filename2 = "tsf2.tif", layerName = "tsf2",
+               tsf = "tsf2.tif",
+               analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+  ml <- mapAdd(vtm2, ml, filename2 = "vtm2.grd", layerName = "vtm2",
+               vtm = "vtm2.grd",
+               analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+
+  # post hoc analysis of data
+  #  use or create a specialized function that can handle the analysesData slot
+  ml <- mapAddPostHocAnalysis(map = ml, functionName = "rbindlistAG",
+              postHocAnalysisGroups = "analysisGroup2",
+              postHocAnalyses = "all")
 
 #}
 }
