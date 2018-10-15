@@ -331,7 +331,19 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
 
   # Add columns by reference to "b"
   Map(cta = columnsToAdd, nta = names(columnsToAdd),
-      function(cta, nta) set(b, NULL, nta, cta))
+      function(cta, nta) {
+        # a data.table can't handle all types of objects ... need to wrap in
+        #   a list to stick it there -- try first without a list wrapper, then
+        #   try once with a list
+        needToSet <- TRUE
+        tries <- 0
+        while (isTRUE(needToSet) && tries < 2) {
+          needToSet <- tryCatch(set(b, NULL, nta, cta), silent = TRUE,
+                                error = function(x) TRUE)
+          tries <- tries + 1
+          cta <- list(cta)
+        }
+      })
 
   map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
 
