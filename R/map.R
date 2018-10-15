@@ -375,20 +375,25 @@ mapRm <- function(map, layer, ask = TRUE, ...) {
 #' @rdname mapRm
 mapRm.default <- function(map = NULL,
                           layer = NULL, ask = TRUE, ...) {
-  browser()
   if (is.null(map)) {
     stop("Must pass a map")
   }
   if (is.character(layer))
     layer <- map@metadata[, which(layerName %in% layer) ]
 
-  layerName
   layerName <- unique(map@metadata[ layer , layerName])
-  if (length(layer > 1))
+  if (length(layer) > 1)
     stop("There are more than object in map with that layer name, '",
          layerName,"'. Please indicate layer by row number in map@metadata.")
 
-  rm(layerName)
+  rm(list = layerName, envir = map@metadata[ layer , envir][[1]])
+  map@metadata <- map@metadata[ -layer , ]
+
+  if (NROW(map@analyses))
+    message("Layer ", layerName, " has been removed, but not any analysis that ",
+            "was previously run using this layer")
+
+  map
 }
 
 if (!isGeneric("crs")) {
