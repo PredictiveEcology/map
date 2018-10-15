@@ -38,7 +38,9 @@ Suggests:
     SpaDES.tools,
     testthat
 Remotes:
-    PredictiveEcology/reproducible@development
+    PredictiveEcology/reproducible@development,
+    PredictiveEcology/SpaDES.core@development,
+    PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
