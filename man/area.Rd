@@ -7,6 +7,9 @@
 \usage{
 \S4method{area}{map}(x)
 }
+\arguments{
+\item{x}{Raster* or SpatialPolygons object}
+}
 \description{
 Calculate area of (named) objects the \code{map} object
 }

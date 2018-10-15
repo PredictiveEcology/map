@@ -91,16 +91,12 @@ mapAddAnalysis <- function(map, functionName, ...) {
   map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
 
   if (NROW(map@analyses)) {
-    #browser()
-    #map@analysesData <- .runMapAnalysis(map@analyses)
-
     out <- by(map@analyses, map@analyses$functionName,
               function(x) {
                 ma <- mapAnalysis(map = map, functionName = x$functionName)
                 ma@analysesData[[x$functionName]]
               })
     map@analysesData[names(out)] <- lapply(out, function(x) x)
-    #map@analysesData <- lapply(out, function(x) x)
   }
 
   map
@@ -108,11 +104,3 @@ mapAddAnalysis <- function(map, functionName, ...) {
 }
 
 
-.runMapAnalysis <- function(analyses) {
-  out <- by(analyses, analyses$functionName,
-            function(x) {
-              ma <- mapAnalysis(map = map, functionName = x$functionName)
-              ma@analysesData[[x$functionName]]
-            })
-  lapply(out, function(x) x)
-}

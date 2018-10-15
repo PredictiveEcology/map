@@ -62,47 +62,73 @@ StudyArea <- SpatialPolygonsDataFrame(StudyArea,
                            data = data.frame(ID = 1, shinyLabel = "zone2"),
                            match.ID = FALSE)
 
-ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area")
+ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area",
+               poly = TRUE, analysisGroup2 = "Small Study Area")
 
-if (require("SpaDES.tools")) {
-  smallStudyArea <- randomPolygon(studyArea(ml), 1e4)
+# if (require("SpaDES.tools")) {
+require("SpaDES.tools")
+  smallStudyArea <- randomPolygon(studyArea(ml), 1e5)
   smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,
                            data = data.frame(ID = 1, shinyLabel = "zone1"),
                            match.ID = FALSE)
   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
-               envir = .GlobalEnv, layerName = "Smaller Study Area") # adds a second studyArea within 1st
+               analysisGroup2 = "Smaller Study Area",
+               poly = TRUE,
+               layerName = "Smaller Study Area") # adds a second studyArea within 1st
 
   rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
-  tsf <- randomPolygons(rasTemplate, numTypes = 3)*80
+  tsf <- randomPolygons(rasTemplate, numTypes = 8)*30
   crs(tsf) <- crs(ml)
   vtm <- randomPolygons(tsf, numTypes = 4)
   levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
                             Factor = c("black spruce", "white spruce", "aspen", "fir"))
   crs(vtm) <- crs(ml)
   ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
-               tsf = TRUE,
-               analysisGroup = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
-  ml <- mapAdd(vtm, ml, filename2 = "vtm1.tif", layerName = "vtm1",
-               vtm = TRUE,
-               analysisGroup = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
+               tsf = "tsf1.tif",
+               analysisGroup1 = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
+  ml <- mapAdd(vtm, ml, filename2 = "vtm1.grd", layerName = "vtm1",
+               vtm = "vtm1.grd",
+               analysisGroup1 = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
 
   ageClasses <- c("Young", "Immature", "Mature", "Old")
   ageClassCutOffs <- c(0, 40, 80, 120)
-  ml <- mapLeadingByStage(ml, ageClasses = ageClasses,
+
+  # add an analysis -- this will trigger analyses because there are already objects in the map
+  #    THis will trigger 2 analyses ... leadingByStage2 on each raster x polygon combo (only 1 currently)
+  #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
+  ml <- mapAddAnalysis(ml, functionName ="leadingByStage2",
+                        ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
+  # add an analysis -- this will trigger analyses because there are already objects in the map
+  #    THis will trigger 2 more analyses ... largePatches on each raster x polygon combo (only 1 currently)
+  #    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
+  ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
+                    id = "1", labelColumn = "shinyLabel",
                     ageClassCutOffs = ageClassCutOffs)
-  ml <- mapLargePatches(ml, ageClasses = ageClasses, id = "1", labelColumn = "shinyLabel",
-                    ageClassCutOffs = ageClassCutOffs)
+# These are now superceded by internal triggering
+#   ml <- mapAnalysis(ml, functionName = "leadingByStage2", ageClasses = ageClasses,
+#                     ageClassCutOffs = ageClassCutOffs)
+#   ml <- mapAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
+#                     id = "1", labelColumn = "shinyLabel",
+#                     ageClassCutOffs = ageClassCutOffs)
 
   # Add a second polygon, trigger
-  smallStudyArea2 <- randomPolygon(studyArea(ml), 1e4)
+  smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
   smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
                            data = data.frame(ID = 1, shinyLabel = "zone1"),
                            match.ID = FALSE)
+  # add a new layer -- this will trigger analyses because there are already analyese in the map
+  #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
+  #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
   ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
-               envir = .GlobalEnv, layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
-  ml <- mapLeadingByStage(ml, ageClasses = ageClasses,
-                    ageClassCutOffs = ageClassCutOffs)
+               analysisGroup2 = "Smaller Study Area 2",
+               poly = TRUE,
+               layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+#   ml <- mapAnalysis(ml, functionName = "leadingByStage2", ageClasses = ageClasses,
+#                     ageClassCutOffs = ageClassCutOffs)
+#   ml <- mapAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
+#                     id = "1", labelColumn = "shinyLabel",
+#                     ageClassCutOffs = ageClassCutOffs)
 
 
-}
+#}
 }

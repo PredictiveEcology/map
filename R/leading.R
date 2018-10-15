@@ -11,7 +11,7 @@
 #' @param polygonToSummarizeBy TODO
 #' @param ageClassCutOffs TODO
 #' @param ageClasses TODO
-#' @param objName
+#' @param objName TODO
 #' @param ... TODO
 #'
 #' @return A \code{data.table} with proportion of the pixels in each vegetation class,

@@ -7,6 +7,11 @@
 \usage{
 \S4method{crs}{map}(x, ...)
 }
+\arguments{
+\item{x}{Raster* or Spatial object }
+
+\item{...}{additional arguments (not implemented)}
+}
 \description{
 Extract the crs of a \code{map}
 }

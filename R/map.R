@@ -27,7 +27,7 @@
 #'
 #'# if (require("SpaDES.tools")) {
 #' require("SpaDES.tools")
-#'   smallStudyArea <- randomPolygon(studyArea(ml), 1e4)
+#'   smallStudyArea <- randomPolygon(studyArea(ml), 1e5)
 #'   smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,
 #'                            data = data.frame(ID = 1, shinyLabel = "zone1"),
 #'                            match.ID = FALSE)
@@ -72,7 +72,7 @@
 #'#                     ageClassCutOffs = ageClassCutOffs)
 #'
 #'   # Add a second polygon, trigger
-#'   smallStudyArea2 <- randomPolygon(studyArea(ml), 1e4)
+#'   smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
 #'   smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
 #'                            data = data.frame(ID = 1, shinyLabel = "zone1"),
 #'                            match.ID = FALSE)
@@ -360,7 +360,7 @@ if (!isGeneric("crs")) {
 
 #' Extract the crs of a \code{map}
 #'
-#' @inheritParams raster crs
+#' @inheritParams raster::crs
 #'
 #' @exportMethod crs
 #' @family mapMethods
@@ -591,7 +591,7 @@ if (!isGeneric("area")) {
 
 #' Calculate area of (named) objects the \code{map} object
 #'
-#' @inheritParams raster area
+#' @inheritParams raster::area
 #'
 #' @export
 #' @family mapMethods
