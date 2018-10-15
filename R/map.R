@@ -231,6 +231,17 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
     layerName <- objectName
   }
 
+  objHash <- .robustDigest(object)
+  purgeAnalyses <- NULL # Set default as NULL
+  if (mustOverwrite) {
+    ln <- layerName
+    purge <- isFALSE(map@metadata[(layerName %in% ln), objectHash] == objHash)
+    if (isTRUE(purge))
+      purgeAnalyses <- map@metadata[layerName %in% ln, get(colnames(map@metadata)[
+        startsWith(colnames(map@metadata), "analysisGroup")])]
+    map@metadata <- map@metadata[!(layerName %in% ln)]
+  }
+
   if (is.null(envir)) {
     envir <- map@.xData # keep envir for later
     # Put map into map slot
@@ -245,10 +256,6 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
       message("object named ", layerName, " does not exist in envir provided",
               ". Adding it to map object")
     }
-  }
-  if (mustOverwrite) {
-    ln <- layerName
-    map@metadata <- map@metadata[!(layerName %in% ln)]
   }
 
   b <- copy(.singleMetadataNAEntry)
@@ -275,6 +282,8 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
       set(b, NULL, "columnNameForLabels", columnNameForLabels)
     }
   }
+  set(b, NULL, "objectHash", objHash)
+
   if (leaflet) {
     set(b, NULL, "leaflet", leaflet)
     if (is(object, "Raster")) {
@@ -317,21 +326,16 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
       }
     }
   }
-  columnsToAdd <- dots#[!names(dots) %in% .formalsReproducible]
+  columnsToAdd <- dots
+
+  # Add columns by reference to "b"
   Map(cta = columnsToAdd, nta = names(columnsToAdd),
       function(cta, nta) set(b, , nta, cta))
 
   map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
 
-  if (NROW(map@analyses)) {
-    #map@analysesData <- .runMapAnalysis(map@analyses)
-    out <- by(map@analyses, map@analyses$functionName,
-             function(x) {
-               ma <- mapAnalysis(map = map, functionName = x$functionName)
-               ma@analysesData[[x$functionName]]
-             })
-    map@analysesData[names(out)] <- lapply(out, function(x) x)
-  }
+  # run map analyses
+  map <- runMapAnalyses(map, purgeAnalyses = purgeAnalyses)
 
   return(map)
 }
