@@ -29,7 +29,6 @@ Imports:
     rgeos,
     sf,
     sp,
-    SpaDES.core,
     tiler
 Suggests:
     covr,
@@ -39,7 +38,6 @@ Suggests:
     testthat
 Remotes:
     PredictiveEcology/reproducible@development,
-    PredictiveEcology/SpaDES.core@development,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
 Language: en-CA
