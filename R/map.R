@@ -162,7 +162,7 @@ mapAdd.default <- function(object = NULL, map = new("map"),
                   overwrite = overwrite,
                   #           url = url,
                   columnNameForLabels = columnNameForLabels,
-                             leaflet = leaflet, isStudyArea = isStudyArea, ...)
+                  leaflet = leaflet, isStudyArea = isStudyArea, ...)
   }
   map
 }
@@ -180,10 +180,10 @@ mapAdd.default <- function(object = NULL, map = new("map"),
 #'
 #' @rdname mapAdd
 mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
-                                   overwrite = FALSE, #url = NULL,
-                                   columnNameForLabels = NULL,
-                                   leaflet = TRUE, isStudyArea = NULL,
-                                   envir = NULL, ...) {
+                                  overwrite = FALSE, #url = NULL,
+                                  columnNameForLabels = NULL,
+                                  leaflet = TRUE, isStudyArea = NULL,
+                                  envir = NULL, ...) {
 
   dots <- list(...)
   objectName <- deparse(substitute(object))
@@ -199,6 +199,7 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
   } else {
     FALSE
   }
+
   if (is.null(studyArea(map)) && is.null(rasterToMatch(map))) {
     object <- fixErrors(object, ...)
     if (isFALSE(isStudyArea)) {
@@ -207,7 +208,10 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
     if (is.na(crs(map))) {
       if (is.null(dots$targetCRS)) { # OK ... user did not pass in targetCRS
         message("No crs already in map, so no reprojection")
+      } else {
+        object <- do.call(projectInputs, append(list(object), dots))
       }
+
     } else {
       dots[["targetCRS"]] <- crs(map)
       object <- do.call(projectInputs, append(list(object), dots))
@@ -430,7 +434,7 @@ setMethod("crs",
               x@CRS
             else
               NA
-})
+          })
 
 #' Map class methods
 #'
@@ -657,14 +661,14 @@ if (!isGeneric("area")) {
 setMethod("area",
           signature = "map",
           function(x) {
-  lsObjs <- ls(x@.xData)
-  logicalRasters <- unlist(lapply(mget(lsObjs, x@.xData), is, "RasterLayer"))
-  if (any(logicalRasters)) {
-    mget(names(logicalRasters)[logicalRasters], x@.xData)
-  } else {
-    NULL
-  }
-})
+            lsObjs <- ls(x@.xData)
+            logicalRasters <- unlist(lapply(mget(lsObjs, x@.xData), is, "RasterLayer"))
+            if (any(logicalRasters)) {
+              mget(names(logicalRasters)[logicalRasters], x@.xData)
+            } else {
+              NULL
+            }
+          })
 
 #' Show method for map class objects
 #'
@@ -677,7 +681,7 @@ setMethod(
   signature = "map",
   definition = function(object) {
     show(object@metadata)
-})
+  })
 
 .formalsReproducible <- unique(c(formalArgs(reproducible::preProcess),
                                  formalArgs(reproducible::postProcess),
