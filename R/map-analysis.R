@@ -1,7 +1,27 @@
 #' Generic analysis for map objects
 #'
+#' This is the workhorse function that runs any analyses described in
+#' \code{map@analyses}. It uses hashing, and will not rerun any analysis that
+#' already ran on identical inputs.
 #'
-mapAnalysis <- function(map, functionName = NULL, ...) {
+#' @inheritParams mapAdd
+#' @param functionName A function name that will be run on combinations of
+#'   inputs in the map object. See details.
+#' @param purgeAnalysis A character string indicating which analysis group
+#'   combination or part thereof (e.g., the name entered into the row under
+#'   \code{analysisGroup2} column of the map@metadata or a \code{functionName}.
+#'
+#' @details
+#' This function will do a sequence of things. First, it will run \code{expand.grid}
+#' on any columns whose names start with \code{analysisGroup}, creating a factorial
+#' set of analyses as described by these columns. Then it will assess if any of
+#' these has already been run. For those that have not been run, it will then
+#' run the \code{functionName} on arguments that it finds in the \code{metadata}
+#' slot of the map object, as well as any arguments passed in here in the \code{...}.
+#' In general, the arguments being passed in here should be fixed across all analyses,
+#' while any that vary by analysis should be entered into the metadata table at the
+#' time of adding the layer to the map, via \code{mapAdd}
+mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL, ...) {
   m <- map@metadata
   dots <- list(...)
 
@@ -17,6 +37,15 @@ mapAnalysis <- function(map, functionName = NULL, ...) {
   names(AGs) <- AGs
   ags <- lapply(AGs, function(AG) sort(na.omit(unique(m[[AG]]))))
   combosCompleted <- map@analysesData[[functionName]]$.Completed
+
+  # Purge if purgeAnalyses is non NULL
+  if (!is.null(purgeAnalyses)) {
+    message("Purging previous analyses with ", purgeAnalyses)
+    combosCompleted <- if (isTRUE(purgeAnalyses == functionName))
+      character()
+    else
+      grep(purgeAnalyses, combosCompleted, value = TRUE, invert = TRUE)
+  }
 
   #if (is.null(combosCompleted)) {
   if (any(unlist(lapply(ags, function(x) length(x>0))))) {
@@ -71,6 +100,8 @@ mapAnalysis <- function(map, functionName = NULL, ...) {
 
     map@analysesData[[functionName]][names(out)] <- unname(lapply(out, function(x) x))
     map@analysesData[[functionName]]$.Completed <- combosCompleted
+  } else {
+    message("  ", functionName, " already run on all layers")
   }
   map
 }
@@ -78,29 +109,140 @@ mapAnalysis <- function(map, functionName = NULL, ...) {
 #' @export
 mapAddAnalysis <- function(map, functionName, ...) {
   dots <- list(...)
-  b <- data.table(functionName = functionName,
-                  quotedFn = "mapAnalysis(map, functionName = functionName, ...)",
-                  t(dots))
+  b <- data.table(functionName = functionName, t(dots))
   prevEntry <- map@analyses$functionName==functionName
+  purgeAnalyses <- NULL # Set default as NULL
+  newDigest <- fastdigest::fastdigest(
+    c(.robustDigest(get(b[, functionName])),
+      .robustDigest(b[, !"functionName"]))
+  )
+  set(b, NULL, "argHash", newDigest)
+  doRbindlist <- TRUE
   if (sum(prevEntry)){
-    message("An analysis called ", functionName, " already added to map object; ",
-            " Overwriting it")
-    map@analyses <- map@analyses[!prevEntry]
+    if (!isTRUE(newDigest %in% map@analyses[prevEntry, ]$argHash)) {
+      message("An analysis called ", functionName, " already added to map object; ",
+              " Overwriting it")
+      purgeAnalyses <- functionName
+      map@analyses <- map@analyses[!prevEntry]
+    } else {
+      doRbindlist <- FALSE
+      message("An analysis called, ", functionName, " with identical function and ",
+              "arguments already added and run. Skipping reruns.")
+    }
   }
 
-  map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
+  if (doRbindlist)
+    map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
 
-  if (NROW(map@analyses)) {
-    out <- by(map@analyses, map@analyses$functionName,
-              function(x) {
-                ma <- mapAnalysis(map = map, functionName = x$functionName)
-                ma@analysesData[[x$functionName]]
-              })
-    map@analysesData[names(out)] <- lapply(out, function(x) x)
-  }
+  map <- runMapAnalyses(map, purgeAnalyses)
 
   map
 
 }
 
 
+#' Add a post hoc analysis function to a map object
+#'
+#' @inheritParams mapAdd
+#' @param functionName A function that is designed for post hoc analysis of
+#'   map class objects, e.g., \code{rbindlistAG}
+#' @param postHocAnalysisGroups Character string with one
+#'   \code{analysisGroups} i.e., \code{"analysisGroup1"} or \code{"analysisGroup2"}
+#' @param postHocAnalyses Character vector with \code{"all"},
+#'   (which will do all analysisGroups) the default,
+#'   or 1 or more of the the \code{functionName}s that are in the analyses slot.
+#' @param ... Optional arguments to pass into \code{functionName}
+#' @rdname postHoc
+#' @aliases mapAddPostHocAnalysis
+mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NULL,
+                                  postHocAnalyses = "all", ...) {
+  dots <- list(...)
+
+  if (is.null(postHocAnalysisGroups))
+    stop("postHocAnalysisGroups cannot be NULL. It should be one of the column names ",
+         "in metadata(map) that starts with 'analysisGroup'")
+  b <- if (length(dots)) {
+    data.table(functionName = functionName, t(dots))
+  } else {
+    data.table(functionName = functionName, postHocAnalysisGroups = postHocAnalysisGroups,
+               postHocAnalyses = postHocAnalyses, postHoc = TRUE)
+  }
+  prevEntry <- map@analyses$functionName==functionName
+  purgeAnalyses <- NULL # Set default as NULL
+  newDigest <- fastdigest::fastdigest(
+    c(.robustDigest(get(b[, functionName])),
+      .robustDigest(b[, !"functionName"]))
+  )
+  set(b, NULL, "argHash", newDigest)
+  doRbindlist <- TRUE
+  if (sum(prevEntry)){
+    if (!isTRUE(newDigest %in% map@analyses[prevEntry, ]$argHash)) {
+      message("An analysis called ", functionName, " already added to map object; ",
+              " Overwriting it")
+      purgeAnalyses <- functionName
+      map@analyses <- map@analyses[!prevEntry]
+    } else {
+      doRbindlist <- FALSE
+      message("An analysis called, ", functionName, " with identical function and ",
+              "arguments already added and run. Skipping reruns.")
+    }
+  }
+
+  if (doRbindlist)
+    map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
+
+  map <- runMapAnalyses(map, purgeAnalyses)
+  map
+
+}
+
+
+runMapAnalyses <- function(map, purgeAnalyses = NULL) {
+  isPostHoc <- if (is.null(map@analyses$postHoc)) {
+    rep(FALSE, NROW(map@analyses))
+  } else {
+    compareNA(map@analyses$postHoc, TRUE)
+  }
+  if (NROW(map@analyses[!isPostHoc])) {
+    out <- tryCatch(
+      by(map@analyses[!isPostHoc], map@analyses$functionName[!isPostHoc],
+         function(x) {
+           ma <- mapAnalysis(map = map, functionName = x$functionName,
+                             purgeAnalyses = purgeAnalyses)
+           ma@analysesData[[x$functionName]]
+         }),
+      error = function(x) NULL)
+    if (!is.null(out)) {
+      map@analysesData[names(out)] <- lapply(out, function(x) x)
+    } else {
+      warning("One of the analyses failed")
+    }
+  }
+
+  # run postHoc analyses
+  if (NROW(map@analyses[isPostHoc])) {
+    out <- tryCatch(
+      by(map@analyses[isPostHoc], map@analyses$functionName[isPostHoc],
+         function(x) {
+           phas <- if (identical(x$postHocAnalyses, "all")) {
+             map@analyses[!isPostHoc]$functionName
+           } else {
+             x$postHocAnalyses
+           }
+           names(phas) <- phas
+           out2 <- lapply(phas, function(pha) {
+             message("    Running ", x$functionName, " on ", pha)
+             ma <- get(x$functionName)(map = map, pha,
+                                       analysisGroups = x$postHocAnalysisGroups)
+           })
+           out2
+         }),
+      error = function(x) NULL)
+    if (!is.null(out)) {
+      map@analysesData[names(out)] <- lapply(out, function(x) x)
+    } else {
+      warning("One of the analyses failed")
+    }
+  }
+  map
+}

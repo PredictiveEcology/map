@@ -43,10 +43,10 @@
 #'   crs(vtm) <- crs(ml)
 #'   ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
 #'                tsf = "tsf1.tif",
-#'                analysisGroup1 = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
+#'                analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)
 #'   ml <- mapAdd(vtm, ml, filename2 = "vtm1.grd", layerName = "vtm1",
 #'                vtm = "vtm1.grd",
-#'                analysisGroup1 = "tsf1_vtm1", leaflet = FALSE, overwrite = TRUE)
+#'                analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)
 #'
 #'   ageClasses <- c("Young", "Immature", "Mature", "Old")
 #'   ageClassCutOffs <- c(0, 40, 80, 120)
@@ -75,6 +75,40 @@
 #'                analysisGroup2 = "Smaller Study Area 2",
 #'                poly = TRUE,
 #'                layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+#'
+#'   # Add a *different* second polygon, via overwrite. This should trigger new analyses
+#'   smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
+#'   smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
+#'                            data = data.frame(ID = 1, shinyLabel = "zone1"),
+#'                            match.ID = FALSE)
+#'   # add a new layer -- this will trigger analyses because there are already analyese in the map
+#'   #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
+#'   #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
+#'   ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
+#'                analysisGroup2 = "Smaller Study Area 2",
+#'                poly = TRUE,
+#'                layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+#'
+#'   # Add a 2nd pair of rasters
+#'   rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
+#'   tsf2 <- randomPolygons(rasTemplate, numTypes = 8)*30
+#'   crs(tsf2) <- crs(ml)
+#'   vtm2 <- randomPolygons(tsf2, numTypes = 4)
+#'   levels(vtm2) <- data.frame(ID = sort(unique(vtm2[])),
+#'                             Factor = c("black spruce", "white spruce", "aspen", "fir"))
+#'   crs(vtm2) <- crs(ml)
+#'   ml <- mapAdd(tsf2, ml, filename2 = "tsf2.tif", layerName = "tsf2",
+#'                tsf = "tsf2.tif",
+#'                analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+#'   ml <- mapAdd(vtm2, ml, filename2 = "vtm2.grd", layerName = "vtm2",
+#'                vtm = "vtm2.grd",
+#'                analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+#'
+#'   # post hoc analysis of data
+#'   #  use or create a specialized function that can handle the analysesData slot
+#'   ml <- mapAddPostHocAnalysis(map = ml, functionName = "rbindlistAG",
+#'               postHocAnalysisGroups = "analysisGroup2",
+#'               postHocAnalyses = "all")
 #'
 #' #}
 #'@param object    Optional spatial object, currently \code{RasterLayer},
@@ -128,7 +162,7 @@ mapAdd.default <- function(object = NULL, map = new("map"),
                   overwrite = overwrite,
                   #           url = url,
                   columnNameForLabels = columnNameForLabels,
-                             leaflet = leaflet, isStudyArea = isStudyArea, ...)
+                  leaflet = leaflet, isStudyArea = isStudyArea, ...)
   }
   map
 }
@@ -146,10 +180,10 @@ mapAdd.default <- function(object = NULL, map = new("map"),
 #'
 #' @rdname mapAdd
 mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
-                                   overwrite = FALSE, #url = NULL,
-                                   columnNameForLabels = NULL,
-                                   leaflet = TRUE, isStudyArea = NULL,
-                                   envir = NULL, ...) {
+                                  overwrite = FALSE, #url = NULL,
+                                  columnNameForLabels = NULL,
+                                  leaflet = TRUE, isStudyArea = NULL,
+                                  envir = NULL, ...) {
 
   dots <- list(...)
   objectName <- deparse(substitute(object))
@@ -165,6 +199,7 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
   } else {
     FALSE
   }
+
   if (is.null(studyArea(map)) && is.null(rasterToMatch(map))) {
     object <- fixErrors(object, ...)
     if (isFALSE(isStudyArea)) {
@@ -173,7 +208,10 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
     if (is.na(crs(map))) {
       if (is.null(dots$targetCRS)) { # OK ... user did not pass in targetCRS
         message("No crs already in map, so no reprojection")
+      } else {
+        object <- do.call(projectInputs, append(list(object), dots))
       }
+
     } else {
       dots[["targetCRS"]] <- crs(map)
       object <- do.call(projectInputs, append(list(object), dots))
@@ -197,6 +235,17 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
     layerName <- objectName
   }
 
+  objHash <- .robustDigest(object)
+  purgeAnalyses <- NULL # Set default as NULL
+  if (mustOverwrite) {
+    ln <- layerName
+    purge <- isFALSE(map@metadata[(layerName %in% ln), objectHash] == objHash)
+    if (isTRUE(purge))
+      purgeAnalyses <- map@metadata[layerName %in% ln, get(colnames(map@metadata)[
+        startsWith(colnames(map@metadata), "analysisGroup")])]
+    map@metadata <- map@metadata[!(layerName %in% ln)]
+  }
+
   if (is.null(envir)) {
     envir <- map@.xData # keep envir for later
     # Put map into map slot
@@ -211,10 +260,6 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
       message("object named ", layerName, " does not exist in envir provided",
               ". Adding it to map object")
     }
-  }
-  if (mustOverwrite) {
-    ln <- layerName
-    map@metadata <- map@metadata[!(layerName %in% ln)]
   }
 
   b <- copy(.singleMetadataNAEntry)
@@ -241,6 +286,8 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
       set(b, NULL, "columnNameForLabels", columnNameForLabels)
     }
   }
+  set(b, NULL, "objectHash", objHash)
+
   if (leaflet) {
     set(b, NULL, "leaflet", leaflet)
     if (is(object, "Raster")) {
@@ -284,21 +331,28 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
       }
     }
   }
-  columnsToAdd <- dots#[!names(dots) %in% .formalsReproducible]
+  columnsToAdd <- dots
+
+  # Add columns by reference to "b"
   Map(cta = columnsToAdd, nta = names(columnsToAdd),
-      function(cta, nta) set(b, NULL, nta, cta))
+      function(cta, nta) {
+        # a data.table can't handle all types of objects ... need to wrap in
+        #   a list to stick it there -- try first without a list wrapper, then
+        #   try once with a list
+        needToSet <- TRUE
+        tries <- 0
+        while (isTRUE(needToSet) && tries < 2) {
+          needToSet <- tryCatch(set(b, NULL, nta, cta), silent = TRUE,
+                                error = function(x) TRUE)
+          tries <- tries + 1
+          cta <- list(cta)
+        }
+      })
 
   map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
 
-  if (NROW(map@analyses)) {
-    #map@analysesData <- .runMapAnalysis(map@analyses)
-    out <- by(map@analyses, map@analyses$functionName,
-             function(x) {
-               ma <- mapAnalysis(map = map, functionName = x$functionName)
-               ma@analysesData[[x$functionName]]
-             })
-    map@analysesData[names(out)] <- lapply(out, function(x) x)
-  }
+  # run map analyses
+  map <- runMapAnalyses(map, purgeAnalyses = purgeAnalyses)
 
   return(map)
 }
@@ -337,20 +391,25 @@ mapRm <- function(map, layer, ask = TRUE, ...) {
 #' @rdname mapRm
 mapRm.default <- function(map = NULL,
                           layer = NULL, ask = TRUE, ...) {
-  browser()
   if (is.null(map)) {
     stop("Must pass a map")
   }
   if (is.character(layer))
     layer <- map@metadata[, which(layerName %in% layer) ]
 
-  layerName
   layerName <- unique(map@metadata[ layer , layerName])
-  if (length(layer > 1))
+  if (length(layer) > 1)
     stop("There are more than object in map with that layer name, '",
          layerName,"'. Please indicate layer by row number in map@metadata.")
 
-  rm(layerName)
+  rm(list = layerName, envir = map@metadata[ layer , envir][[1]])
+  map@metadata <- map@metadata[ -layer , ]
+
+  if (NROW(map@analyses))
+    message("Layer ", layerName, " has been removed, but not any analysis that ",
+            "was previously run using this layer")
+
+  map
 }
 
 if (!isGeneric("crs")) {
@@ -375,7 +434,7 @@ setMethod("crs",
               x@CRS
             else
               NA
-})
+          })
 
 #' Map class methods
 #'
@@ -602,14 +661,14 @@ if (!isGeneric("area")) {
 setMethod("area",
           signature = "map",
           function(x) {
-  lsObjs <- ls(x@.xData)
-  logicalRasters <- unlist(lapply(mget(lsObjs, x@.xData), is, "RasterLayer"))
-  if (any(logicalRasters)) {
-    mget(names(logicalRasters)[logicalRasters], x@.xData)
-  } else {
-    NULL
-  }
-})
+            lsObjs <- ls(x@.xData)
+            logicalRasters <- unlist(lapply(mget(lsObjs, x@.xData), is, "RasterLayer"))
+            if (any(logicalRasters)) {
+              mget(names(logicalRasters)[logicalRasters], x@.xData)
+            } else {
+              NULL
+            }
+          })
 
 #' Show method for map class objects
 #'
@@ -622,7 +681,7 @@ setMethod(
   signature = "map",
   definition = function(object) {
     show(object@metadata)
-})
+  })
 
 .formalsReproducible <- unique(c(formalArgs(reproducible::preProcess),
                                  formalArgs(reproducible::postProcess),

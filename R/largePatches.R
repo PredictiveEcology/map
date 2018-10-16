@@ -1,9 +1,7 @@
 
-
-#' @importFrom SpaDES.core rasterToMemory
 LargePatches <- function(tsf, vtm, poly, labelColumn,
                               id, ageClassCutOffs, ageClasses) {
-  timeSinceFireFilesRast <- Cache(rasterToMemory, tsf)
+  timeSinceFireFilesRast <- Cache(.rasterToMemory, tsf)
 
   tsf <- reclassify(timeSinceFireFilesRast,
                     cbind(from = ageClassCutOffs - 0.1,
@@ -20,7 +18,7 @@ LargePatches <- function(tsf, vtm, poly, labelColumn,
   )
 
   # 3rd raster
-  rasVeg <- Cache(rasterToMemory, vtm)#,
+  rasVeg <- Cache(.rasterToMemory, vtm)#,
 
   splitVal <- paste0("_", 75757575, "_") # unlikely to occur for any other reason
 
@@ -155,3 +153,8 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile",
   }
 }
 
+.rasterToMemory <- function(x, ...) {
+  r <- raster(x, ...)
+  r <- setValues(r, getValues(r))
+  return(r)
+}

@@ -1,5 +1,4 @@
-
-test_that("prepInputs doesn't work", {
+test_that("mapAdd doesn't work", {
   testthat::skip_on_cran()
   testthat::skip_on_travis()
   testthat::skip_on_appveyor()
@@ -9,40 +8,109 @@ test_that("prepInputs doesn't work", {
     testOnExit(testInitOut)
   }, add = TRUE)
 
-  ml <- mapAdd(layerName = "LandWeb Study Area", targetFile = "landweb_ltfc_v6.shp",
-               alsoExtract = c("landweb_ltfc_v6.dbf", "landweb_ltfc_v6.prj",
-                               "landweb_ltfc_v6.sbn", "landweb_ltfc_v6.sbx", "landweb_ltfc_v6.shx"),
-               targetCRS = CRS("+proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0"),
-               url = "https://drive.google.com/open?id=1JptU0R7qsHOEAEkxybx5MGg650KC98c6",
-               columnNameForLabels = "Name", isStudyArea = TRUE
-  )
+ library(sp)
+ library(raster)
+ setwd(tempdir())
+ coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98,
+                       59.9, 65.73, 63.58, 54.79, 59.9),
+                     .Dim = c(5L, 2L))
+ Sr1 <- Polygon(coords)
+ Srs1 <- Polygons(list(Sr1), "s1")
+ StudyArea <- SpatialPolygons(list(Srs1), 1L)
+ crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+ StudyArea <- SpatialPolygonsDataFrame(StudyArea,
+                            data = data.frame(ID = 1, shinyLabel = "zone2"),
+                            match.ID = FALSE)
 
-  # Make a random small study area
-  seed <- 863
-  set.seed(seed)
-  sp2 <- SpaDES.tools::randomPolygon(studyArea(ml), 4e5)
-  ml <- mapAdd(object = sp2, map = ml, filename2 = FALSE,
-               layerName = "Small Study Area",
-               columnNameForLabels = "Name", isStudyArea = TRUE,
-               filename1 = NULL, overwrite = TRUE
-  )
+ ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area",
+                poly = TRUE, analysisGroup2 = "Small Study Area")
 
-  ml <- mapAdd(url = "https://drive.google.com/open?id=1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1",
-               map = ml, leaflet = TRUE,
-               alsoExtract = c("Age1.tfw", "Age1.tif.aux.xml", "Age1.tif.ovr",
-                               "Age1.tif.vat.cpg", "Age1.tif.vat.dbf", "Age1.tif.vat.dbf.xml"),
-               targetFile = "Age1.tif", overwrite = TRUE, filename2 = "Age.tif",
-               layerName = "Age") # dots include things like method = "ngb" for projectRaster
+# if (require("SpaDES.tools")) {
+ require("SpaDES.tools")
+   smallStudyArea <- randomPolygon(studyArea(ml), 1e5)
+   smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,
+                            data = data.frame(ID = 1, shinyLabel = "zone1"),
+                            match.ID = FALSE)
+   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
+                analysisGroup2 = "Smaller Study Area",
+                poly = TRUE,
+                layerName = "Smaller Study Area") # adds a second studyArea within 1st
 
-  # local path
-  ml <- mapAdd(url = "https://www.albertaparks.ca/media/429607/natural_regions_subregions_of_alberta.zip",
-               map = ml, leaflet = TRUE,
-               #alsoExtract = c("Age1.tfw", "Age1.tif.aux.xml", "Age1.tif.ovr",
-              #                 "Age1.tif.vat.cpg", "Age1.tif.vat.dbf", "Age1.tif.vat.dbf.xml"),
-              # targetFile = "Age1.tif",
-               overwrite = TRUE, filename2 = NULL,
-               layerName = "AB Natural Sub Regions") # dots include things like method = "ngb" for projectRaster
+   rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
+   tsf <- randomPolygons(rasTemplate, numTypes = 8)*30
+   crs(tsf) <- crs(ml)
+   vtm <- randomPolygons(tsf, numTypes = 4)
+   levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
+                             Factor = c("black spruce", "white spruce", "aspen", "fir"))
+   crs(vtm) <- crs(ml)
+   ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
+                tsf = "tsf1.tif",
+                analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)
+   ml <- mapAdd(vtm, ml, filename2 = "vtm1.grd", layerName = "vtm1",
+                vtm = "vtm1.grd",
+                analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)
 
+   ageClasses <- c("Young", "Immature", "Mature", "Old")
+   ageClassCutOffs <- c(0, 40, 80, 120)
+
+   # add an analysis -- this will trigger analyses because there are already objects in the map
+   #    THis will trigger 2 analyses ... LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
+   #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
+   ml <- mapAddAnalysis(ml, functionName ="LeadingVegTypeByAgeClass",
+                         ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
+   # add an analysis -- this will trigger analyses because there are already objects in the map
+   #    THis will trigger 2 more analyses ... largePatches on each raster x polygon combo (only 1 currently)
+   #    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
+   ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
+                     id = "1", labelColumn = "shinyLabel",
+                     ageClassCutOffs = ageClassCutOffs)
+
+   # Add a second polygon, trigger
+   smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
+   smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
+                            data = data.frame(ID = 1, shinyLabel = "zone1"),
+                            match.ID = FALSE)
+   # add a new layer -- this will trigger analyses because there are already analyese in the map
+   #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
+   #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
+   ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
+                analysisGroup2 = "Smaller Study Area 2",
+                poly = TRUE,
+                layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+
+   # Add a *different* second polygon, via overwrite. This should trigger new analyses
+   smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
+   smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
+                            data = data.frame(ID = 1, shinyLabel = "zone1"),
+                            match.ID = FALSE)
+   # add a new layer -- this will trigger analyses because there are already analyese in the map
+   #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
+   #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
+   ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
+                analysisGroup2 = "Smaller Study Area 2",
+                poly = TRUE,
+                layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+
+   # Add a 2nd pair of rasters
+   rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
+   tsf2 <- randomPolygons(rasTemplate, numTypes = 8)*30
+   crs(tsf2) <- crs(ml)
+   vtm2 <- randomPolygons(tsf2, numTypes = 4)
+   levels(vtm2) <- data.frame(ID = sort(unique(vtm2[])),
+                             Factor = c("black spruce", "white spruce", "aspen", "fir"))
+   crs(vtm2) <- crs(ml)
+   ml <- mapAdd(tsf2, ml, filename2 = "tsf2.tif", layerName = "tsf2",
+                tsf = "tsf2.tif",
+                analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+   ml <- mapAdd(vtm2, ml, filename2 = "vtm2.grd", layerName = "vtm2",
+                vtm = "vtm2.grd",
+                analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+
+   # post hoc analysis of data
+   #  use or create a specialized function that can handle the analysesData slot
+   ml <- mapAddPostHocAnalysis(map = ml, functionName = "rbindlistAG",
+               postHocAnalysisGroups = "analysisGroup2",
+               postHocAnalyses = "all")
 
 
 })
