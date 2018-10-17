@@ -1,6 +1,7 @@
 
 buildMetadata <- function(metadata, isStudyArea, layerName,
                           object, columnNameForLabels, objHash, leaflet, envir, ...) {
+
   b <- copy(.singleMetadataNAEntry)
   dots <- list(...)
 

@@ -285,20 +285,26 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
   ####################################################
   # Assign object to map@.xData
   ####################################################
-
   if (is.null(envir)) {
     envir <- map@.xData # keep envir for later
     # Put map into map slot
-    args1 <- identifyVectorArgs(assignMap, envir = environment())
-    Map3(assignMap, args1) # this overwrites, if same name
+    a <- list()
+    obj <- if (is(object, "list")) object else list(object)
+    a[layerName] <- list(object)
+    list2env(a, envir = envir)
   } else {
 
     if (exists(layerName, envir = envir)) {
-      assign(layerName, envir, envir = map@.xData) # put then environment as the reference
+      a <- list()
+      envir1 <- if (is(envir, "list")) object else list(envir)
+      a[layerName] <- list(envir1)
+      list2env(a, envir = map@.xData)
     } else {
       envir <- map@.xData
-      args1 <- identifyVectorArgs(assignMap, envir = environment())
-      Map3(assignMap, args1) # this overwrites, if same name
+      a <- list()
+      obj <- if (is(object, "list")) object else list(object)
+      a[layerName] <- list(object)
+      list2env(a, envir = envir)
       message("object named ", paste(layerName, collapse = ", "), " does not exist in envir provided",
               ". Adding it to map object")
     }
@@ -318,8 +324,10 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
   }
 
   # make tiles, if it is leaflet
-  if (any(leaflet) && !is.null(dts$tilePath))
-    makeTiles(dts$tilePath, object)
+  if (any(leaflet) && !is.null(dts$leafletTiles)) {
+    Map(object = object, tilePath = dts$leafletTiles, makeTiles)
+  }
+
 
   ###################################
   # set CRS
@@ -337,7 +345,6 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
   # rbindlist new metadata with existing metadata
   ########################################
   map@metadata <- rbindlist(list(map@metadata, dts), use.names = TRUE, fill = TRUE)
-
 
   ######################################
   # run map analyses
@@ -759,8 +766,7 @@ identifyVectorArgs <- function(fn, localFormalArgs, envir, ...) {
 #'   argsSingle and second element argsMulti. These latter are the
 #'   arguments that Map will cycle over.
 #' @param fn The function that will be run via Map/clusterMap/
-Map3 <- function(fn, args) {
-  browser(expr = exists("aaa"))
+Map3 <- function(fn, args, useCache) {
   if (length(args$argsMulti)) {
     object <- do.call(Cache,
                       args = append(args$argsMulti,
@@ -768,6 +774,7 @@ Map3 <- function(fn, args) {
   } else {
     object <- do.call(Cache, args = append(list(fn), args$argsSingle))
   }
+  object
 
 }
 
