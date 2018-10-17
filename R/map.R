@@ -41,10 +41,15 @@
 #'   levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
 #'                             Factor = c("black spruce", "white spruce", "aspen", "fir"))
 #'   crs(vtm) <- crs(ml)
-#'   ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
-#'                tsf = "tsf1.tif",
-#'                analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)
-#'   ml <- mapAdd(vtm, ml, filename2 = "vtm1.grd", layerName = "vtm1",
+#'   ml <- mapAdd(tsf, ml, layerName = "tsf1",
+#'                filename2 = "tsf1.tif", # to postProcess
+#'                # to map object
+#'                tsf = "tsf1.tif", # to column in map@metadata
+#'                analysisGroup1 = "tsf1_vtm1",  # this is the label for analysisGroup1
+#'                leaflet = TRUE, # to column in map@metadata, will be used for visualizing in leaflet
+#'                overwrite = TRUE)
+#'   ml <- mapAdd(vtm, ml, filename2 = "vtm1.grd",
+#'                layerName = "vtm1",
 #'                vtm = "vtm1.grd",
 #'                analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)
 #'
@@ -144,28 +149,29 @@ mapAdd <- function(object, map, layerName, overwrite = FALSE, ...) {
 #' @importFrom reproducible prepInputs preProcess
 #' @param ... passed to reproducible::postProcess and reproducible::projectInputs and
 #'            reproducible::fixErrors and reproducible::prepInputs
-mapAdd.default <- function(object = NULL, map = new("map"),
-                           layerName = NULL, overwrite = FALSE,
-                           #url = NULL,
-                           columnNameForLabels = character(),
-                           leaflet = TRUE, isStudyArea = FALSE, ...) {
-  if (is.null(object)) {    # with no object, we get it first, then pass to mapAdd
-
-    dots <- list(...)
-    # Don't run preProcess because that will happen in next mapAdd when object is
-    #   in hand
-    forms <- reproducible:::.formalsNotInCurrentDots(preProcess, ...)
-    args <- dots[!(names(dots) %in% forms)]
-    object <- do.call(prepInputs, args = args)
-
-    map <- mapAdd(object, map = map, layerName = layerName,
-                  overwrite = overwrite,
-                  #           url = url,
-                  columnNameForLabels = columnNameForLabels,
-                  leaflet = leaflet, isStudyArea = isStudyArea, ...)
-  }
-  map
-}
+# mapAdd.default <- function(object = NULL, map = new("map"),
+#                            layerName = NULL, overwrite = FALSE,
+#                            #url = NULL,
+#                            columnNameForLabels = character(),
+#                            leaflet = TRUE, isStudyArea = FALSE, ...) {
+#   if (is.null(object)) {    # with no object, we get it first, then pass to mapAdd
+#
+#     dots <- list(...)
+#     # Don't run postProcess because that will happen in next mapAdd when object is
+#     #   in hand
+#     forms <- reproducible:::.formalsNotInCurrentDots(preProcess, ...)
+#     args <- dots[!(names(dots) %in% forms)]
+#     args <- append(args, mget(ls()[ls() %in% formalArgs(preProcess)], inherits = FALSE))
+#     object <- do.call(prepInputs, args = args)
+#
+#     map <- mapAdd(object, map = map, layerName = layerName,
+#                   overwrite = overwrite,
+#                   #           url = url,
+#                   columnNameForLabels = columnNameForLabels,
+#                   leaflet = leaflet, isStudyArea = isStudyArea, ...)
+#   }
+#   map
+# }
 
 #' @param envir An optional environment. If supplied, then the object
 #'        will not be placed "into" the maps slot, rather the environment label will
@@ -179,15 +185,27 @@ mapAdd.default <- function(object = NULL, map = new("map"),
 #' @importFrom sp CRS
 #'
 #' @rdname mapAdd
-mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
+mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
                                   overwrite = FALSE, #url = NULL,
-                                  columnNameForLabels = NULL,
-                                  leaflet = TRUE, isStudyArea = NULL,
+                                  columnNameForLabels = 1,
+                                  leaflet = TRUE, isStudyArea = FALSE,
                                   envir = NULL, ...) {
 
   dots <- list(...)
-  objectName <- deparse(substitute(object))
-  objectEnv <- whereInStack(objectName)
+
+  ###########################################
+  # Get object, if missing, via prepInputs url, or targetFile
+  ###########################################
+  if (is.null(object)) {    # with no object, we get it first, then pass to mapAdd
+    dots <- list(...)
+    # Don't run postProcess because that will happen in next mapAdd when object is
+    #   in hand
+    forms <- reproducible:::.formalsNotInCurrentDots(preProcess, ...)
+    args <- dots[!(names(dots) %in% forms)]
+    args <- append(args, mget(ls()[ls() %in% formalArgs(preProcess)], inherits = FALSE))
+    object <- do.call(prepInputs, args = args)
+  }
+
 
   mustOverwrite <- if (isTRUE(layerName %in% ls(map@.xData))) {
     if (isTRUE(overwrite)) {
@@ -214,7 +232,10 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
 
     } else {
       dots[["targetCRS"]] <- crs(map)
-      object <- do.call(projectInputs, append(list(object), dots))
+      args <- dots
+      args <- append(args, mget(ls()[ls() %in% formalArgs(projectInputs)], inherits = FALSE))
+
+      object <- do.call(projectInputs, append(list(object), args))
     }
   } else {
     if (is.na(crs(map))) {
@@ -227,12 +248,10 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
       if (!is.null(rasterToMatch(map))) {
         dots$rasterToMatch <- rasterToMatch(map)
       }
-      object <- do.call(postProcess, append(list(object), dots))
+      args <- dots
+      args <- append(args, mget(ls()[ls() %in% formalArgs(postProcess)], inherits = FALSE))
+      object <- do.call(postProcess, append(list(object), args))
     }
-  }
-
-  if (is.null(layerName)) {
-    layerName <- objectName
   }
 
   objHash <- .robustDigest(object)
@@ -262,92 +281,41 @@ mapAdd.spatialObjects <- function(object, map = new("map"), layerName = NULL,
     }
   }
 
-  b <- copy(.singleMetadataNAEntry)
-
-  # If it is studyArea
-  if (isTRUE(isStudyArea)) {
-    studyAreaNumber <- 1 + NROW(map@metadata[compareNA(studyArea, TRUE) |
-                                               (is.numeric(studyArea) & studyArea > 0)])
-    if (!is.null(studyArea(map))) {
-      message("map already has a studyArea; adding another one as study area ",
-              studyAreaNumber)
-    } else {
-      message("Setting map CRS to this layer because it is the (first) studyArea inserted")
-      map@CRS <- raster::crs(object)
-    }
-    set(b, NULL, "studyArea", studyAreaNumber)
-  }
-  if (!is.null(dots$url))
-    set(b, NULL, "url", dots$url)
-  set(b, NULL, "layerName", layerName)
-  set(b, NULL, "layerType", class(object))
-  if (length(columnNameForLabels)>0) {
-    if (is(object, "SpatialPolygonsDataFrame")) {
-      set(b, NULL, "columnNameForLabels", columnNameForLabels)
-    }
-  }
-  set(b, NULL, "objectHash", objHash)
-
-  if (leaflet) {
-    set(b, NULL, "leaflet", leaflet)
-    if (is(object, "Raster")) {
-      dig <- .robustDigest(object)
-      tilePath <- asPath(paste0("tiles_", layerName, "_", substr(dig, 1,6)))
-      dirNotExist <- !dir.exists(tilePath)
-
-      if (dirNotExist) {
-        object[] <- object[]
-        objectLflt <- projectRaster(object, crs = CRS("+init=epsg:4326"))
-        tmpFile <- tempfile(fileext = ".tif")
-        objectLflt <- writeRaster(objectLflt, tmpFile)
-        message("  Creating tiles - reprojecting to epsg:4326 (leaflet projection)")
-        message("Creating tiles")
-        if (isTRUE(getOption("reproducible.useCache", FALSE)) ||
-            getOption("reproducible.useCache", FALSE) == "overwrite")
-          message("  using Cache. To prevent this, set options('reproducible.useCache' = FALSE)")
-        tiler::tile(asPath(tmpFile), tilePath, zoom = "1-10", crs = CRS("+init=epsg:4326"),
-                    format = "tms", useCache = getOption("reproducible.useCache"))
-      } else {
-        message("  Tiles - skipping creation - already exist")
-      }
-      set(b, NULL, "leafletTiles", tilePath)
-    }
-  }
-
-  set(b, NULL, "envir", list(list(envir)))
-  set(b, NULL, "objectName", objectName)
-
-  # Add all extra columns to metadata
   dots <- list(...)
-  if (length(dots)) {
-    dots <- dots[!unlist(lapply(dots, is.null))] # remove NULL because that isn't added to data.table anyway
-    if (!is.null(dots$filename2)) {
-      if (inherits(object, "RasterLayer")) {
-        if (endsWith(dots$filename2, suffix = "tif")) {
-          if (raster::is.factor(object)) {
-            dots$filename2 <- basename(filename(object))
-          }
-        }
-      }
-    }
-  }
-  columnsToAdd <- dots
 
-  # Add columns by reference to "b"
-  Map(cta = columnsToAdd, nta = names(columnsToAdd),
-      function(cta, nta) {
-        # a data.table can't handle all types of objects ... need to wrap in
-        #   a list to stick it there -- try first without a list wrapper, then
-        #   try once with a list
-        needToSet <- TRUE
-        tries <- 0
-        while (isTRUE(needToSet) && tries < 2) {
-          needToSet <- tryCatch(set(b, NULL, nta, cta), silent = TRUE,
-                                error = function(x) TRUE)
-          tries <- tries + 1
-          cta <- list(cta)
-        }
-      })
+  browser()
+  args1 <- append(dots, list(isStudyArea = isStudyArea,
+                            layerName = layerName,
+                            object = object, columnNameForLabels = columnNameForLabels,
+                            objHash = objHash, leaflet = leaflet))
+  anyNonVectors <- unlist(lapply(args1, is.null)) | unlist(lapply(args1, function(x) {
+    if (is(x, "SpatialPolygons") | length(x)==1) {
+      TRUE
+    } else {
+      FALSE
+    }
+
+
+  }))
+  if (sum(anyNonVectors)) {
+    argsMulti <- args1[!anyNonVectors]
+    argsSingle <- args1[anyNonVectors]
+  } else {
+    argsMulti <- args1
+    argsSingle <- list()
+  }
+
+  MoreArgs = append(argsSingle, list(metadata = map@metadata))
+  if (length(argsMulti)==0) {
+    dts <- do.call(buildMetadata, MoreArgs)
+  } else {
+    dtsList <- do.call(Map, args = append(argsMulti, list(f = buildMetadata, MoreArgs = MoreArgs)))
+    dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE)
+  }
+
+  # make tiles, if it is leaflet
+  if (any(leaflet))
+    makeTiles(dts$tilePath, object)
 
   map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
 

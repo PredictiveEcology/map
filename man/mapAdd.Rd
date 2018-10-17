@@ -3,17 +3,11 @@
 \name{mapAdd}
 \alias{mapAdd}
 \alias{mapAdd.default}
-\alias{mapAdd.spatialObjects}
 \title{Append a spatial object to map}
 \usage{
 mapAdd(object, map, layerName, overwrite = FALSE, ...)
 
 \method{mapAdd}{default}(object = NULL, map = new("map"),
-  layerName = NULL, overwrite = FALSE,
-  columnNameForLabels = character(), leaflet = TRUE,
-  isStudyArea = FALSE, ...)
-
-\method{mapAdd}{spatialObjects}(object, map = new("map"),
   layerName = NULL, overwrite = FALSE, columnNameForLabels = NULL,
   leaflet = TRUE, isStudyArea = NULL, envir = NULL, ...)
 }
@@ -93,10 +87,15 @@ require("SpaDES.tools")
   levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
                             Factor = c("black spruce", "white spruce", "aspen", "fir"))
   crs(vtm) <- crs(ml)
-  ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
-               tsf = "tsf1.tif",
-               analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)
-  ml <- mapAdd(vtm, ml, filename2 = "vtm1.grd", layerName = "vtm1",
+  ml <- mapAdd(tsf, ml, layerName = "tsf1",
+               filename2 = "tsf1.tif", # to postProcess
+               # to map object
+               tsf = "tsf1.tif", # to column in map@metadata
+               analysisGroup1 = "tsf1_vtm1",  # this is the label for analysisGroup1
+               leaflet = TRUE, # to column in map@metadata, will be used for visualizing in leaflet
+               overwrite = TRUE)
+  ml <- mapAdd(vtm, ml, filename2 = "vtm1.grd",
+               layerName = "vtm1",
                vtm = "vtm1.grd",
                analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)
 
