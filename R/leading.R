@@ -20,6 +20,8 @@
 #' @return A \code{data.table} with proportion of the pixels in each vegetation class,
 #'         for each given age class within each polygon.
 #'
+#' @importFrom stats na.omit
+#' @importFrom utils tail
 LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasses) {
   # main function code
   startTime <- Sys.time()
@@ -106,7 +108,7 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasse
   # All species
   tabulated2 <- bb[, list(NPixels = .N), by = c("zone", "polygonID", "ageClass")]
   tabulated2[, proportion := round(NPixels / sum(NPixels), 4), by = c("zone")]
-  set(tabulated2, , "vegCover", "All species")
+  set(tabulated2, NULL, "vegCover", "All species")
 
   tabulated <- rbindlist(list(tabulated, tabulated2), use.names = TRUE, fill = TRUE)
 
@@ -128,7 +130,7 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasse
   # fill in zeros where there is no value
   tabulated[is.na(proportion), proportion := 0]
   set(tabulated,
-      ,
+      NULL,
       "label",
       paste(
         tabulated$ageClass,
@@ -153,6 +155,8 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasse
 #'        will be cropped first if
 #'        \code{extent(emptyRaster) < extent(polygonToFasterize)}
 #' @param field passed to fasterize
+#'
+#' @importFrom raster extent
 #' @importFrom reproducible cropInputs projectInputs
 fasterize2 <- function(emptyRaster, polygonToFasterize, field) {
   ras <- raster(emptyRaster)
@@ -220,7 +224,7 @@ makeOptimalCluster <- function(useParallel = FALSE, MBper = 5e3,
     if (numClus <= 1) {
       NULL
     } else {
-      makeForkClusterRandom(numClus, ...)
+      makeForkClusterRandom(numClus, ...) ## TODO: this function doesn't exist in the package
     }
   } else {
     NULL

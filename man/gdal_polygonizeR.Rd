@@ -2,7 +2,7 @@
 % Please edit documentation in R/largePatches.R
 \name{gdal_polygonizeR}
 \alias{gdal_polygonizeR}
-\title{Polygonize with gdal}
+\title{Polygonize with GDAL}
 \usage{
 gdal_polygonizeR(x, outshape = NULL, gdalformat = "ESRI Shapefile",
   pypath = NULL, readpoly = TRUE, quiet = TRUE)

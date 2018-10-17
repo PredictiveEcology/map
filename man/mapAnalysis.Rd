@@ -14,12 +14,12 @@ prepInputs e.g., \code{url}, will be appended to this \code{map}}
 \item{functionName}{A function name that will be run on combinations of
 inputs in the map object. See details.}
 
+\item{purgeAnalyses}{A character string indicating which analysis group
+combination or part thereof (e.g., the name entered into the row under
+\code{analysisGroup2} column of the \code{map@metadata} or a \code{functionName}.}
+
 \item{...}{passed to reproducible::postProcess and reproducible::projectInputs and
 reproducible::fixErrors and reproducible::prepInputs}
-
-\item{purgeAnalysis}{A character string indicating which analysis group
-combination or part thereof (e.g., the name entered into the row under
-\code{analysisGroup2} column of the map@metadata or a \code{functionName}.}
 }
 \description{
 This is the workhorse function that runs any analyses described in
@@ -35,5 +35,5 @@ run the \code{functionName} on arguments that it finds in the \code{metadata}
 slot of the map object, as well as any arguments passed in here in the \code{...}.
 In general, the arguments being passed in here should be fixed across all analyses,
 while any that vary by analysis should be entered into the metadata table at the
-time of adding the layer to the map, via \code{mapAdd}
+time of adding the layer to the map, via \code{mapAdd}.
 }

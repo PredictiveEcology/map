@@ -97,16 +97,17 @@ areaAndPolyValue <- function(ras) {
   list(sizeInHa = pArea, polyID = polyIndivSpecies$DN)
 }
 
-#' Polygonize with gdal
+#' Polygonize with GDAL
 #'
 #' Copied from https://johnbaumgartner.wordpress.com/2012/07/26/getting-rasters-into-shape-from-r/
 #'
+#' @importFrom raster extent
 #' @importFrom reproducible assessDataType
-#' @importFrom tools file_path_sans_ext
 #' @importFrom sf st_bbox read_sf
+#' @importFrom tools file_path_sans_ext
 gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile",
                              pypath = NULL, readpoly = TRUE, quiet = TRUE) {
-  if (isTRUE(readpoly)) require(rgdal)
+  if (isTRUE(readpoly)) requireNamespace(rgdal, quietly = TRUE)
   if (is.null(pypath)) {
     pypath <- Sys.which("gdal_polygonize.py")
     if (!nzchar(pypath)) {
@@ -155,6 +156,6 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile",
 
 .rasterToMemory <- function(x, ...) {
   r <- raster(x, ...)
-  r <- setValues(r, getValues(r))
+  r <- raster::setValues(r, raster::getValues(r))
   return(r)
 }

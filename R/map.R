@@ -1,13 +1,19 @@
-#'Append a spatial object to map
+if (getRversion() >= "3.1.0") {
+  utils::globalVariables(c(".N", "objectHash"))
+}
+
+
+#' Append a spatial object to map
 #'
-#'If \code{isStudyArea = TRUE}, then several things will be triggered:
-#'\enumerate{ \item This layer will be added to metadata with \code{studyArea}
-#'set to \code{max(studyArea(map)) + 1}. \item update CRS slot to be the CRS of
-#'the study area. }
+#' If \code{isStudyArea = TRUE}, then several things will be triggered:
+#' \enumerate{ \item This layer will be added to metadata with \code{studyArea}
+#' set to \code{max(studyArea(map)) + 1}. \item update CRS slot to be the CRS of
+#' the study area. }
 #'
 #' @examples
 #' library(sp)
 #' library(raster)
+#' cwd <- getwd()
 #' setwd(tempdir())
 #' coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98,
 #'                       59.9, 65.73, 63.58, 54.79, 59.9),
@@ -115,6 +121,9 @@
 #'               postHocAnalysisGroups = "analysisGroup2",
 #'               postHocAnalyses = "all")
 #'
+#' ## cleanup
+#' setwd(cwd)
+#' unlink(tempdir(), recursive = TRUE)
 #' #}
 #'@param object    Optional spatial object, currently \code{RasterLayer},
 #'  \code{SpatialPolygons}
@@ -186,10 +195,10 @@ mapAdd <- function(object, map, layerName, overwrite = FALSE, ...) {
 #'
 #' @rdname mapAdd
 mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
-                                  overwrite = FALSE, #url = NULL,
-                                  columnNameForLabels = 1,
-                                  leaflet = TRUE, isStudyArea = FALSE,
-                                  envir = NULL, ...) {
+                           overwrite = FALSE, #url = NULL,
+                           columnNameForLabels = 1,
+                           leaflet = TRUE, isStudyArea = FALSE,
+                           envir = NULL, ...) {
 
   dots <- list(...)
 
@@ -289,7 +298,7 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
                             object = object, columnNameForLabels = columnNameForLabels,
                             objHash = objHash, leaflet = leaflet))
   anyNonVectors <- unlist(lapply(args1, is.null)) | unlist(lapply(args1, function(x) {
-    if (is(x, "SpatialPolygons") | length(x)==1) {
+    if (is(x, "SpatialPolygons") | length(x) == 1) {
       TRUE
     } else {
       FALSE
@@ -306,7 +315,7 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
   }
 
   MoreArgs = append(argsSingle, list(metadata = map@metadata))
-  if (length(argsMulti)==0) {
+  if (length(argsMulti) == 0) {
     dts <- do.call(buildMetadata, MoreArgs)
   } else {
     dtsList <- do.call(Map, args = append(argsMulti, list(f = buildMetadata, MoreArgs = MoreArgs)))
@@ -317,7 +326,7 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
   if (any(leaflet))
     makeTiles(dts$tilePath, object)
 
-  map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE)
+  map@metadata <- rbindlist(list(map@metadata, b), use.names = TRUE, fill = TRUE) ## TODO: object 'b' not found
 
   # run map analyses
   map <- runMapAnalyses(map, purgeAnalyses = purgeAnalyses)

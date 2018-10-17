@@ -22,6 +22,9 @@ Depends:
 Imports:
     backports,
     data.table (>= 1.10.4),
+    fastdigest,
+    fasterize,
+    gdalUtils,
     methods,
     quickPlot,
     reproducible,
@@ -29,7 +32,9 @@ Imports:
     rgeos,
     sf,
     sp,
-    tiler
+    stats,
+    tiler,
+    utils
 Suggests:
     covr,
     knitr,
