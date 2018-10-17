@@ -3,13 +3,11 @@ test_that("mapAdd doesn't work", {
   testthat::skip_on_travis()
   testthat::skip_on_appveyor()
 
-  testInitOut <- testInit("raster")
+  testInitOut <- testInit(c("raster", "sp"))
   on.exit({
     testOnExit(testInitOut)
   }, add = TRUE)
 
- library(sp)
- library(raster)
  setwd(tempdir())
  coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98,
                        59.9, 65.73, 63.58, 54.79, 59.9),
@@ -56,8 +54,8 @@ test_that("mapAdd doesn't work", {
    # add an analysis -- this will trigger analyses because there are already objects in the map
    #    THis will trigger 2 analyses ... LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
    #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
-   ml <- mapAddAnalysis(ml, functionName ="LeadingVegTypeByAgeClass",
-                         ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
+   ml <- mapAddAnalysis(ml, functionName = "LeadingVegTypeByAgeClass",
+                        ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
    # add an analysis -- this will trigger analyses because there are already objects in the map
    #    THis will trigger 2 more analyses ... largePatches on each raster x polygon combo (only 1 currently)
    #    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now

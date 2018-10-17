@@ -8,8 +8,8 @@
 mapAdd(object, map, layerName, overwrite = FALSE, ...)
 
 \method{mapAdd}{default}(object = NULL, map = new("map"),
-  layerName = NULL, overwrite = FALSE, columnNameForLabels = NULL,
-  leaflet = TRUE, isStudyArea = NULL, envir = NULL, ...)
+  layerName = NULL, overwrite = FALSE, columnNameForLabels = 1,
+  leaflet = TRUE, isStudyArea = FALSE, envir = NULL, ...)
 }
 \arguments{
 \item{object}{Optional spatial object, currently \code{RasterLayer},
@@ -54,6 +54,7 @@ the study area. }
 \examples{
 library(sp)
 library(raster)
+cwd <- getwd()
 setwd(tempdir())
 coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98,
                       59.9, 65.73, 63.58, 54.79, 59.9),
@@ -103,12 +104,12 @@ require("SpaDES.tools")
   ageClassCutOffs <- c(0, 40, 80, 120)
 
   # add an analysis -- this will trigger analyses because there are already objects in the map
-  #    THis will trigger 2 analyses ... LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
+  #    This will trigger 2 analyses ... LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
   #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
   ml <- mapAddAnalysis(ml, functionName ="LeadingVegTypeByAgeClass",
                         ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
   # add an analysis -- this will trigger analyses because there are already objects in the map
-  #    THis will trigger 2 more analyses ... largePatches on each raster x polygon combo (only 1 currently)
+  #    This will trigger 2 more analyses ... largePatches on each raster x polygon combo (only 1 currently)
   #    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
   ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
                     id = "1", labelColumn = "shinyLabel",
@@ -132,7 +133,7 @@ require("SpaDES.tools")
   smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
                            data = data.frame(ID = 1, shinyLabel = "zone1"),
                            match.ID = FALSE)
-  # add a new layer -- this will trigger analyses because there are already analyese in the map
+  # add a new layer -- this will trigger analyses because there are already analyses in the map
   #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
   #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
   ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
@@ -161,5 +162,8 @@ require("SpaDES.tools")
               postHocAnalysisGroups = "analysisGroup2",
               postHocAnalyses = "all")
 
+## cleanup
+setwd(cwd)
+unlink(tempdir(), recursive = TRUE)
 #}
 }

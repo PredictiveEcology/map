@@ -1,4 +1,6 @@
-
+#' Build \code{map} object metadata table
+#'
+#' @rdname buildMetadata
 buildMetadata <- function(metadata, isStudyArea, layerName,
                           object, columnNameForLabels, objHash, leaflet, envir, ...) {
 
@@ -15,7 +17,7 @@ buildMetadata <- function(metadata, isStudyArea, layerName,
     set(b, NULL, "url", dots$url)
   set(b, NULL, "layerName", layerName)
   set(b, NULL, "layerType", class(object))
-  if (length(columnNameForLabels)>0) {
+  if (length(columnNameForLabels) > 0) {
     if (is(object, "SpatialPolygonsDataFrame")) {
       set(b, NULL, "columnNameForLabels", columnNameForLabels)
     }
@@ -41,7 +43,7 @@ buildMetadata <- function(metadata, isStudyArea, layerName,
         if (inherits(object, "RasterLayer")) {
           if (endsWith(dots$filename2, suffix = "tif")) {
             if (raster::is.factor(object)) {
-              dots$filename2 <- basename(filename(object))
+              dots$filename2 <- basename(raster::filename(object))
             }
           }
         }

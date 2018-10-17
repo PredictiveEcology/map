@@ -1,13 +1,19 @@
-#'Append a spatial object to map
+if (getRversion() >= "3.1.0") {
+  utils::globalVariables(c(".N", "objectHash"))
+}
+
+
+#' Append a spatial object to map
 #'
-#'If \code{isStudyArea = TRUE}, then several things will be triggered:
-#'\enumerate{ \item This layer will be added to metadata with \code{studyArea}
-#'set to \code{max(studyArea(map)) + 1}. \item update CRS slot to be the CRS of
-#'the study area. }
+#' If \code{isStudyArea = TRUE}, then several things will be triggered:
+#' \enumerate{ \item This layer will be added to metadata with \code{studyArea}
+#' set to \code{max(studyArea(map)) + 1}. \item update CRS slot to be the CRS of
+#' the study area. }
 #'
 #' @examples
 #' library(sp)
 #' library(raster)
+#' cwd <- getwd()
 #' setwd(tempdir())
 #' coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98,
 #'                       59.9, 65.73, 63.58, 54.79, 59.9),
@@ -115,6 +121,9 @@
 #'               postHocAnalysisGroups = "analysisGroup2",
 #'               postHocAnalyses = "all")
 #'
+#' ## cleanup
+#' setwd(cwd)
+#' unlink(tempdir(), recursive = TRUE)
 #' #}
 #'@param object    Optional spatial object, currently \code{RasterLayer},
 #'  \code{SpatialPolygons}
@@ -188,10 +197,10 @@ mapAdd <- function(object, map, layerName, overwrite = FALSE, ...) {
 #'
 #' @rdname mapAdd
 mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
-                                  overwrite = FALSE, #url = NULL,
-                                  columnNameForLabels = 1,
-                                  leaflet = TRUE, isStudyArea = FALSE,
-                                  envir = NULL, useCache = TRUE, ...) {
+                           overwrite = FALSE, #url = NULL,
+                           columnNameForLabels = 1,
+                           leaflet = TRUE, isStudyArea = FALSE,
+                           envir = NULL, useCache = TRUE, ...) {
 
   dots <- list(...)
 
