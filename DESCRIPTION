@@ -47,8 +47,10 @@ BugReports: https://github.com/PredictiveEcology/map/issues
 ByteCompile: yes
 RoxygenNote: 6.1.0
 Collate: 
+    'buildMetadata.R'
     'largePatches.R'
     'leading.R'
+    'makeTiles.R'
     'map-analysis.R'
     'map-class.R'
     'map-package.R'
