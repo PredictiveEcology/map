@@ -24,7 +24,7 @@ buildMetadata <- function(metadata, isStudyArea, layerName,
   }
   set(b, NULL, "objectHash", objHash)
 
-  if (leaflet) {
+  if (!isFALSE(leaflet)) {
     set(b, NULL, "leaflet", leaflet)
     if (is(object, "Raster")) {
       dig <- .robustDigest(object)

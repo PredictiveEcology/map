@@ -137,9 +137,11 @@ if (getRversion() >= "3.1.0") {
 #'@param columnNameForLabels A character string indicating which column to use
 #'  for labels. This is currently only used if the object is a
 #'  \code{SpatialPolygonsDataFram}.
-#'@param leaflet Logical. If \code{TRUE}, then this layer will be added to a
+#'@param leaflet Logical or Character vector of path(s) to write tiles.
+#'  If \code{TRUE} or a character vector, then this layer will be added to a
 #'  leaflet map. For \code{RasterLayer} object, this will trigger a call to
-#'  \code{gdal2tiles}, making tiles. The tile base file path will be the
+#'  \code{gdal2tiles}, making tiles. If path is not specified, it will be
+#'  the current path. The tile base file path will be the
 #'  \code{paste0(layerName, "_", rndstr(1,6))}
 #'@param isStudyArea Logical. If \code{TRUE}, this will be assigned the label,
 #'  "StudyArea", and will be passed into \code{prepInputs} for any future layers
@@ -299,7 +301,7 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
     # Put map into map slot
     a <- list()
     obj <- if (is(object, "list")) object else list(object)
-    a[layerName] <- list(object)
+    a[layerName] <- obj
     list2env(a, envir = envir)
   } else {
 
@@ -312,7 +314,7 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
       envir <- map@.xData
       a <- list()
       obj <- if (is(object, "list")) object else list(object)
-      a[layerName] <- list(object)
+      a[layerName] <- obj
       list2env(a, envir = envir)
       message("object named ", paste(layerName, collapse = ", "), " does not exist in envir provided",
               ". Adding it to map object")
@@ -333,8 +335,12 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
   }
 
   # make tiles, if it is leaflet
-  if (any(leaflet) && !is.null(dts$leafletTiles)) {
-    Map(object = object, tilePath = dts$leafletTiles, makeTiles)
+  if (any(!isFALSE(leaflet)) && !is.null(dts$leafletTiles)) {
+    if (is.logical(leaflet)) {
+      leaflet <- getwd()
+    }
+    Map(object = object, tilePath = file.path(leaflet, dts$leafletTiles),
+        makeTiles)
   }
 
 
