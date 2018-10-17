@@ -3,21 +3,13 @@
 #' @rdname buildMetadata
 buildMetadata <- function(metadata, isStudyArea, layerName,
                           object, columnNameForLabels, objHash, leaflet, envir, ...) {
-  browser()
   b <- copy(.singleMetadataNAEntry)
   dots <- list(...)
 
   # If it is studyArea
   if (isTRUE(isStudyArea)) {
-    studyAreaNumber <- 1 + NROW(map@metadata[compareNA(studyArea, TRUE) |
+    studyAreaNumber <- 1 + NROW(metadata[compareNA(studyArea, TRUE) |
                                                (is.numeric(studyArea) & studyArea > 0)])
-    if (!is.null(studyArea(map))) {
-      message("map already has a studyArea; adding another one as study area ",
-              studyAreaNumber)
-    } else {
-      message("Setting map CRS to this layer because it is the (first) studyArea inserted")
-      map@CRS <- raster::crs(object)
-    }
     set(b, NULL, "studyArea", studyAreaNumber)
   }
   if (!is.null(dots$url))
