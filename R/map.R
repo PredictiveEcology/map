@@ -86,7 +86,7 @@
 #'   smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
 #'                            data = data.frame(ID = 1, shinyLabel = "zone1"),
 #'                            match.ID = FALSE)
-#'   # add a new layer -- this will trigger analyses because there are already analyese in the map
+#'   # add a new layer -- this will trigger analyses because there are already analyses in the map
 #'   #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
 #'   #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
 #'   ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
