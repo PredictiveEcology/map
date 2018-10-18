@@ -215,7 +215,7 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
     # Don't run postProcess because that will happen in next mapAdd when object is
     #   in hand
     args1 <- identifyVectorArgs(fn = list(Cache, preProcess), ls(), environment(), ...)
-    object <- Map3(prepInputs, args1)
+    object <- Map3(prepInputs, args1, useCache = useCache)
   }
 
   layerNameExistsInMetadata <- if (isTRUE(layerName %in% ls(map@.xData))) {
@@ -259,14 +259,18 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
     } else {
       dots <- list(...)
       if (!is.null(studyArea(map))) {
-        dots$studyArea <- studyArea(map)
+        studyArea <- studyArea(map)
       }
       if (!is.null(rasterToMatch(map))) {
-        dots$rasterToMatch <- rasterToMatch(map)
+        rasterToMatch <- rasterToMatch(map)
       }
-      args <- dots
-      args <- append(args, mget(ls()[ls() %in% formalArgs(postProcess)], inherits = FALSE))
-      object <- do.call(postProcess, append(list(object), args))
+
+      list2env(dots, envir = environment()) # put any arguments from the ... into this local env
+      x <- object # put it into memory so identifyVectorArgs finds it
+      args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialObjects"),
+                                            projectInputs, cropInputs, writeOutputs),
+                                  ls(), environment(), ...)
+      object <- Map3(postProcess, args1, useCache = useCache)
     }
   }
 
@@ -324,7 +328,7 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
   ####################################################
   # Metadata -- build new entries in data.table -- vectorized
   ####################################################
-  args1 <- identifyVectorArgs(fn = buildMetadata, ls(), environment(), ...)
+  args1 <- identifyVectorArgs(fn = list(buildMetadata, prepInputs), ls(), environment(), ...)
   MoreArgs = append(args1$argsSingle, list(metadata = map@metadata))
   if (length(args1$argsMulti)==0) {
     dts <- do.call(buildMetadata, MoreArgs)
@@ -725,35 +729,11 @@ metadata.map <- function(x) {
 }
 
 
-getLocalArgsFor <- function(fn, localFormalArgs, envir, ...) {
-  browser(expr = exists("aaa"))
-  if (missing(envir))
-    envir <- parent.frame()
-  if (missing(localFormalArgs))
-    localFormalArgs <- ls(envir = envir)
-  dots <- list(...)
-  if (length(fn) > 1) {
-    forms <- unlist(lapply(fn, reproducible:::.formalsNotInCurrentDots, ...))
-    forms <- forms[duplicated(forms)]
-  } else {
-    forms <- reproducible:::.formalsNotInCurrentDots(fn, ...)
-  }
-  args <- dots[!(names(dots) %in% forms)]
-  localFormals <- if (length(fn) > 1) {
-    a <- lapply(fn, function(f)
-      localFormalArgs[localFormalArgs %in% formalArgs(f)]
-    )
-    unique(unlist(a))
-  } else {
-    localFormalArgs[localFormalArgs %in% formalArgs(fn)]
-  }
-  args <- append(args, mget(localFormals, envir = envir))
 
-}
-
+#' @importFrom reproducible getLocalArgsFor
 identifyVectorArgs <- function(fn, localFormalArgs, envir, ...) {
   dots <- list(...)
-  argsMulti <- getLocalArgsFor(fn, localFormalArgs, envir = envir, ...)
+  argsMulti <- reproducible::getLocalArgsFor(fn, localFormalArgs, envir = envir, ...)
 
   #argsMulti <- append(dots, fnArgs)
   specialTypes = c("environment", "SpatialPolygons")
@@ -785,9 +765,12 @@ Map3 <- function(fn, args, useCache) {
   if (length(args$argsMulti)) {
     object <- do.call(Cache,
                       args = append(args$argsMulti,
-                                    list(Map, f = fn, MoreArgs = args$argsSingle)))
+                                    list(Map, f = fn,
+                                         MoreArgs = args$argsSingle, # passed to Map
+                                         useCache = useCache))) # passed to Cache
   } else {
-    object <- do.call(Cache, args = append(list(fn), args$argsSingle))
+    object <- do.call(Cache, args = append(list(fn),
+                                           args$argsSingle))
   }
   object
 
