@@ -730,7 +730,32 @@ metadata.map <- function(x) {
 
 
 
-#' @importFrom reproducible getLocalArgsFor
+getLocalArgsFor <- function(fn, localFormalArgs, envir, ...) {
+  browser(expr = exists("aaa"))
+  if (missing(envir))
+    envir <- parent.frame()
+  if (missing(localFormalArgs))
+    localFormalArgs <- ls(envir = envir)
+  dots <- list(...)
+  if (length(fn) > 1) {
+    forms <- unlist(lapply(fn, reproducible:::.formalsNotInCurrentDots, ...))
+    forms <- forms[duplicated(forms)]
+  } else {
+    forms <- reproducible:::.formalsNotInCurrentDots(fn, ...)
+  }
+  args <- dots[!(names(dots) %in% forms)]
+  localFormals <- if (length(fn) > 1) {
+    a <- lapply(fn, function(f)
+      localFormalArgs[localFormalArgs %in% formalArgs(f)]
+    )
+    unique(unlist(a))
+  } else {
+    localFormalArgs[localFormalArgs %in% formalArgs(fn)]
+  }
+  args <- append(args, mget(localFormals, envir = envir))
+
+}
+
 identifyVectorArgs <- function(fn, localFormalArgs, envir, ...) {
   dots <- list(...)
   argsMulti <- reproducible::getLocalArgsFor(fn, localFormalArgs, envir = envir, ...)
