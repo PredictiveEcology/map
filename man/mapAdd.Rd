@@ -9,7 +9,8 @@ mapAdd(object, map, layerName, overwrite = FALSE, ...)
 
 \method{mapAdd}{default}(object = NULL, map = new("map"),
   layerName = NULL, overwrite = FALSE, columnNameForLabels = 1,
-  leaflet = TRUE, isStudyArea = FALSE, envir = NULL, ...)
+  leaflet = TRUE, isStudyArea = FALSE, envir = NULL,
+  useCache = TRUE, ...)
 }
 \arguments{
 \item{object}{Optional spatial object, currently \code{RasterLayer},
@@ -32,9 +33,11 @@ reproducible::fixErrors and reproducible::prepInputs}
 for labels. This is currently only used if the object is a
 \code{SpatialPolygonsDataFram}.}
 
-\item{leaflet}{Logical. If \code{TRUE}, then this layer will be added to a
+\item{leaflet}{Logical or Character vector of path(s) to write tiles.
+If \code{TRUE} or a character vector, then this layer will be added to a
 leaflet map. For \code{RasterLayer} object, this will trigger a call to
-\code{gdal2tiles}, making tiles. The tile base file path will be the
+\code{gdal2tiles}, making tiles. If path is not specified, it will be
+the current path. The tile base file path will be the
 \code{paste0(layerName, "_", rndstr(1,6))}}
 
 \item{isStudyArea}{Logical. If \code{TRUE}, this will be assigned the label,
@@ -44,6 +47,9 @@ added.}
 \item{envir}{An optional environment. If supplied, then the object
 will not be placed "into" the maps slot, rather the environment label will
 be placed into the maps slot. Upon re}
+
+\item{useCache}{Logical. If \code{TRUE}, then internal calls to \code{Cache} will
+be used. Default is \code{TRUE}}
 }
 \description{
 If \code{isStudyArea = TRUE}, then several things will be triggered:
