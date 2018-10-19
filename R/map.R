@@ -191,30 +191,6 @@ mapAdd <- function(obj, map, layerName,
 #' @importFrom reproducible prepInputs preProcess
 #' @param ... passed to reproducible::postProcess and reproducible::projectInputs and
 #'            reproducible::fixErrors and reproducible::prepInputs
-# mapAdd.default <- function(obj = NULL, map = new("map"),
-#                            layerName = NULL, overwrite = FALSE,
-#                            #url = NULL,
-#                            columnNameForLabels = character(),
-#                            leaflet = TRUE, isStudyArea = FALSE, ...) {
-#   if (is.null(obj)) {    # with no obj, we get it first, then pass to mapAdd
-#
-#     dots <- list(...)
-#     # Don't run postProcess because that will happen in next mapAdd when obj is
-#     #   in hand
-#     forms <- reproducible:::.formalsNotInCurrentDots(preProcess, ...)
-#     args <- dots[!(names(dots) %in% forms)]
-#     args <- append(args, mget(ls()[ls() %in% formalArgs(preProcess)], inherits = FALSE))
-#     obj <- do.call(prepInputs, args = args)
-#
-#     map <- mapAdd(obj, map = map, layerName = layerName,
-#                   overwrite = overwrite,
-#                   #           url = url,
-#                   columnNameForLabels = columnNameForLabels,
-#                   leaflet = leaflet, isStudyArea = isStudyArea, ...)
-#   }
-#   map
-# }
-
 #' @param envir An optional environment. If supplied, then the obj
 #'        will not be placed "into" the maps slot, rather the environment label will
 #'        be placed into the maps slot. Upon re
@@ -828,6 +804,7 @@ metadata.map <- function(x) {
 #' be found because it matches the \code{x} argument in \code{fn}.
 #'
 #' @param localFormalArgs A (named) character vector or arguments to
+#' @importFrom reproducible .formalsNotInCurrentDots
 #' @return List of named objects. The names are the formals in fn, and
 #' the objects are the values for those formals. This can easily
 #' be passed to do.call(fn, args1)
@@ -845,7 +822,7 @@ getLocalArgsFor <- function(fn, localFormalArgs, envir, dots) {
     forms <- unlist(lapply(fn, reproducible::.formalsNotInCurrentDots, dots = dots))
     forms <- forms[duplicated(forms)]
   } else {
-    forms <- reproducible:::.formalsNotInCurrentDots(fn, dots = dots)
+    forms <- reproducible::.formalsNotInCurrentDots(fn, dots = dots)
   }
   args <- dots[!(names(dots) %in% forms)]
   localFormals <- if (length(fn) > 1) {
