@@ -2,16 +2,20 @@
 % Please edit documentation in R/map.R
 \name{MapOrLapply}
 \alias{MapOrLapply}
-\title{Map/lapply all in one}
+\title{\code{Map}/\code{lapply} all in one}
 \usage{
 MapOrLapply(fn, multiple, single, useCache, cl = NULL)
 }
 \arguments{
-\item{fn}{The function that will be run via Map/clusterMap/}
+\item{fn}{The function that will be run via \code{Map}/\code{clusterMap}.}
 
 \item{multiple}{This a list the arguments that Map will cycle over.}
 
-\item{single}{Passed to \code{MoreArgs} in the \code{mapply} function}
+\item{single}{Passed to \code{MoreArgs} in the \code{mapply} function.}
+
+\item{useCache}{Logical indicating whether to use the cache.}
+
+\item{cl}{A cluster object or \code{NULL}.}
 }
 \description{
 Usually run after \code{identifyVectorArgs}

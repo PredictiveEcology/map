@@ -50,6 +50,8 @@ be placed into the maps slot. Upon re}
 
 \item{useCache}{Logical. If \code{TRUE}, then internal calls to \code{Cache} will
 be used. Default is \code{TRUE}}
+
+\item{paths}{TODO: description needed}
 }
 \description{
 If \code{isStudyArea = TRUE}, then several things will be triggered:
@@ -68,7 +70,8 @@ coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98,
 Sr1 <- Polygon(coords)
 Srs1 <- Polygons(list(Sr1), "s1")
 StudyArea <- SpatialPolygons(list(Srs1), 1L)
-crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+crs(StudyArea) <- paste("+init=epsg:4326 +proj=longlat +datum=WGS84",
+                        "+no_defs +ellps=WGS84 +towgs84=0,0,0")
 StudyArea <- SpatialPolygonsDataFrame(StudyArea,
                            data = data.frame(ID = 1, shinyLabel = "zone2"),
                            match.ID = FALSE)
@@ -110,12 +113,14 @@ require("SpaDES.tools")
   ageClassCutOffs <- c(0, 40, 80, 120)
 
   # add an analysis -- this will trigger analyses because there are already objects in the map
-  #    This will trigger 2 analyses ... LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
+  #    This will trigger 2 analyses:
+  #    LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
   #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
   ml <- mapAddAnalysis(ml, functionName ="LeadingVegTypeByAgeClass",
                         ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
   # add an analysis -- this will trigger analyses because there are already objects in the map
-  #    This will trigger 2 more analyses ... largePatches on each raster x polygon combo (only 1 currently)
+  #    This will trigger 2 more analyses:
+  #    largePatches on each raster x polygon combo (only 1 currently)
   #    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
   ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
                     id = "1", labelColumn = "shinyLabel",
@@ -172,4 +177,5 @@ require("SpaDES.tools")
 setwd(cwd)
 unlink(tempdir(), recursive = TRUE)
 #}
+
 }

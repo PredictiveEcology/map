@@ -7,6 +7,25 @@
 buildMetadata(metadata, isStudyArea, layerName, object,
   columnNameForLabels, objHash, leaflet, envir, ...)
 }
+\arguments{
+\item{metadata}{TODO: description needed}
+
+\item{isStudyArea}{TODO: description needed}
+
+\item{layerName}{TODO: description needed}
+
+\item{object}{TODO: description needed}
+
+\item{columnNameForLabels}{TODO: description needed}
+
+\item{objHash}{TODO: description needed}
+
+\item{leaflet}{TODO: description needed}
+
+\item{envir}{TODO: description needed}
+
+\item{...}{Additional arguments.}
+}
 \description{
 Build \code{map} object metadata table
 }

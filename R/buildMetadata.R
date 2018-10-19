@@ -1,9 +1,18 @@
 #' Build \code{map} object metadata table
 #'
+#' @param metadata TODO: description needed
+#' @param isStudyArea TODO: description needed
+#' @param layerName TODO: description needed
+#' @param object TODO: description needed
+#' @param columnNameForLabels TODO: description needed
+#' @param objHash TODO: description needed
+#' @param leaflet TODO: description needed
+#' @param envir TODO: description needed
+#' @param ... Additional arguments.
+#'
 #' @rdname buildMetadata
-buildMetadata <- function(metadata, isStudyArea, layerName,
-                          object, columnNameForLabels, objHash,
-                          leaflet, envir, ...) {
+buildMetadata <- function(metadata, isStudyArea, layerName, object,
+                          columnNameForLabels, objHash, leaflet, envir, ...) {
 
   b <- copy(.singleMetadataNAEntry)
   dots <- list(...)
@@ -70,5 +79,4 @@ buildMetadata <- function(metadata, isStudyArea, layerName,
       })
 
   return(b)
-
 }

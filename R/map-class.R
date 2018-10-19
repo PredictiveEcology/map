@@ -62,10 +62,7 @@ setMethod("initialize", "map",
                                  tilePath = getOption("map.tilePath", "."))
 
             .Object
-          })
-
-
-
+})
 
 if (!isGeneric("paths")) {
   setGeneric(
@@ -75,6 +72,10 @@ if (!isGeneric("paths")) {
     })
 }
 
+#' Get the paths of an object
+#'
+#' TODO: description needed
+#'
 #' @exportMethod paths
 #' @importFrom reproducible .tagsByClass
 #' @importFrom reproducible .grepSysCalls

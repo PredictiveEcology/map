@@ -1,3 +1,10 @@
+#' Determine the number of nodes to use in a new cluster
+#'
+#' TODO: DESCRIPTION NEEDED
+#'
+#' @param memRequiredMB The amount of memory needed in MB
+#' @param maxNumClusters The maximum number of nodes to use
+#'
 optimalClusterNum <- function(memRequiredMB = 5000, maxNumClusters = 1) {
   if (Sys.info()["sysname"] == "Linux") {
     detectedNumCores <- parallel::detectCores()
@@ -51,7 +58,6 @@ makeOptimalCluster <- function(useParallel = FALSE, MBper = 5e3,
   }
 }
 
-
 #' \code{makeForkCluster} with random seed set
 #'
 #' This will set different random seeds on the clusters (not the default)
@@ -74,12 +80,12 @@ makeForkClusterRandom <- function(..., iseed = NULL) {
   cl
 }
 
-#' Map and parallel::clusterMap together
+#' \code{Map} and \code{parallel::clusterMap} together
 #'
 #' This will send to Map or clusterMap, depending on whether cl is provided.
 #'
-#' @param ... passed to Map or clusterMap
-#' @param cl passed to clusterMap
+#' @param ... passed to \code{Map} or \code{clusterMap}
+#' @param cl A cluster object, passed to \code{clusterMap}
 Map2 <- function(..., cl = NULL) {
   formsMap <- reproducible:::.formalsNotInCurrentDots(mapply, ...)
   formsClusterMap <- reproducible:::.formalsNotInCurrentDots(clusterMap, ...)

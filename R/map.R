@@ -10,6 +10,32 @@ if (getRversion() >= "3.1.0") {
 #' set to \code{max(studyArea(map)) + 1}. \item update CRS slot to be the CRS of
 #' the study area. }
 #'
+#' @param object    Optional spatial object, currently \code{RasterLayer},
+#'  \code{SpatialPolygons}
+#' @param map       Optional map object. If not provided, then one will be
+#'  created. If provided, then the present \code{object} or options passed to
+#'  prepInputs e.g., \code{url}, will be appended to this \code{map}
+#' @param layerName Required. A label for this map layer. This can be the same as
+#'  the object name.
+#' @param overwrite Logical. If \code{TRUE} and this \code{layerName} exists in
+#'  the \code{map}, then it will replace the existing object.
+#' @param columnNameForLabels A character string indicating which column to use
+#'  for labels. This is currently only used if the object is a
+#'  \code{SpatialPolygonsDataFram}.
+#' @param leaflet Logical or Character vector of path(s) to write tiles.
+#'  If \code{TRUE} or a character vector, then this layer will be added to a
+#'  leaflet map. For \code{RasterLayer} object, this will trigger a call to
+#'  \code{gdal2tiles}, making tiles. If path is not specified, it will be
+#'  the current path. The tile base file path will be the
+#'  \code{paste0(layerName, "_", rndstr(1,6))}
+#' @param isStudyArea Logical. If \code{TRUE}, this will be assigned the label,
+#'  "StudyArea", and will be passed into \code{prepInputs} for any future layers
+#'  added.
+#'
+#' @export
+#' @include map-class.R
+#' @rdname mapAdd
+#'
 #' @examples
 #' library(sp)
 #' library(raster)
@@ -21,7 +47,8 @@ if (getRversion() >= "3.1.0") {
 #' Sr1 <- Polygon(coords)
 #' Srs1 <- Polygons(list(Sr1), "s1")
 #' StudyArea <- SpatialPolygons(list(Srs1), 1L)
-#' crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+#' crs(StudyArea) <- paste("+init=epsg:4326 +proj=longlat +datum=WGS84",
+#'                         "+no_defs +ellps=WGS84 +towgs84=0,0,0")
 #' StudyArea <- SpatialPolygonsDataFrame(StudyArea,
 #'                            data = data.frame(ID = 1, shinyLabel = "zone2"),
 #'                            match.ID = FALSE)
@@ -63,12 +90,14 @@ if (getRversion() >= "3.1.0") {
 #'   ageClassCutOffs <- c(0, 40, 80, 120)
 #'
 #'   # add an analysis -- this will trigger analyses because there are already objects in the map
-#'   #    This will trigger 2 analyses ... LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
+#'   #    This will trigger 2 analyses:
+#'   #    LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
 #'   #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
 #'   ml <- mapAddAnalysis(ml, functionName ="LeadingVegTypeByAgeClass",
 #'                         ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
 #'   # add an analysis -- this will trigger analyses because there are already objects in the map
-#'   #    This will trigger 2 more analyses ... largePatches on each raster x polygon combo (only 1 currently)
+#'   #    This will trigger 2 more analyses:
+#'   #    largePatches on each raster x polygon combo (only 1 currently)
 #'   #    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
 #'   ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
 #'                     id = "1", labelColumn = "shinyLabel",
@@ -125,31 +154,6 @@ if (getRversion() >= "3.1.0") {
 #' setwd(cwd)
 #' unlink(tempdir(), recursive = TRUE)
 #' #}
-#'@param object    Optional spatial object, currently \code{RasterLayer},
-#'  \code{SpatialPolygons}
-#'@param map       Optional map object. If not provided, then one will be
-#'  created. If provided, then the present \code{object} or options passed to
-#'  prepInputs e.g., \code{url}, will be appended to this \code{map}
-#'@param layerName Required. A label for this map layer. This can be the same as
-#'  the object name.
-#'@param overwrite Logical. If \code{TRUE} and this \code{layerName} exists in
-#'  the \code{map}, then it will replace the existing object.
-#'@param columnNameForLabels A character string indicating which column to use
-#'  for labels. This is currently only used if the object is a
-#'  \code{SpatialPolygonsDataFram}.
-#'@param leaflet Logical or Character vector of path(s) to write tiles.
-#'  If \code{TRUE} or a character vector, then this layer will be added to a
-#'  leaflet map. For \code{RasterLayer} object, this will trigger a call to
-#'  \code{gdal2tiles}, making tiles. If path is not specified, it will be
-#'  the current path. The tile base file path will be the
-#'  \code{paste0(layerName, "_", rndstr(1,6))}
-#'@param isStudyArea Logical. If \code{TRUE}, this will be assigned the label,
-#'  "StudyArea", and will be passed into \code{prepInputs} for any future layers
-#'  added.
-#'@include map-class.R
-#'
-#'@export
-#'@rdname mapAdd
 #'
 mapAdd <- function(object, map, layerName, overwrite = FALSE, ...) {
   UseMethod("mapAdd")
@@ -189,6 +193,7 @@ mapAdd <- function(object, map, layerName, overwrite = FALSE, ...) {
 #'        be placed into the maps slot. Upon re
 #' @param useCache Logical. If \code{TRUE}, then internal calls to \code{Cache} will
 #'        be used. Default is \code{TRUE}
+#' @param paths TODO: description needed
 #'
 #' @export
 #' @importFrom data.table rbindlist set copy
@@ -279,6 +284,7 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
     }
   }
 
+  ## TODO: remove the block below
   if (FALSE) {
     aaa <<- 1
     on.exit(rm(aaa, envir = .GlobalEnv))
@@ -745,6 +751,8 @@ setMethod(
 #'
 #' Methods for specific classes exist.
 #'
+#' @param x TODO: description needed
+#'
 #' @export
 #' @rdname metadata
 metadata <- function(x) UseMethod("metadata")
@@ -761,8 +769,6 @@ metadata.Raster <- function(x) {
 metadata.map <- function(x) {
   x@metadata
 }
-
-
 
 getLocalArgsFor <- function(fn, localFormalArgs, envir, ...) {
   if (missing(envir))
@@ -796,7 +802,7 @@ identifyVectorArgs <- function(fn, localFormalArgs, envir, ...) {
   #argsMulti <- append(dots, fnArgs)
   specialTypes = c("environment", "SpatialPolygons")
   lengthOne <- unlist(lapply(argsMulti, is.null)) | unlist(lapply(argsMulti, function(x) {
-    if (any(unlist(lapply(specialTypes, is, object = x))) | length(x)==1) {
+    if (any(unlist(lapply(specialTypes, is, object = x))) | length(x) == 1) {
       TRUE
     } else {
       FALSE
@@ -812,12 +818,15 @@ identifyVectorArgs <- function(fn, localFormalArgs, envir, ...) {
 
 }
 
-#' Map/lapply all in one
+#' \code{Map}/\code{lapply} all in one
 #'
 #' Usually run after \code{identifyVectorArgs}
+#'
 #' @param multiple This a list the arguments that Map will cycle over.
-#' @param single Passed to \code{MoreArgs} in the \code{mapply} function
-#' @param fn The function that will be run via Map/clusterMap/
+#' @param single Passed to \code{MoreArgs} in the \code{mapply} function.
+#' @param fn The function that will be run via \code{Map}/\code{clusterMap}.
+#' @param useCache Logical indicating whether to use the cache.
+#' @param cl A cluster object or \code{NULL}.
 #'
 #' @seealso \code{identifyVectorArgs}
 MapOrLapply <- function(fn, multiple, single, useCache, cl = NULL) {
@@ -832,17 +841,17 @@ MapOrLapply <- function(fn, multiple, single, useCache, cl = NULL) {
     #                                           MoreArgs = single,
     #                                           cl = cl)))
     object <- do.call(Cache, args = append(multiple, list(Map2, fn,
-                                               MoreArgs = single,
-                                               cl = cl, useCache = useCache)))
+                                                          MoreArgs = single,
+                                                          cl = cl,
+                                                          useCache = useCache)))
   } else {
     if (!missing(useCache))
       single[["useCache"]] <- useCache
-    object <- do.call(Cache, args = append(list(fn),
-                                           single))
+    object <- do.call(Cache, args = append(list(fn), single))
   }
   object
-
 }
 
 assignMap <- function(layerName, object, envir) {
-  assign(layerName, object, envir = envir)}
+  assign(layerName, object, envir = envir)
+}

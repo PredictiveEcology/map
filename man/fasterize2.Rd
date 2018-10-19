@@ -14,7 +14,7 @@ correct for to pass to \code{fasterize}}
 will be cropped first if
 \code{extent(emptyRaster) < extent(polygonToFasterize)}}
 
-\item{field}{passed to fasterize}
+\item{field}{passed to \code{fasterize}}
 }
 \description{
 Fasterize with crop & spTransform first

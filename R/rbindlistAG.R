@@ -1,14 +1,19 @@
 
 #' Utility functions for grouping analyses in a \code{map} object
-#' @export
+#'
 #' @inheritParams mapAdd
-#' @rdname map-utilities
+#'
+#' @param analysisGroups A character (length 1 currently), indicating which
+#'   analysis group (e.g., "analysisGroup1") should be used to \code{rbindlist}.
+#'   Can also specify \code{"all"} which will \code{rbindlist} all outputs.
+#' @param functionName TODO: description needed
+#'
+#' @return A list of \code{data.table}s.
+#'
 #' @aliases rbindlist-analysisGroups
 #' @aliases rbindlistAG
-#' @return A list of data.tables
-#' @param analysisGroups A character (length 1 currently), indicating which
-#'   analysis group (e.g., "analysisGroup1") should be used to rbindlist. Can
-#'   also specify "all" which will rbindlist all outputs
+#' @export
+#' @rdname map-utilities
 rbindlistAG <- function(map, functionName, analysisGroups) {
   lpNames <- names(map@analysesData[[functionName]])
   if (length(analysisGroups) > 1)
