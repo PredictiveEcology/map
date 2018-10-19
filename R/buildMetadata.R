@@ -2,7 +2,8 @@
 #'
 #' @rdname buildMetadata
 buildMetadata <- function(metadata, isStudyArea, layerName,
-                          object, columnNameForLabels, objHash, leaflet, envir, ...) {
+                          object, columnNameForLabels, objHash,
+                          leaflet, envir, ...) {
 
   b <- copy(.singleMetadataNAEntry)
   dots <- list(...)
@@ -28,7 +29,7 @@ buildMetadata <- function(metadata, isStudyArea, layerName,
     set(b, NULL, "leaflet", leaflet)
     if (is(object, "Raster")) {
       dig <- .robustDigest(object)
-      tilePath <- asPath(paste0("tiles_", layerName, "_", substr(dig, 1,6)))
+      tilePath <- asPath(file.path(leaflet, paste0("tiles_", layerName, "_", substr(dig, 1,6))))
       set(b, NULL, "leafletTiles", tilePath)
     }
   }

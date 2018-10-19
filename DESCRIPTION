@@ -60,5 +60,6 @@ Collate:
     'map-class.R'
     'map-package.R'
     'map.R'
+    'parallel.R'
     'rbindlistAG.R'
     'zzz.R'

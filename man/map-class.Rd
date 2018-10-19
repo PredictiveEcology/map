@@ -21,6 +21,9 @@ indicates where to find the object, i.e., via \code{get(layerName, envir = envir
 
 \item{\code{CRS}}{The common crs of all layers}
 
+\item{\code{paths}}{File paths. A named list of paths. The default is a list of length 2,
+\code{dataPath} and \code{tilePath}}
+
 \item{\code{analyses}}{A \code{data.table} or \code{data.frame} of the types of analyses to perform.}
 
 \item{\code{analysesData}}{A \code{data.table} or \code{data.frame} of the results of the analyses.}

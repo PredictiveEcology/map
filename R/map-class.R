@@ -12,6 +12,9 @@
 #'
 #' @slot CRS  The common crs of all layers
 #'
+#' @slot paths File paths. A named list of paths. The default is a list of length 2,
+#'             \code{dataPath} and \code{tilePath}
+#'
 #' @slot analyses    A \code{data.table} or \code{data.frame} of the types of analyses to perform.
 #'
 #' @slot analysesData A \code{data.table} or \code{data.frame} of the results of the analyses.
@@ -28,6 +31,7 @@ setClass(
     metadata = "data.table",
     #.Data = "environment",
     CRS = "CRS",
+    paths = "list",
     analyses = "data.table",
     analysesData = "list"
   ),
@@ -54,7 +58,33 @@ setMethod("initialize", "map",
             .Object@CRS = sp::CRS()
             .Object@analyses = data.table::data.table(functionName = character())#, quotedFn = character())
             .Object@analysesData = list()
+            .Object@paths = list(dataPath = getOption("map.dataPath", "."),
+                                 tilePath = getOption("map.tilePath", "."))
 
             .Object
           })
+
+
+
+
+if (!isGeneric("paths")) {
+  setGeneric(
+    "paths",
+    function(object) {
+      standardGeneric("paths")
+    })
+}
+
+#' @exportMethod paths
+#' @importFrom reproducible .tagsByClass
+#' @importFrom reproducible .grepSysCalls
+#' @importMethodsFrom reproducible .tagsByClass
+#' @rdname paths
+#'
+setMethod(
+  "paths",
+  signature = "map",
+  definition = function(object) {
+    object@paths
+})
 

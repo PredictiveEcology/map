@@ -202,7 +202,8 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
                            overwrite = FALSE, #url = NULL,
                            columnNameForLabels = 1,
                            leaflet = TRUE, isStudyArea = FALSE,
-                           envir = NULL, useCache = TRUE, ...) {
+                           envir = NULL, useCache = TRUE,
+                           paths = getOption("map.paths"), ...) {
 
   dots <- list(...)
 
@@ -215,7 +216,10 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
     # Don't run postProcess because that will happen in next mapAdd when object is
     #   in hand
     args1 <- identifyVectorArgs(fn = list(Cache, preProcess), ls(), environment(), ...)
-    object <- Map3(prepInputs, args1, useCache = useCache)
+    object <- MapOrLapply(prepInputs, multiple = args1$argsMulti,
+                   single = args1$argsSingle, useCache = useCache)
+    if (is(object, "list")) # note is.list returns TRUE for data.frames ... BAD
+      names(object) <- layerName
   }
 
   layerNameExistsInMetadata <- if (isTRUE(layerName %in% ls(map@.xData))) {
@@ -270,7 +274,8 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
       args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialObjects"),
                                             projectInputs, cropInputs, writeOutputs),
                                   ls(), environment(), ...)
-      object <- Map3(postProcess, args1, useCache = useCache)
+      object <- MapOrLapply(postProcess, multiple = args1$argsMulti,
+                     single = args1$argsSingle, useCache = useCache)
     }
   }
 
@@ -328,7 +333,13 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
   ####################################################
   # Metadata -- build new entries in data.table -- vectorized
   ####################################################
+  browser(expr = exists("aaa"))
   args1 <- identifyVectorArgs(fn = list(buildMetadata, prepInputs), ls(), environment(), ...)
+  if (length(dots)) {
+    howLong <- unlist(lapply(dots, length))
+    args1$argsSingle[names(dots)[howLong<=1]] <- dots[howLong<=1]
+    args1$argsMulti[names(dots)[howLong>1]] <- dots[howLong>1]
+  }
   MoreArgs = append(args1$argsSingle, list(metadata = map@metadata))
   if (length(args1$argsMulti)==0) {
     dts <- do.call(buildMetadata, MoreArgs)
@@ -343,10 +354,32 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
     if (is.logical(leaflet)) {
       leaflet <- getwd()
     }
-    Map(object = object, tilePath = file.path(leaflet, dts$leafletTiles),
-        makeTiles)
-  }
+    MBadjustment <- 4000 # some approximate, empirically derived number. Likely only good in some cases
+    MBper <- if (is(object, "RasterLayer")) {
+      ncell(object) / MBadjustment
+    } else if ( tryCatch(is(object[[1]], "RasterLayer"), error = function(x) FALSE)) {
+      ncell(object[[1]]) / MBadjustment
+    } else {
+      1 # i.e., default to detectClusters()
+    }
+    useParallel <- if (isTRUE(all(dir.exists(dts$leafletTiles)))) {
+      FALSE
+    } else {
+      getOption("map.useParallel",
+                !identical("windows", .Platform$OS.type))
+    }
+    cl <- makeOptimalCluster(useParallel = useParallel,
+                             MBper = MBper,
+                             maxNumClusters = length(object))
+    on.exit(try(stopCluster(cl), silent = TRUE))
+    tilePath <- dts$leafletTiles
+    args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), ...)
+    out <- MapOrLapply(makeTiles, multiple = args1$argsMulti,
+                       single = args1$argsSingle, useCache = FALSE, cl = cl)
+                # If the rasters are identical, then there may be
+                              # errors
 
+  }
 
   ###################################
   # set CRS
@@ -360,6 +393,7 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
       map@CRS <- raster::crs(object)
     }
   }
+
   ######################################
   # rbindlist new metadata with existing metadata
   ########################################
@@ -502,7 +536,7 @@ studyArea <- function(map, layerName, layer) {
 #' @family mapMethods
 #' @rdname studyArea
 studyArea.default <- function(map, layerName, layer = NA) {
-  browser()
+  NULL
 }
 
 #' @export
@@ -731,7 +765,6 @@ metadata.map <- function(x) {
 
 
 getLocalArgsFor <- function(fn, localFormalArgs, envir, ...) {
-  browser(expr = exists("aaa"))
   if (missing(envir))
     envir <- parent.frame()
   if (missing(localFormalArgs))
@@ -758,7 +791,7 @@ getLocalArgsFor <- function(fn, localFormalArgs, envir, ...) {
 
 identifyVectorArgs <- function(fn, localFormalArgs, envir, ...) {
   dots <- list(...)
-  argsMulti <- reproducible::getLocalArgsFor(fn, localFormalArgs, envir = envir, ...)
+  argsMulti <- getLocalArgsFor(fn, localFormalArgs, envir = envir, ...)
 
   #argsMulti <- append(dots, fnArgs)
   specialTypes = c("environment", "SpatialPolygons")
@@ -779,23 +812,33 @@ identifyVectorArgs <- function(fn, localFormalArgs, envir, ...) {
 
 }
 
-#' Map/lapply/clusterMap/clusterApply all in one
+#' Map/lapply all in one
 #'
 #' Usually run after \code{identifyVectorArgs}
-#' @param args This MUST be a list of length 2, with first element
-#'   argsSingle and second element argsMulti. These latter are the
-#'   arguments that Map will cycle over.
+#' @param multiple This a list the arguments that Map will cycle over.
+#' @param single Passed to \code{MoreArgs} in the \code{mapply} function
 #' @param fn The function that will be run via Map/clusterMap/
-Map3 <- function(fn, args, useCache) {
-  if (length(args$argsMulti)) {
-    object <- do.call(Cache,
-                      args = append(args$argsMulti,
-                                    list(Map, f = fn,
-                                         MoreArgs = args$argsSingle, # passed to Map
-                                         useCache = useCache))) # passed to Cache
+#'
+#' @seealso \code{identifyVectorArgs}
+MapOrLapply <- function(fn, multiple, single, useCache, cl = NULL) {
+  if (length(multiple)) {
+    # object <- do.call(Cache,
+    #                   args = append(multiple,
+    #                                 list(Map2, f = fn,
+    #                                      MoreArgs = append(single, list(cl = cl)), # passed to Map
+    #                                      useCache = useCache
+    #                                      ))) # passed to Cache
+    #do.call(Map2, args = append(multiple, list(fn,
+    #                                           MoreArgs = single,
+    #                                           cl = cl)))
+    object <- do.call(Cache, args = append(multiple, list(Map2, fn,
+                                               MoreArgs = single,
+                                               cl = cl, useCache = useCache)))
   } else {
+    if (!missing(useCache))
+      single[["useCache"]] <- useCache
     object <- do.call(Cache, args = append(list(fn),
-                                           args$argsSingle))
+                                           single))
   }
   object
 
