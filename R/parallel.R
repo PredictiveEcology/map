@@ -47,7 +47,8 @@ optimalClusterNum <- function(memRequiredMB = 5000, maxNumClusters = 1) {
 #' @param ... Passed to \code{makeForkClusterRandom}.
 #'            Only relevant for \code{iseed}.
 #' @export
-makeOptimalCluster <- function(useParallel = FALSE, MBper = 5e3,
+makeOptimalCluster <- function(useParallel = getOption("map.useParallel", FALSE),
+                               MBper = 5e3,
                                maxNumClusters = parallel::detectCores(), ...) {
   if (!identical("windows", .Platform$OS.type)) {
     numClus <- if (isTRUE(useParallel)) {

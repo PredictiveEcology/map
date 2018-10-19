@@ -4,8 +4,8 @@
 \alias{makeOptimalCluster}
 \title{Create a parallel Fork cluster, if useful}
 \usage{
-makeOptimalCluster(useParallel = FALSE, MBper = 5000,
-  maxNumClusters = parallel::detectCores(), ...)
+makeOptimalCluster(useParallel = getOption("map.useParallel", FALSE),
+  MBper = 5000, maxNumClusters = parallel::detectCores(), ...)
 }
 \arguments{
 \item{useParallel}{Logical or numeric. If \code{FALSE}, returns NULL. If
