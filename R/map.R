@@ -817,7 +817,6 @@ getLocalArgsFor <- function(fn, localFormalArgs, envir, dots) {
   if (is.null(names(localFormalArgs)))
     names(localFormalArgs) <- localFormalArgs
 
-  #dots <- list(...)
   if (length(fn) > 1) {
     forms <- unlist(lapply(fn, reproducible::.formalsNotInCurrentDots, dots = dots))
     forms <- forms[duplicated(forms)]

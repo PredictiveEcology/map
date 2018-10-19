@@ -98,6 +98,7 @@ makeForkClusterRandom <- function(..., iseed = NULL) {
 #' This will send to Map or clusterMap, depending on whether cl is provided.
 #'
 #' @importFrom reproducible .formalsNotInCurrentDots
+#' @importFrom parallel clusterMap
 #' @param ... passed to \code{Map} or \code{clusterMap}
 #' @param cl A cluster object, passed to \code{clusterMap}
 Map2 <- function(..., cl = NULL) {

@@ -1,13 +1,13 @@
-makeTiles <- function(tilePath, object) {
+makeTiles <- function(tilePath, obj) {
   dirNotExist <- !dir.exists(tilePath)
 
-  if (dirNotExist) { # assume that tilePath is unique for that object, via .robustDigest
-    object[] <- object[]
+  if (dirNotExist) { # assume that tilePath is unique for that obj, via .robustDigest
+    obj[] <- obj[]
     message("  Creating tiles - reprojecting to epsg:4326 (leaflet projection)")
     message("                   writing to disk")
-    objectLflt <- try(projectRaster(object, crs = CRS("+init=epsg:4326")), silent = TRUE)
+    objLflt <- try(projectRaster(obj, crs = CRS("+init=epsg:4326")), silent = TRUE)
     tmpFile <- tempfile(fileext = ".tif")
-    objectLflt <- try(writeRaster(objectLflt, tmpFile), silent = TRUE)
+    objLflt <- try(writeRaster(objLflt, tmpFile), silent = TRUE)
 
     toDo <- TRUE
     tryNum <- 1
