@@ -84,7 +84,8 @@ makeForkClusterRandom <- function(..., iseed = NULL) {
   dots <- list(...)
   if (!("outfile" %in% names(dots))) {
     dots$outfile <- "outputs/.log.txt"
-    file.remove(dots$outfile)
+    for (i in 1:4)
+      cat(file = dots$outfile, "------------------------------------------------------------")
   }
   cl <- do.call(makeForkCluster, args = dots)
   message("  Starting a cluster with ", length(cl)," threads")
