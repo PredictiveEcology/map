@@ -5,8 +5,9 @@
 #' already ran on identical inputs.
 #'
 #' @inheritParams mapAdd
+#' @importFrom data.table setDT
 #' @param functionName A function name that will be run on combinations of
-#'   inputs in the map object. See details.
+#'   inputs in the map obj. See details.
 #' @param purgeAnalyses A character string indicating which analysis group
 #'   combination or part thereof (e.g., the name entered into the row under
 #'   \code{analysisGroup2} column of the \code{map@metadata} or a \code{functionName}.
@@ -17,95 +18,120 @@
 #' set of analyses as described by these columns. Then it will assess if any of
 #' these has already been run. For those that have not been run, it will then
 #' run the \code{functionName} on arguments that it finds in the \code{metadata}
-#' slot of the map object, as well as any arguments passed in here in the \code{...}.
+#' slot of the map obj, as well as any arguments passed in here in the \code{...}.
 #' In general, the arguments being passed in here should be fixed across all analyses,
 #' while any that vary by analysis should be entered into the metadata table at the
 #' time of adding the layer to the map, via \code{mapAdd}.
 #'
 #' @importFrom stats na.omit
-mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL, ...) {
+mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
+                        useParallel = getOption("map.useParallel"),
+                        ...) {
   m <- map@metadata
   dots <- list(...)
 
   if (is.null(functionName)) {
     stop("Each analysis must have a functionName")
   }
+  if (is.null(names(functionName)))
+    names(functionName) <- functionName
   if (!isTRUE(any(grepl("analysisGroup", colnames(m))))) {
     stop("Expecting analysisGroup1 column in map metadata. ",
          "Please pass in a unique name representing the analysis group, ",
          "i.e., which tsf is associated with which vtm")
   }
-  browser()
   AGs <- sort(unique(colnames(m)[startsWith(colnames(m), "analysisGroup")]))
   names(AGs) <- AGs
   ags <- lapply(AGs, function(AG) sort(na.omit(unique(m[[AG]]))))
-  combosCompleted <- map@analysesData[[functionName]]$.Completed
+
+  combosCompleted <- lapply(functionName, function(fn)
+    map@analysesData[[fn]]$.Completed)
+  #combosCompleted <- map@analysesData[[functionName]]$.Completed
 
   # Purge if purgeAnalyses is non NULL
   if (!is.null(purgeAnalyses)) {
     message("Purging previous analyses with ", purgeAnalyses)
-    combosCompleted <- if (isTRUE(purgeAnalyses == functionName))
-      character()
-    else
-      grep(purgeAnalyses, combosCompleted, value = TRUE, invert = TRUE)
+    purge <- names(combosCompleted) %in% purgeAnalyses
+    if (sum(purge) > 0)
+      combosCompleted[purge] <- list(rep(NULL, sum(purge)))
   }
 
   #if (is.null(combosCompleted)) {
-  if (any(unlist(lapply(ags, function(x) length(x > 0))))) {
-    combosAll <- do.call(expand.grid, args = append(list(stringsAsFactors = FALSE),
-                                                    lapply(ags, function(x) x)))
-    combosAll$all <- apply(combosAll, 1, paste, collapse = "._.")
-  }
-  #}
-  combosToDo <- combosAll[!combosAll$all %in% combosCompleted,]
+  combosAll <- expandAnalysisGroups(ags)
 
-  if (NROW(combosToDo)) {
-    # Get the expand.grid arguments
-    formalsInFunction <- formalArgs(functionName)[formalArgs(functionName) %in% colnames(m)]
-    names(formalsInFunction) <- formalsInFunction
+  # Cycle through for each analysisGroup, get each argument
+  args1 <- lapply(functionName, function(funName) {
+    args <- getFormalsFromMetadata(metadata = m, combo = combosAll[1,],
+                                   AGs = AGs, funName = funName)
+    keepArgs <- unlist(lapply(args, function(arg) length(arg) > 0))
+    args[keepArgs]
 
+  })
+
+  AGsByFunName <- lapply(functionName, function(funName) {
+    names(args1[[funName]])
+  })
+
+  # Corrected for analysis groups that are relevant to each functionName
+  combosAll <-Map(agsByFunName = AGsByFunName,
+      MoreArgs = list(ags = ags),
+      function(agsByFunName, ags) {
+    expandAnalysisGroups(ags[agsByFunName])
+  })
+
+
+  combosToDo <- Map(cc = combosCompleted, ca = combosAll, function(cc, ca) {
+    if (!is.null(cc))
+      setDT(ca[!ca$all %in% cc,])
+    else
+      setDT(ca)
+  })
+
+  combosToDo <- Map(ctd = combosToDo, fn = functionName,
+      function(ctd, fn) ctd[, functionName:=fn])
+  combosToDoDT <- rbindlist(combosToDo)
+  # clear out empty ones
+  combosToDo <- combosToDo[!unlist(lapply(combosToDo, function(ctd) NROW(ctd)==0))]
+
+  if (NROW(combosToDoDT)) {
+    funNames <- unique(combosToDoDT$functionName)
+    names(funNames) <- funNames
     # Get the fixed arguments
-    otherFormalsInFunction <- formalArgs(functionName)[formalArgs(functionName) %in% colnames(map@analyses)]
-    if (length(otherFormalsInFunction)) {
-      names(otherFormalsInFunction) <- otherFormalsInFunction
+    otherFormalsInFunction <- lapply(funNames, function(funName) {
+      otherFormalsInFunction <- formalArgs(funName)[formalArgs(funName) %in%
+                                                      colnames(map@analyses)]
+      if (length(otherFormalsInFunction)) {
+        names(otherFormalsInFunction) <- otherFormalsInFunction
 
-      # Override dots from this function call
-      dots <- lapply(otherFormalsInFunction, function(form) {
-        fn <- functionName
-        assign(form, map@analyses[functionName == fn, get(form)][[1]])
-      })
-    }
+        # Override dots from this function call
+        dots <- lapply(otherFormalsInFunction, function(form) {
+          fn <- funName
+          assign(form, map@analyses[functionName == fn, get(form)][[1]])
+        })
+      }
+    })
 
-    out <- by(combosToDo, combosToDo$all, simplify = FALSE,
-              function(combo) {
-
-                # Cycle through for each analysisGroup, get each argument
-                args <- lapply(AGs, function(AG) {
-                  browser()
-                  args <- lapply(formalsInFunction, function(arg) {
-                    browser()
-                    val <- na.omit(m[get(AG) == combo[[AG]], ][[arg]])
-                    if (isTRUE(val)) {
-                      val <- get(m[get(AG) == combo[[AG]], layerName],
-                                 envir = m[get(AG) == combo[[AG]], envir][[1]])
-                    }
-                    if (length(val) > 0)
-                      assign(arg, val)
-                    else
-                      NULL
-                  })
-                  args[!sapply(args, is.null)]
+    cl <- makeOptimalCluster(useParallel, maxNumClusters = NROW(combosToDoDT))
+    on.exit(try(stopCluster(cl), silent = TRUE))
+    out3 <- Map2(funName = funNames, cl = cl,
+                combos = combosToDo, function(funName, combos) {
+                  out <- by(combos, combos$all, simplify = FALSE,
+                            function(combo) {
+                              args <- unlist(unname(args1[[funName]]), recursive = FALSE)
+                              message("  Calculating ", funName, " for ", combo$all)
+                              fnOut <- do.call(Cache, args = append(list(get(funName)), append(args,
+                                                                                               otherFormalsInFunction[[funName]])))
+                              combosCompleted[[funName]] <<- unique(c(combosCompleted[[funName]], combo$all))
+                              list(dt = fnOut)
+                            })
+                  out$.Completed <- combosCompleted[[funName]]
+                  out
                 })
-                browser()
-                args <- unlist(unname(args), recursive = FALSE)
-                message("  Calculating ", functionName, " for ", combo$all)
-                fnOut <- do.call(Cache, args = c(list(get(functionName)), args, dots))
-                combosCompleted <<- c(combosCompleted, combo$all)
-                list(dt = fnOut)
-              })
 
-    map@analysesData[[functionName]][names(out)] <- unname(lapply(out, function(x) x))
-    map@analysesData[[functionName]]$.Completed <- combosCompleted
+    for (funName in funNames) {
+      map@analysesData[[funName]][names(out3[[funName]])] <- unname(lapply(out3[[funName]], function(x) x))
+      map@analysesData[[funName]]$.Completed <- combosCompleted[[funName]]
+    }
   } else {
     message("  ", functionName, " already run on all layers")
   }
@@ -115,7 +141,8 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL, ...) {
 #' @export
 #' @importFrom data.table data.table
 #' @importFrom fastdigest fastdigest
-mapAddAnalysis <- function(map, functionName, ...) {
+mapAddAnalysis <- function(map, functionName,
+                           useParallel = getOption("map.useParallel"), ...) {
   dots <- list(...)
   b <- data.table(functionName = functionName, t(dots))
   prevEntry <- map@analyses$functionName == functionName
@@ -128,13 +155,13 @@ mapAddAnalysis <- function(map, functionName, ...) {
   doRbindlist <- TRUE
   if (sum(prevEntry)) {
     if (!isTRUE(newDigest %in% map@analyses[prevEntry, ]$argHash)) {
-      message("An analysis called ", functionName, " already added to map object; ",
+      message("An analysis called ", functionName, " already added to map obj; ",
               " Overwriting it")
       purgeAnalyses <- functionName
       map@analyses <- map@analyses[!prevEntry]
     } else {
       doRbindlist <- FALSE
-      message("An analysis called, ", functionName, " with identical function and ",
+      message("An analysis called ", functionName, " with identical function and ",
               "arguments already added and run. Skipping reruns.")
     }
   }
@@ -142,14 +169,14 @@ mapAddAnalysis <- function(map, functionName, ...) {
   if (doRbindlist)
     map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
 
-  map <- runMapAnalyses(map, purgeAnalyses)
+  map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
 
   map
 
 }
 
 
-#' Add a post hoc analysis function to a map object
+#' Add a post hoc analysis function to a map obj
 #'
 #' @inheritParams mapAdd
 #'
@@ -170,7 +197,9 @@ mapAddAnalysis <- function(map, functionName, ...) {
 #' @importFrom fastdigest fastdigest
 #' @rdname postHoc
 mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NULL,
-                                  postHocAnalyses = "all", ...) {
+                                  postHocAnalyses = "all",
+                                  useParallel = getOption("map.useParallel"),
+                                  ...) {
   dots <- list(...)
 
   if (is.null(postHocAnalysisGroups))
@@ -192,7 +221,7 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
   doRbindlist <- TRUE
   if (sum(prevEntry)) {
     if (!isTRUE(newDigest %in% map@analyses[prevEntry, ]$argHash)) {
-      message("An analysis called ", functionName, " already added to map object; ",
+      message("An analysis called ", functionName, " already added to map obj; ",
               " Overwriting it")
       purgeAnalyses <- functionName
       map@analyses <- map@analyses[!prevEntry]
@@ -206,37 +235,27 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
   if (doRbindlist)
     map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
 
-  map <- runMapAnalyses(map, purgeAnalyses)
+  map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
   map
 
 }
 
 ## TODO: needs documentation?
-runMapAnalyses <- function(map, purgeAnalyses = NULL) {
-  browser(expr = exists("aaa"))
+runMapAnalyses <- function(map, purgeAnalyses = NULL,
+                           useParallel = getOption("map.useParallel")) {
   isPostHoc <- if (is.null(map@analyses$postHoc)) {
     rep(FALSE, NROW(map@analyses))
   } else {
     compareNA(map@analyses$postHoc, TRUE)
   }
   if (NROW(map@analyses[!isPostHoc])) {
-    out <- tryCatch(
-      by(map@analyses[!isPostHoc], map@analyses$functionName[!isPostHoc],
-         function(x) {
-           ma <- mapAnalysis(map = map, functionName = x$functionName,
-                             purgeAnalyses = purgeAnalyses)
-           ma@analysesData[[x$functionName]]
-         }),
-      error = function(x) NULL)
-    if (!is.null(out)) {
-      map@analysesData[names(out)] <- lapply(out, function(x) x)
-    } else {
-      warning("One of the analyses failed")
-    }
+    funName <- map@analyses$functionName[!isPostHoc]
+    map <- mapAnalysis(map, funName, purgeAnalyses = purgeAnalyses)
   }
 
   # run postHoc analyses
   if (NROW(map@analyses[isPostHoc])) {
+    browser()
     out <- tryCatch(
       by(map@analyses[isPostHoc], map@analyses$functionName[isPostHoc],
          function(x) {
@@ -255,10 +274,42 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL) {
          }),
       error = function(x) NULL)
     if (!is.null(out)) {
+      browser()
       map@analysesData[names(out)] <- lapply(out, function(x) x)
     } else {
       warning("One of the analyses failed")
     }
   }
   map
+}
+
+getFormalsFromMetadata <- function(metadata, combo, AGs, funName) {
+  formalsInFunction <- formalArgs(funName)[formalArgs(funName) %in% colnames(metadata)]
+  names(formalsInFunction) <- formalsInFunction
+  args <- lapply(AGs, function(AG) {
+    args <- lapply(formalsInFunction, function(arg) {
+      val <- na.omit(metadata[get(AG) == combo[[AG]], ][[arg]])
+      if (isTRUE(val)) {
+        val <- get(metadata[get(AG) == combo[[AG]], layerName],
+                   envir = metadata[get(AG) == combo[[AG]], envir][[1]])
+      }
+      if (length(val) > 0)
+        assign(arg, val)
+      else
+        NULL
+    })
+    args[!sapply(args, is.null)]
+  })
+  #args <- unlist(unname(args), recursive = FALSE)
+
+  args
+}
+
+expandAnalysisGroups <- function(ags) {
+   if (any(unlist(lapply(ags, function(x) length(x > 0))))) {
+     combosAll <- do.call(expand.grid, args = append(list(stringsAsFactors = FALSE),
+                                                     lapply(ags, function(x) x)))
+     combosAll$all <- apply(combosAll, 1, paste, collapse = "._.")
+   }
+   combosAll
 }

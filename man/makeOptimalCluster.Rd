@@ -23,7 +23,9 @@ for number of clusters to create (e.g., because there are only
 \item{...}{Passed to \code{makeForkClusterRandom}.
 Only relevant for \code{iseed}.}
 
-\item{useParallel}{Logical. If \code{FALSE}, returns NULL}
+\item{useParallel}{Logical or numeric. If \code{FALSE}, returns NULL. If
+\code{numeric}, then will return a cluster object with this
+many cores, up to \code{maxNumClusters}}
 
 \item{MBper}{Numeric. Passed to \code{memRequiredMB} in
 \code{\link{optimalClusterNum}}}

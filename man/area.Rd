@@ -3,7 +3,7 @@
 \docType{methods}
 \name{area,map-method}
 \alias{area,map-method}
-\title{Calculate area of (named) objects the \code{map} object}
+\title{Calculate area of (named) objects the \code{map} obj}
 \usage{
 \S4method{area}{map}(x)
 }
@@ -11,7 +11,7 @@
 \item{x}{Raster* or SpatialPolygons object}
 }
 \description{
-Calculate area of (named) objects the \code{map} object
+Calculate area of (named) objects the \code{map} obj
 }
 \seealso{
 Other mapMethods: \code{\link{crs,map-method}},

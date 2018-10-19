@@ -125,15 +125,16 @@ if (getRversion() >= "3.1.0") {
 #' setwd(cwd)
 #' unlink(tempdir(), recursive = TRUE)
 #' #}
-#'@param object    Optional spatial object, currently \code{RasterLayer},
-#'  \code{SpatialPolygons}
+#'@param obj    Optional spatial object, currently tested with \code{RasterLayer},
+#'  \code{SpatialPolygons*}
 #'@param map       Optional map object. If not provided, then one will be
-#'  created. If provided, then the present \code{object} or options passed to
+#'  created. If provided, then the present \code{obj} or options passed to
 #'  prepInputs e.g., \code{url}, will be appended to this \code{map}
 #'@param layerName Required. A label for this map layer. This can be the same as
 #'  the object name.
 #'@param overwrite Logical. If \code{TRUE} and this \code{layerName} exists in
-#'  the \code{map}, then it will replace the existing object.
+#'  the \code{map}, then it will replace the existing object. Default is
+#'  \code{getOption("map.overwrite")}
 #'@param columnNameForLabels A character string indicating which column to use
 #'  for labels. This is currently only used if the object is a
 #'  \code{SpatialPolygonsDataFram}.
@@ -151,7 +152,8 @@ if (getRversion() >= "3.1.0") {
 #'@export
 #'@rdname mapAdd
 #'
-mapAdd <- function(object, map, layerName, overwrite = FALSE, ...) {
+mapAdd <- function(obj, map, layerName,
+                   overwrite = getOption("map.overwrite", FALSE), ...) {
   UseMethod("mapAdd")
 }
 
@@ -160,22 +162,22 @@ mapAdd <- function(object, map, layerName, overwrite = FALSE, ...) {
 #' @importFrom reproducible prepInputs preProcess
 #' @param ... passed to reproducible::postProcess and reproducible::projectInputs and
 #'            reproducible::fixErrors and reproducible::prepInputs
-# mapAdd.default <- function(object = NULL, map = new("map"),
+# mapAdd.default <- function(obj = NULL, map = new("map"),
 #                            layerName = NULL, overwrite = FALSE,
 #                            #url = NULL,
 #                            columnNameForLabels = character(),
 #                            leaflet = TRUE, isStudyArea = FALSE, ...) {
-#   if (is.null(object)) {    # with no object, we get it first, then pass to mapAdd
+#   if (is.null(obj)) {    # with no obj, we get it first, then pass to mapAdd
 #
 #     dots <- list(...)
-#     # Don't run postProcess because that will happen in next mapAdd when object is
+#     # Don't run postProcess because that will happen in next mapAdd when obj is
 #     #   in hand
 #     forms <- reproducible:::.formalsNotInCurrentDots(preProcess, ...)
 #     args <- dots[!(names(dots) %in% forms)]
 #     args <- append(args, mget(ls()[ls() %in% formalArgs(preProcess)], inherits = FALSE))
-#     object <- do.call(prepInputs, args = args)
+#     obj <- do.call(prepInputs, args = args)
 #
-#     map <- mapAdd(object, map = map, layerName = layerName,
+#     map <- mapAdd(obj, map = map, layerName = layerName,
 #                   overwrite = overwrite,
 #                   #           url = url,
 #                   columnNameForLabels = columnNameForLabels,
@@ -184,11 +186,14 @@ mapAdd <- function(object, map, layerName, overwrite = FALSE, ...) {
 #   map
 # }
 
-#' @param envir An optional environment. If supplied, then the object
+#' @param envir An optional environment. If supplied, then the obj
 #'        will not be placed "into" the maps slot, rather the environment label will
 #'        be placed into the maps slot. Upon re
 #' @param useCache Logical. If \code{TRUE}, then internal calls to \code{Cache} will
 #'        be used. Default is \code{TRUE}
+#' @param useParallel Logical. If \code{TRUE}, then if there is more than one
+#'        calculation to do at any stage, it will create and use a parallel
+#'        cluster via \code{makeOptimalCluster}
 #'
 #' @export
 #' @importFrom data.table rbindlist set copy
@@ -198,28 +203,29 @@ mapAdd <- function(object, map, layerName, overwrite = FALSE, ...) {
 #' @importFrom sp CRS
 #'
 #' @rdname mapAdd
-mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
-                           overwrite = FALSE, #url = NULL,
+mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
+                           overwrite = getOption("map.overwrite"),
                            columnNameForLabels = 1,
                            leaflet = TRUE, isStudyArea = FALSE,
                            envir = NULL, useCache = TRUE,
+                           useParallel = getOption("map.useParallel"),
                            paths = getOption("map.paths"), ...) {
 
   dots <- list(...)
 
   # Some of the arguments will need to be passed into Cache
   ###########################################
-  # Get object, if missing, via prepInputs url, or targetFile
+  # Get obj, if missing, via prepInputs url, or targetFile
   ###########################################
-  if (is.null(object)) {    # with no object, we get it first, then pass to mapAdd
+  if (is.null(obj)) {    # with no obj, we get it first, then pass to mapAdd
     dots <- list(...)
-    # Don't run postProcess because that will happen in next mapAdd when object is
+    # Don't run postProcess because that will happen in next mapAdd when obj is
     #   in hand
-    args1 <- identifyVectorArgs(fn = list(Cache, preProcess), ls(), environment(), ...)
-    object <- MapOrLapply(prepInputs, multiple = args1$argsMulti,
+    args1 <- identifyVectorArgs(fn = list(Cache, preProcess), ls(), environment(), dots)
+    obj <- MapOrLapply(prepInputs, multiple = args1$argsMulti,
                    single = args1$argsSingle, useCache = useCache)
-    if (is(object, "list")) # note is.list returns TRUE for data.frames ... BAD
-      names(object) <- layerName
+    if (is(obj, "list")) # note is.list returns TRUE for data.frames ... BAD
+      names(obj) <- layerName
   }
 
   layerNameExistsInMetadata <- if (isTRUE(layerName %in% ls(map@.xData))) {
@@ -237,8 +243,8 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
   # postProcess -- determine studyArea and rasterToMatch from map
   ####################################################
   if (is.null(studyArea(map)) && is.null(rasterToMatch(map))) {
-    argsFixErrors <- getLocalArgsFor(list(Cache, fixErrors), ...)
-    object <- do.call(Cache, append(list(fixErrors, object), argsFixErrors))
+    argsFixErrors <- getLocalArgsFor(list(Cache, fixErrors), dots = dots)
+    obj <- do.call(Cache, append(list(fixErrors, obj), argsFixErrors))
     if (isFALSE(isStudyArea)) {
       message("There is no studyArea in map; consider adding one with 'studyArea = TRUE'")
     }
@@ -246,8 +252,8 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
       if (is.null(dots$targetCRS)) { # OK ... user did not pass in targetCRS
         message("No crs already in map, so no reprojection")
       } else {
-        argsProjectInputs <- getLocalArgsFor(list(Cache, projectInputs), ...)
-        object <- do.call(Cache, append(list(projectInputs, object), argsProjectInputs))
+        argsProjectInputs <- getLocalArgsFor(list(Cache, projectInputs), dots = dots)
+        obj <- do.call(Cache, append(list(projectInputs, obj), argsProjectInputs))
       }
 
     } else {
@@ -255,7 +261,7 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
       args <- dots
       args <- append(args, mget(ls()[ls() %in% formalArgs(projectInputs)], inherits = FALSE))
 
-      object <- do.call(projectInputs, append(list(object), args))
+      obj <- do.call(projectInputs, append(list(obj), args))
     }
   } else {
     if (is.na(crs(map))) {
@@ -270,11 +276,11 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
       }
 
       list2env(dots, envir = environment()) # put any arguments from the ... into this local env
-      x <- object # put it into memory so identifyVectorArgs finds it
+      x <- obj # put it into memory so identifyVectorArgs finds it
       args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialObjects"),
                                             projectInputs, cropInputs, writeOutputs),
-                                  ls(), environment(), ...)
-      object <- MapOrLapply(postProcess, multiple = args1$argsMulti,
+                                  ls(), environment(), dots = dots)
+      obj <- MapOrLapply(postProcess, multiple = args1$argsMulti,
                      single = args1$argsSingle, useCache = useCache)
     }
   }
@@ -286,9 +292,9 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
   }
 
   ###############################################
-  # Purge object(s) from metadata, if overwrite is TRUE
+  # Purge obj(s) from metadata, if overwrite is TRUE
   ###############################################
-  objHash <- .robustDigest(object)
+  objHash <- .robustDigest(obj)
   purgeAnalyses <- NULL # Set default as NULL
   if (layerNameExistsInMetadata) {
     ln <- layerName
@@ -302,39 +308,48 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
     map@metadata <- map@metadata[!(layerName %in% ln)]
   }
 
+  ###################################################
+  # Add "shinyLabel" column if it is a SpatialPolygonsDataFrame
+  ###################################################
+  args1 <- identifyVectorArgs(fn = addColumnNameForLabels,
+                              c(x = "obj", columnNameForLabels = "columnNameForLabels"),
+                              environment(), dots = dots)
+  obj <- MapOrLapply(addColumnNameForLabels, multiple = args1$argsMulti,
+              single = args1$argsSingle, useCache = useCache)
+
   ####################################################
-  # Assign object to map@.xData
+  # Assign obj to map@.xData
   ####################################################
   if (is.null(envir)) {
     envir <- map@.xData # keep envir for later
     # Put map into map slot
     a <- list()
-    obj <- if (is(object, "list")) object else list(object)
-    a[layerName] <- obj
+    objTmp <- if (is(obj, "list")) obj else list(obj)
+    a[layerName] <- objTmp
     list2env(a, envir = envir)
   } else {
 
     if (exists(layerName, envir = envir)) {
       a <- list()
-      envir1 <- if (is(envir, "list")) object else list(envir)
+      envir1 <- if (is(envir, "list")) obj else list(envir)
       a[layerName] <- list(envir1)
       list2env(a, envir = map@.xData)
     } else {
       envir <- map@.xData
       a <- list()
-      obj <- if (is(object, "list")) object else list(object)
-      a[layerName] <- obj
+      objTmp <- if (is(obj, "list")) obj else list(obj)
+      a[layerName] <- objTmp
       list2env(a, envir = envir)
-      message("object named ", paste(layerName, collapse = ", "), " does not exist in envir provided",
-              ". Adding it to map object")
+      message("obj named ", paste(layerName, collapse = ", "), " does not exist in envir provided",
+              ". Adding it to map obj")
     }
   }
 
   ####################################################
   # Metadata -- build new entries in data.table -- vectorized
   ####################################################
-  browser(expr = exists("aaa"))
-  args1 <- identifyVectorArgs(fn = list(buildMetadata, prepInputs), ls(), environment(), ...)
+  args1 <- identifyVectorArgs(fn = list(buildMetadata, prepInputs), ls(), environment(),
+                              dots = dots)
   if (length(dots)) {
     howLong <- unlist(lapply(dots, length))
     args1$argsSingle[names(dots)[howLong<=1]] <- dots[howLong<=1]
@@ -349,31 +364,36 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
     dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE)
   }
 
+
+  ########################################################
   # make tiles, if it is leaflet
+  ########################################################
   if (any(!isFALSE(leaflet)) && !is.null(dts$leafletTiles)) {
     if (is.logical(leaflet)) {
       leaflet <- getwd()
     }
     MBadjustment <- 4000 # some approximate, empirically derived number. Likely only good in some cases
-    MBper <- if (is(object, "RasterLayer")) {
-      ncell(object) / MBadjustment
-    } else if ( tryCatch(is(object[[1]], "RasterLayer"), error = function(x) FALSE)) {
-      ncell(object[[1]]) / MBadjustment
+    MBper <- if (is(obj, "RasterLayer")) {
+      ncell(obj) / MBadjustment
+    } else if ( tryCatch(is(obj[[1]], "RasterLayer"), error = function(x) FALSE)) {
+      ncell(obj[[1]]) / MBadjustment
     } else {
       1 # i.e., default to detectClusters()
     }
-    useParallel <- if (isTRUE(all(dir.exists(dts$leafletTiles)))) {
-      FALSE
+    if (isTRUE(all(dir.exists(dts$leafletTiles)))) {
+      useParallel <- FALSE
     } else {
-      getOption("map.useParallel",
-                !identical("windows", .Platform$OS.type))
+      if (missing(useParallel)) {
+        useParallel <- getOption("map.useParallel",
+                                 !identical("windows", .Platform$OS.type))
+      }
     }
     cl <- makeOptimalCluster(useParallel = useParallel,
                              MBper = MBper,
-                             maxNumClusters = length(object))
+                             maxNumClusters = length(obj))
     on.exit(try(stopCluster(cl), silent = TRUE))
     tilePath <- dts$leafletTiles
-    args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), ...)
+    args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
     out <- MapOrLapply(makeTiles, multiple = args1$argsMulti,
                        single = args1$argsSingle, useCache = FALSE, cl = cl)
                 # If the rasters are identical, then there may be
@@ -390,7 +410,7 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
               dts$studyArea)
     } else {
       message("Setting map CRS to this layer because it is the (first) studyArea inserted")
-      map@CRS <- raster::crs(object)
+      map@CRS <- raster::crs(obj)
     }
   }
 
@@ -402,7 +422,7 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
   ######################################
   # run map analyses
   ########################################
-  map <- runMapAnalyses(map, purgeAnalyses = purgeAnalyses)
+  map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
 
   return(map)
 }
@@ -449,7 +469,7 @@ mapRm.default <- function(map = NULL,
 
   layerName <- unique(map@metadata[ layer , layerName])
   if (length(layer) > 1)
-    stop("There are more than object in map with that layer name, '",
+    stop("There are more than obj in map with that layer name, '",
          layerName,"'. Please indicate layer by row number in map@metadata.")
 
   rm(list = layerName, envir = map@metadata[ layer , envir][[1]])
@@ -586,7 +606,7 @@ rasterToMatch.map <- function(map, layerName, layer = NA) {
   }
 }
 
-#' Extract rasters in the \code{map} object
+#' Extract rasters in the \code{map} obj
 #' @export
 #' @family mapMethods
 #' @rdname maps
@@ -601,7 +621,7 @@ rasters.map <- function(map) {
   maps(map, "RasterLayer")
 }
 
-#' Extract sp class objects from the \code{map} object
+#' Extract sp class objects from the \code{map} obj
 #' @export
 #' @family mapMethods
 #' @rdname maps
@@ -616,7 +636,7 @@ sp.map <- function(map) {
   maps(map, "Spatial")
 }
 
-#' Extract \code{sf} class objects from the \code{map} object
+#' Extract \code{sf} class objects from the \code{map} obj
 #' @export
 #' @family mapMethods
 #' @rdname maps
@@ -643,9 +663,9 @@ spatialPoints <- function(map) {
   maps(map, "SpatialPoints")
 }
 
-#' Extract leaflet tile paths from a \code{map} object
+#' Extract leaflet tile paths from a \code{map} obj
 #'
-#' @param map A \code{map} class object
+#' @param map A \code{map} class obj
 #'
 #' @export
 #' @return
@@ -658,14 +678,14 @@ leafletTiles <- function(map) {
   tiles
 }
 
-#' Extract maps from a \code{map} object
+#' Extract maps from a \code{map} obj
 #'
 #' This will extract all objects in or pointed to within the \code{map}.
 #'
-#' @param map A \code{map} class object
+#' @param map A \code{map} class obj
 #' @param class If supplied, this will be the class of objects returned. Default
 #'              is \code{NULL} which is "all", meaning all objects in the \code{map}
-#'              object
+#'              obj
 #' @export
 #' @return
 #' A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
@@ -699,7 +719,7 @@ if (!isGeneric("area")) {
   })
 }
 
-#' Calculate area of (named) objects the \code{map} object
+#' Calculate area of (named) objects the \code{map} obj
 #'
 #' @inheritParams raster::area
 #'
@@ -722,7 +742,7 @@ setMethod("area",
 
 #' Show method for map class objects
 #'
-#' @param object TODO: describe this
+#' @param obj TODO: describe this
 #'
 #' @export
 #' @rdname show
@@ -741,7 +761,7 @@ setMethod(
                                  formalArgs(reproducible::projectInputs)))
 
 ################################################################################
-#' Extract the metadata object
+#' Extract the metadata obj
 #'
 #' Methods for specific classes exist.
 #'
@@ -764,48 +784,69 @@ metadata.map <- function(x) {
 
 
 
-getLocalArgsFor <- function(fn, localFormalArgs, envir, ...) {
+#' Find sources for arguments in arbitrary function(s)
+#'
+#' Search among local objects (which will often be arguments passed
+#' into a function) as well as dot objects to match the
+#' formals needed by \code{fn}. If \code{localFormalArgs} is named,
+#' then it will match the formal (name of localFormaArgs) with the
+#' local object, e.g., localFormalArgs = c(x = "obj") will find
+#' the object in the local environment called "obj", and this will
+#' be found because it matches the \code{x} argument in \code{fn}.
+#'
+#' @param localFormalArgs A (named) character vector or arguments to
+#' @return List of named objects. The names are the formals in fn, and
+#' the objects are the values for those formals. This can easily
+#' be passed to do.call(fn, args1)
+getLocalArgsFor <- function(fn, localFormalArgs, envir, dots) {
   if (missing(envir))
     envir <- parent.frame()
   if (missing(localFormalArgs))
     localFormalArgs <- ls(envir = envir)
-  dots <- list(...)
+
+  if (is.null(names(localFormalArgs)))
+    names(localFormalArgs) <- localFormalArgs
+
+  #dots <- list(...)
   if (length(fn) > 1) {
-    forms <- unlist(lapply(fn, reproducible:::.formalsNotInCurrentDots, ...))
+    forms <- unlist(lapply(fn, reproducible::.formalsNotInCurrentDots, dots = dots))
     forms <- forms[duplicated(forms)]
   } else {
-    forms <- reproducible:::.formalsNotInCurrentDots(fn, ...)
+    forms <- reproducible:::.formalsNotInCurrentDots(fn, dots = dots)
   }
   args <- dots[!(names(dots) %in% forms)]
   localFormals <- if (length(fn) > 1) {
     a <- lapply(fn, function(f)
-      localFormalArgs[localFormalArgs %in% formalArgs(f)]
+      localFormalArgs[names(localFormalArgs) %in% formalArgs(f)]
     )
-    unique(unlist(a))
+    unlist(a)[!duplicated(unlist(a))] # unique strips names
   } else {
-    localFormalArgs[localFormalArgs %in% formalArgs(fn)]
+    localFormalArgs[names(localFormalArgs) %in% formalArgs(fn)]
   }
-  args <- append(args, mget(localFormals, envir = envir))
+  objsFromLocal <- mget(localFormals, envir = envir)
+  names(objsFromLocal) <- names(localFormals)
+  args <- append(args, objsFromLocal)
 
 }
 
-identifyVectorArgs <- function(fn, localFormalArgs, envir, ...) {
-  dots <- list(...)
-  argsMulti <- getLocalArgsFor(fn, localFormalArgs, envir = envir, ...)
 
-  #argsMulti <- append(dots, fnArgs)
+identifyVectorArgs <- function(fn, localFormalArgs, envir, dots) {
+
+  allArgs <- getLocalArgsFor(fn, localFormalArgs, envir = envir, dots = dots)
+
   specialTypes = c("environment", "SpatialPolygons")
-  lengthOne <- unlist(lapply(argsMulti, is.null)) | unlist(lapply(argsMulti, function(x) {
-    if (any(unlist(lapply(specialTypes, is, object = x))) | length(x)==1) {
+  lengthOne <- unlist(lapply(allArgs, is.null)) | unlist(lapply(allArgs, function(x) {
+    if (any(unlist(lapply(specialTypes, is, obj = x))) | length(x)==1) {
       TRUE
     } else {
       FALSE
     }}))
   if (sum(lengthOne)) {
-    argsSingle <- argsMulti[lengthOne]
-    argsMulti <- argsMulti[!lengthOne]
+    argsSingle <- allArgs[lengthOne]
+    argsMulti <- allArgs[!lengthOne]
   } else {
     argsSingle <- list()
+    argsMulti <- allArgs
   }
 
   list(argsSingle = argsSingle, argsMulti = argsMulti)
@@ -822,27 +863,25 @@ identifyVectorArgs <- function(fn, localFormalArgs, envir, ...) {
 #' @seealso \code{identifyVectorArgs}
 MapOrLapply <- function(fn, multiple, single, useCache, cl = NULL) {
   if (length(multiple)) {
-    # object <- do.call(Cache,
-    #                   args = append(multiple,
-    #                                 list(Map2, f = fn,
-    #                                      MoreArgs = append(single, list(cl = cl)), # passed to Map
-    #                                      useCache = useCache
-    #                                      ))) # passed to Cache
-    #do.call(Map2, args = append(multiple, list(fn,
-    #                                           MoreArgs = single,
-    #                                           cl = cl)))
-    object <- do.call(Cache, args = append(multiple, list(Map2, fn,
+    obj <- do.call(Cache, args = append(multiple, list(Map2, fn,
                                                MoreArgs = single,
                                                cl = cl, useCache = useCache)))
   } else {
     if (!missing(useCache))
       single[["useCache"]] <- useCache
-    object <- do.call(Cache, args = append(list(fn),
+    obj <- do.call(Cache, args = append(list(fn),
                                            single))
   }
-  object
+  obj
 
 }
 
-assignMap <- function(layerName, object, envir) {
-  assign(layerName, object, envir = envir)}
+assignMap <- function(layerName, obj, envir) {
+  assign(layerName, obj, envir = envir)}
+
+addColumnNameForLabels <- function(x, columnNameForLabels) {
+  if (is(x, "SpatialPolygonsDataFrame")) {
+    x$shinyLabel <- x[[columnNameForLabels]]
+  }
+  x
+}

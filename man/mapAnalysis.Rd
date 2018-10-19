@@ -4,19 +4,24 @@
 \alias{mapAnalysis}
 \title{Generic analysis for map objects}
 \usage{
-mapAnalysis(map, functionName = NULL, purgeAnalyses = NULL, ...)
+mapAnalysis(map, functionName = NULL, purgeAnalyses = NULL,
+  useParallel = getOption("map.useParallel"), ...)
 }
 \arguments{
 \item{map}{Optional map object. If not provided, then one will be
-created. If provided, then the present \code{object} or options passed to
+created. If provided, then the present \code{obj} or options passed to
 prepInputs e.g., \code{url}, will be appended to this \code{map}}
 
 \item{functionName}{A function name that will be run on combinations of
-inputs in the map object. See details.}
+inputs in the map obj. See details.}
 
 \item{purgeAnalyses}{A character string indicating which analysis group
 combination or part thereof (e.g., the name entered into the row under
 \code{analysisGroup2} column of the \code{map@metadata} or a \code{functionName}.}
+
+\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one
+calculation to do at any stage, it will create and use a parallel
+cluster via \code{makeOptimalCluster}}
 
 \item{...}{passed to reproducible::postProcess and reproducible::projectInputs and
 reproducible::fixErrors and reproducible::prepInputs}
@@ -32,7 +37,7 @@ on any columns whose names start with \code{analysisGroup}, creating a factorial
 set of analyses as described by these columns. Then it will assess if any of
 these has already been run. For those that have not been run, it will then
 run the \code{functionName} on arguments that it finds in the \code{metadata}
-slot of the map object, as well as any arguments passed in here in the \code{...}.
+slot of the map obj, as well as any arguments passed in here in the \code{...}.
 In general, the arguments being passed in here should be fixed across all analyses,
 while any that vary by analysis should be entered into the metadata table at the
 time of adding the layer to the map, via \code{mapAdd}.

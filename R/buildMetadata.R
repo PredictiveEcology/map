@@ -1,8 +1,8 @@
-#' Build \code{map} object metadata table
+#' Build \code{map} obj metadata table
 #'
 #' @rdname buildMetadata
 buildMetadata <- function(metadata, isStudyArea, layerName,
-                          object, columnNameForLabels, objHash,
+                          obj, columnNameForLabels, objHash,
                           leaflet, envir, ...) {
 
   b <- copy(.singleMetadataNAEntry)
@@ -17,9 +17,9 @@ buildMetadata <- function(metadata, isStudyArea, layerName,
   if (!is.null(dots$url))
     set(b, NULL, "url", dots$url)
   set(b, NULL, "layerName", layerName)
-  set(b, NULL, "layerType", class(object))
+  set(b, NULL, "layerType", class(obj))
   if (length(columnNameForLabels) > 0) {
-    if (is(object, "SpatialPolygonsDataFrame")) {
+    if (is(obj, "SpatialPolygonsDataFrame")) {
       set(b, NULL, "columnNameForLabels", columnNameForLabels)
     }
   }
@@ -27,8 +27,8 @@ buildMetadata <- function(metadata, isStudyArea, layerName,
 
   if (!isFALSE(leaflet)) {
     set(b, NULL, "leaflet", leaflet)
-    if (is(object, "Raster")) {
-      dig <- .robustDigest(object)
+    if (is(obj, "Raster")) {
+      dig <- .robustDigest(obj)
       tilePath <- asPath(file.path(leaflet, paste0("tiles_", layerName, "_", substr(dig, 1,6))))
       set(b, NULL, "leafletTiles", tilePath)
     }
@@ -41,10 +41,10 @@ buildMetadata <- function(metadata, isStudyArea, layerName,
     dots <- dots[!unlist(lapply(dots, is.null))] # remove NULL because that isn't added to data.table anyway
     if (!is.null(dots$filename2)) {
       if (!isFALSE(dots$filename2)) {
-        if (inherits(object, "RasterLayer")) {
+        if (inherits(obj, "RasterLayer")) {
           if (endsWith(dots$filename2, suffix = "tif")) {
-            if (raster::is.factor(object)) {
-              dots$filename2 <- basename(raster::filename(object))
+            if (raster::is.factor(obj)) {
+              dots$filename2 <- basename(raster::filename(obj))
             }
           }
         }

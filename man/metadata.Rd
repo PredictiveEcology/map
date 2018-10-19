@@ -4,7 +4,7 @@
 \alias{metadata}
 \alias{metadata.Raster}
 \alias{metadata.map}
-\title{Extract the metadata object}
+\title{Extract the metadata obj}
 \usage{
 metadata(x)
 

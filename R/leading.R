@@ -22,6 +22,8 @@
 #'
 #' @importFrom stats na.omit
 #' @importFrom utils tail
+#' @importFrom data.table setDT
+#' @export
 LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasses) {
   # main function code
   startTime <- Sys.time()

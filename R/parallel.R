@@ -29,7 +29,9 @@ optimalClusterNum <- function(memRequiredMB = 5000, maxNumClusters = 1) {
 #'
 #' Given the size of a problem, it may not be useful to create a cluster.
 #' This will make a Fork cluster (so Linux only)
-#' @param useParallel Logical. If \code{FALSE}, returns NULL
+#' @param useParallel Logical or numeric. If \code{FALSE}, returns NULL. If
+#'        \code{numeric}, then will return a cluster object with this
+#'        many cores, up to \code{maxNumClusters}
 #' @param MBper Numeric. Passed to \code{memRequiredMB} in
 #'              \code{\link{optimalClusterNum}}
 #' @param maxNumClusters Numeric or Integer. The theoretical upper limit
@@ -37,18 +39,29 @@ optimalClusterNum <- function(memRequiredMB = 5000, maxNumClusters = 1) {
 #'        3 problems to solve, not \code{parallel::detectCores})
 #' @param ... Passed to \code{makeForkClusterRandom}.
 #'            Only relevant for \code{iseed}.
+#' @export
 makeOptimalCluster <- function(useParallel = FALSE, MBper = 5e3,
                                maxNumClusters = parallel::detectCores(), ...) {
-  if (isTRUE(useParallel) && tolower(Sys.info()[["sysname"]]) != "windows") {
-    numClus <- optimalClusterNum(MBper, maxNumClusters = maxNumClusters)
-    if (numClus <= 1) {
-      NULL
+  if (!identical("windows", .Platform$OS.type)) {
+    numClus <- if (isTRUE(useParallel)) {
+      numClus <- optimalClusterNum(MBper, maxNumClusters = maxNumClusters)
+      if (numClus <= 1) {
+        numClus <- NULL
+      }
+      numClus
+    } else if (is.numeric(useParallel)) {
+      min(useParallel, maxNumClusters)
+    }
+
+    if (!is.null(numClus)) {
+      cl <- makeForkClusterRandom(numClus, ...)
     } else {
-      makeForkClusterRandom(numClus, ...)
+      cl <- NULL
     }
   } else {
-    NULL
+    cl <- NULL
   }
+  return(cl)
 }
 
 

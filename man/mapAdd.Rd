@@ -5,26 +5,30 @@
 \alias{mapAdd.default}
 \title{Append a spatial object to map}
 \usage{
-mapAdd(object, map, layerName, overwrite = FALSE, ...)
+mapAdd(obj, map, layerName, overwrite = getOption("map.overwrite",
+  FALSE), ...)
 
-\method{mapAdd}{default}(object = NULL, map = new("map"),
-  layerName = NULL, overwrite = FALSE, columnNameForLabels = 1,
-  leaflet = TRUE, isStudyArea = FALSE, envir = NULL,
-  useCache = TRUE, paths = getOption("map.paths"), ...)
+\method{mapAdd}{default}(obj = NULL, map = new("map"),
+  layerName = NULL, overwrite = getOption("map.overwrite"),
+  columnNameForLabels = 1, leaflet = TRUE, isStudyArea = FALSE,
+  envir = NULL, useCache = TRUE,
+  useParallel = getOption("map.useParallel"),
+  paths = getOption("map.paths"), ...)
 }
 \arguments{
-\item{object}{Optional spatial object, currently \code{RasterLayer},
-\code{SpatialPolygons}}
+\item{obj}{Optional spatial object, currently tested with \code{RasterLayer},
+\code{SpatialPolygons*}}
 
 \item{map}{Optional map object. If not provided, then one will be
-created. If provided, then the present \code{object} or options passed to
+created. If provided, then the present \code{obj} or options passed to
 prepInputs e.g., \code{url}, will be appended to this \code{map}}
 
 \item{layerName}{Required. A label for this map layer. This can be the same as
 the object name.}
 
 \item{overwrite}{Logical. If \code{TRUE} and this \code{layerName} exists in
-the \code{map}, then it will replace the existing object.}
+the \code{map}, then it will replace the existing object. Default is
+\code{getOption("map.overwrite")}}
 
 \item{...}{passed to reproducible::postProcess and reproducible::projectInputs and
 reproducible::fixErrors and reproducible::prepInputs}
@@ -44,12 +48,16 @@ the current path. The tile base file path will be the
 "StudyArea", and will be passed into \code{prepInputs} for any future layers
 added.}
 
-\item{envir}{An optional environment. If supplied, then the object
+\item{envir}{An optional environment. If supplied, then the obj
 will not be placed "into" the maps slot, rather the environment label will
 be placed into the maps slot. Upon re}
 
 \item{useCache}{Logical. If \code{TRUE}, then internal calls to \code{Cache} will
 be used. Default is \code{TRUE}}
+
+\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one
+calculation to do at any stage, it will create and use a parallel
+cluster via \code{makeOptimalCluster}}
 }
 \description{
 If \code{isStudyArea = TRUE}, then several things will be triggered:

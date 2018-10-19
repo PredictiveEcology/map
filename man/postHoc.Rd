@@ -2,14 +2,15 @@
 % Please edit documentation in R/map-analysis.R
 \name{mapAddPostHocAnalysis}
 \alias{mapAddPostHocAnalysis}
-\title{Add a post hoc analysis function to a map object}
+\title{Add a post hoc analysis function to a map obj}
 \usage{
 mapAddPostHocAnalysis(map, functionName, postHocAnalysisGroups = NULL,
-  postHocAnalyses = "all", ...)
+  postHocAnalyses = "all", useParallel = getOption("map.useParallel"),
+  ...)
 }
 \arguments{
 \item{map}{Optional map object. If not provided, then one will be
-created. If provided, then the present \code{object} or options passed to
+created. If provided, then the present \code{obj} or options passed to
 prepInputs e.g., \code{url}, will be appended to this \code{map}}
 
 \item{functionName}{A function that is designed for post hoc analysis of
@@ -22,8 +23,12 @@ map class objects, e.g., \code{rbindlistAG}}
 (which will do all analysisGroups) the default,
 or 1 or more of the the \code{functionName}s that are in the analyses slot.}
 
+\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one
+calculation to do at any stage, it will create and use a parallel
+cluster via \code{makeOptimalCluster}}
+
 \item{...}{Optional arguments to pass into \code{functionName}}
 }
 \description{
-Add a post hoc analysis function to a map object
+Add a post hoc analysis function to a map obj
 }

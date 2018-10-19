@@ -10,7 +10,7 @@
 \alias{spatialPolygons}
 \alias{spatialPoints}
 \alias{maps}
-\title{Extract rasters in the \code{map} object}
+\title{Extract rasters in the \code{map} obj}
 \usage{
 rasters(map)
 
@@ -31,11 +31,11 @@ spatialPoints(map)
 maps(map, class = NULL)
 }
 \arguments{
-\item{map}{A \code{map} class object}
+\item{map}{A \code{map} class obj}
 
 \item{class}{If supplied, this will be the class of objects returned. Default
 is \code{NULL} which is "all", meaning all objects in the \code{map}
-object}
+obj}
 }
 \value{
 A list of maps (i.e., sp, raster, or sf objects) of class \code{class}

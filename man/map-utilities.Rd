@@ -9,7 +9,7 @@ rbindlistAG(map, functionName, analysisGroups)
 }
 \arguments{
 \item{map}{Optional map object. If not provided, then one will be
-created. If provided, then the present \code{object} or options passed to
+created. If provided, then the present \code{obj} or options passed to
 prepInputs e.g., \code{url}, will be appended to this \code{map}}
 
 \item{analysisGroups}{A character (length 1 currently), indicating which

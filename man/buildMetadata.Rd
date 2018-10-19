@@ -2,11 +2,11 @@
 % Please edit documentation in R/buildMetadata.R
 \name{buildMetadata}
 \alias{buildMetadata}
-\title{Build \code{map} object metadata table}
+\title{Build \code{map} obj metadata table}
 \usage{
-buildMetadata(metadata, isStudyArea, layerName, object,
-  columnNameForLabels, objHash, leaflet, envir, ...)
+buildMetadata(metadata, isStudyArea, layerName, obj, columnNameForLabels,
+  objHash, leaflet, envir, ...)
 }
 \description{
-Build \code{map} object metadata table
+Build \code{map} obj metadata table
 }

@@ -1,4 +1,5 @@
 
+#' @export
 LargePatches <- function(tsf, vtm, poly, labelColumn,
                               id, ageClassCutOffs, ageClasses) {
   timeSinceFireFilesRast <- Cache(.rasterToMemory, tsf)
@@ -107,7 +108,7 @@ areaAndPolyValue <- function(ras) {
 #' @importFrom tools file_path_sans_ext
 gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile",
                              pypath = NULL, readpoly = TRUE, quiet = TRUE) {
-  if (isTRUE(readpoly)) requireNamespace(rgdal, quietly = TRUE)
+  if (isTRUE(readpoly)) requireNamespace("rgdal", quietly = TRUE)
   if (is.null(pypath)) {
     pypath <- Sys.which("gdal_polygonize.py")
     if (!nzchar(pypath)) {
