@@ -4,7 +4,7 @@
 \alias{MapOrLapply}
 \title{Map/lapply all in one}
 \usage{
-MapOrLapply(fn, multiple, single, useCache)
+MapOrLapply(fn, multiple, single, useCache, cl = NULL)
 }
 \arguments{
 \item{fn}{The function that will be run via Map/clusterMap/}
