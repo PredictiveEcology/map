@@ -252,7 +252,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     argsFixErrors <- getLocalArgsFor(list(Cache, fixErrors), dots = dots)
     obj <- do.call(Cache, append(list(fixErrors, obj), argsFixErrors))
     if (isFALSE(isStudyArea)) {
-      message("There is no studyArea in map; consider adding one with 'studyArea = TRUE'")
+      message("There is no studyArea in map; consider adding one with 'isStudyArea = TRUE'")
     }
     if (is.na(crs(map))) {
       if (is.null(dots$targetCRS)) { # OK ... user did not pass in targetCRS
