@@ -431,7 +431,8 @@ mapAdd.default <- function(object = NULL, map = new("map"), layerName = NULL,
 #' @examples
 #' if (require("SpaDES.tools")) {
 #'   library(sp)
-#'   longLatCRS <- CRS("+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+#'   longLatCRS <- CRS(paste("+init=epsg:4326 +proj=longlat +datum=WGS84",
+#'                           "+no_defs +ellps=WGS84 +towgs84=0,0,0"))
 #'   p <- randomPolygon(SpatialPoints(cbind(-120, 60), proj4string = longLatCRS),
 #'        area = 1e5)
 #'   m <- mapAdd(p, layerName = "p")
