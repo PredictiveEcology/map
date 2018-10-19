@@ -102,6 +102,13 @@ areaAndPolyValue <- function(ras) {
 #'
 #' Copied from https://johnbaumgartner.wordpress.com/2012/07/26/getting-rasters-into-shape-from-r/
 #'
+#' @param x TODO: description needed
+#' @param outshape TODO: description needed
+#' @param gdalformat TODO: description needed
+#' @param pypath TODO: description needed
+#' @param readpoly TODO: description needed
+#' @param quiet TODO: description needed
+#'
 #' @importFrom raster extent
 #' @importFrom reproducible assessDataType
 #' @importFrom sf st_bbox read_sf

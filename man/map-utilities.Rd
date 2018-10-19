@@ -9,15 +9,17 @@ rbindlistAG(map, functionName, analysisGroups)
 }
 \arguments{
 \item{map}{Optional map object. If not provided, then one will be
-created. If provided, then the present \code{obj} or options passed to
+created. If provided, then the present \code{object} or options passed to
 prepInputs e.g., \code{url}, will be appended to this \code{map}}
 
+\item{functionName}{TODO: description needed}
+
 \item{analysisGroups}{A character (length 1 currently), indicating which
-analysis group (e.g., "analysisGroup1") should be used to rbindlist. Can
-also specify "all" which will rbindlist all outputs}
+analysis group (e.g., "analysisGroup1") should be used to \code{rbindlist}.
+Can also specify \code{"all"} which will \code{rbindlist} all outputs.}
 }
 \value{
-A list of data.tables
+A list of \code{data.table}s.
 }
 \description{
 Utility functions for grouping analyses in a \code{map} object

@@ -12,6 +12,9 @@ metadata(x)
 
 \method{metadata}{map}(x)
 }
+\arguments{
+\item{x}{TODO: description needed}
+}
 \description{
 Methods for specific classes exist.
 }

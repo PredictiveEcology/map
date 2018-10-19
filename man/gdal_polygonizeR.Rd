@@ -7,6 +7,19 @@
 gdal_polygonizeR(x, outshape = NULL, gdalformat = "ESRI Shapefile",
   pypath = NULL, readpoly = TRUE, quiet = TRUE)
 }
+\arguments{
+\item{x}{TODO: description needed}
+
+\item{outshape}{TODO: description needed}
+
+\item{gdalformat}{TODO: description needed}
+
+\item{pypath}{TODO: description needed}
+
+\item{readpoly}{TODO: description needed}
+
+\item{quiet}{TODO: description needed}
+}
 \description{
 Copied from https://johnbaumgartner.wordpress.com/2012/07/26/getting-rasters-into-shape-from-r/
 }

@@ -2,14 +2,14 @@
 % Please edit documentation in R/parallel.R
 \name{Map2}
 \alias{Map2}
-\title{Map and parallel::clusterMap together}
+\title{\code{Map} and \code{parallel::clusterMap} together}
 \usage{
 Map2(..., cl = NULL)
 }
 \arguments{
-\item{...}{passed to Map or clusterMap}
+\item{...}{passed to \code{Map} or \code{clusterMap}}
 
-\item{cl}{passed to clusterMap}
+\item{cl}{A cluster object, passed to \code{clusterMap}}
 }
 \description{
 This will send to Map or clusterMap, depending on whether cl is provided.

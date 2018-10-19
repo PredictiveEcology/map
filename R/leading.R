@@ -156,8 +156,9 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasse
 #' @param polygonToFasterize passed to \code{fasterize}, but it
 #'        will be cropped first if
 #'        \code{extent(emptyRaster) < extent(polygonToFasterize)}
-#' @param field passed to fasterize
+#' @param field passed to \code{fasterize}
 #'
+#' @importFrom fasterize fasterize
 #' @importFrom raster extent
 #' @importFrom reproducible cropInputs projectInputs
 fasterize2 <- function(emptyRaster, polygonToFasterize, field) {
@@ -178,57 +179,4 @@ fasterize2 <- function(emptyRaster, polygonToFasterize, field) {
                             as.data.frame(thePoly))
 
   aa2
-}
-
-optimalClusterNum <- function(memRequiredMB = 5000, maxNumClusters = 1) {
-  if (Sys.info()["sysname"] == "Linux") {
-    detectedNumCores <- parallel::detectCores()
-    shouldUseCluster <- (maxNumClusters > 0)
-
-    if (shouldUseCluster) {
-      # try to scale to available RAM
-      try(aa <- system("free -lm", intern = TRUE))
-      if (!is(aa, "try-error")) {
-        bb <- strsplit(aa[2], split = " ") # 'Mem:' row
-        availMem <- as.numeric(bb[[1]][nzchar(bb[[1]])][7]) # 'available' column
-        numClusters <- floor(min(detectedNumCores, availMem / memRequiredMB))
-      } else {
-        message("The OS function, 'free' is not available. Returning 1 cluster")
-        numClusters <- 1
-      }
-      numClusters <- min(maxNumClusters, numClusters, detectedNumCores)
-    } else {
-      numClusters <- 1
-    }
-  } else {
-    message("This function returns 1 cluster on Windows and MacOS.")
-    numClusters <- 1
-  }
-  return(numClusters)
-}
-
-#' Create a parallel Fork cluster, if useful
-#'
-#' Given the size of a problem, it may not be useful to create a cluster.
-#' This will make a Fork cluster (so Linux only)
-#' @param useParallel Logical. If \code{FALSE}, returns NULL
-#' @param MBper Numeric. Passed to \code{memRequiredMB} in
-#'              \code{\link{optimalClusterNum}}
-#' @param maxNumClusters Numeric or Integer. The theoretical upper limit
-#'        for number of clusters to create (e.g., because there are only
-#'        3 problems to solve, not \code{parallel::detectCores})
-#' @param ... Passed to \code{makeForkClusterRandom}.
-#'            Only relevant for \code{iseed}.
-makeOptimalCluster <- function(useParallel = FALSE, MBper = 5e3,
-                               maxNumClusters = parallel::detectCores(), ...) {
-  if (isTRUE(useParallel) && tolower(Sys.info()[["sysname"]]) != "windows") {
-    numClus <- optimalClusterNum(MBper, maxNumClusters = maxNumClusters)
-    if (numClus <= 1) {
-      NULL
-    } else {
-      makeForkClusterRandom(numClus, ...) ## TODO: this function doesn't exist in the package
-    }
-  } else {
-    NULL
-  }
 }

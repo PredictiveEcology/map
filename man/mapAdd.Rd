@@ -20,15 +20,14 @@ mapAdd(obj, map, layerName, overwrite = getOption("map.overwrite",
 \code{SpatialPolygons*}}
 
 \item{map}{Optional map object. If not provided, then one will be
-created. If provided, then the present \code{obj} or options passed to
+created. If provided, then the present \code{object} or options passed to
 prepInputs e.g., \code{url}, will be appended to this \code{map}}
 
 \item{layerName}{Required. A label for this map layer. This can be the same as
 the object name.}
 
 \item{overwrite}{Logical. If \code{TRUE} and this \code{layerName} exists in
-the \code{map}, then it will replace the existing object. Default is
-\code{getOption("map.overwrite")}}
+the \code{map}, then it will replace the existing object.}
 
 \item{...}{passed to reproducible::postProcess and reproducible::projectInputs and
 reproducible::fixErrors and reproducible::prepInputs}
@@ -58,6 +57,37 @@ be used. Default is \code{TRUE}}
 \item{useParallel}{Logical. If \code{TRUE}, then if there is more than one
 calculation to do at any stage, it will create and use a parallel
 cluster via \code{makeOptimalCluster}}
+
+\item{paths}{TODO: description needed}
+
+\item{object}{Optional spatial object, currently \code{RasterLayer},
+\code{SpatialPolygons}}
+
+\item{map}{Optional map object. If not provided, then one will be
+created. If provided, then the present \code{obj} or options passed to
+prepInputs e.g., \code{url}, will be appended to this \code{map}}
+
+\item{layerName}{Required. A label for this map layer. This can be the same as
+the object name.}
+
+\item{overwrite}{Logical. If \code{TRUE} and this \code{layerName} exists in
+the \code{map}, then it will replace the existing object. Default is
+\code{getOption("map.overwrite")}}
+
+\item{columnNameForLabels}{A character string indicating which column to use
+for labels. This is currently only used if the object is a
+\code{SpatialPolygonsDataFram}.}
+
+\item{leaflet}{Logical or Character vector of path(s) to write tiles.
+If \code{TRUE} or a character vector, then this layer will be added to a
+leaflet map. For \code{RasterLayer} object, this will trigger a call to
+\code{gdal2tiles}, making tiles. If path is not specified, it will be
+the current path. The tile base file path will be the
+\code{paste0(layerName, "_", rndstr(1,6))}}
+
+\item{isStudyArea}{Logical. If \code{TRUE}, this will be assigned the label,
+"StudyArea", and will be passed into \code{prepInputs} for any future layers
+added.}
 }
 \description{
 If \code{isStudyArea = TRUE}, then several things will be triggered:
@@ -76,7 +106,8 @@ coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98,
 Sr1 <- Polygon(coords)
 Srs1 <- Polygons(list(Sr1), "s1")
 StudyArea <- SpatialPolygons(list(Srs1), 1L)
-crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+crs(StudyArea) <- paste("+init=epsg:4326 +proj=longlat +datum=WGS84",
+                        "+no_defs +ellps=WGS84 +towgs84=0,0,0")
 StudyArea <- SpatialPolygonsDataFrame(StudyArea,
                            data = data.frame(ID = 1, shinyLabel = "zone2"),
                            match.ID = FALSE)
@@ -118,12 +149,14 @@ require("SpaDES.tools")
   ageClassCutOffs <- c(0, 40, 80, 120)
 
   # add an analysis -- this will trigger analyses because there are already objects in the map
-  #    This will trigger 2 analyses ... LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
+  #    This will trigger 2 analyses:
+  #    LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
   #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
   ml <- mapAddAnalysis(ml, functionName ="LeadingVegTypeByAgeClass",
                         ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
   # add an analysis -- this will trigger analyses because there are already objects in the map
-  #    This will trigger 2 more analyses ... largePatches on each raster x polygon combo (only 1 currently)
+  #    This will trigger 2 more analyses:
+  #    largePatches on each raster x polygon combo (only 1 currently)
   #    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
   ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
                     id = "1", labelColumn = "shinyLabel",
