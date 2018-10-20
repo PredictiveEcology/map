@@ -130,7 +130,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
 
     for (funName in funNames) {
       map@analysesData[[funName]][names(out3[[funName]])] <- unname(lapply(out3[[funName]], function(x) x))
-      map@analysesData[[funName]]$.Completed <- combosCompleted[[funName]]
+      map@analysesData[[funName]]$.Completed <- out3[[funName]]$.Completed
     }
   } else {
     message("  ", functionName, " already run on all layers")
@@ -255,7 +255,6 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
 
   # run postHoc analyses
   if (NROW(map@analyses[isPostHoc])) {
-    browser()
     out <- tryCatch(
       by(map@analyses[isPostHoc], map@analyses$functionName[isPostHoc],
          function(x) {
@@ -274,7 +273,6 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
          }),
       error = function(x) NULL)
     if (!is.null(out)) {
-      browser()
       map@analysesData[names(out)] <- lapply(out, function(x) x)
     } else {
       warning("One of the analyses failed")
