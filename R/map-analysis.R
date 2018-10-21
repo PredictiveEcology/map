@@ -15,7 +15,11 @@
 #' @details
 #' This function will do a sequence of things. First, it will run \code{expand.grid}
 #' on any columns whose names start with \code{analysisGroup}, creating a factorial
-#' set of analyses as described by these columns. Then it will assess if any of
+#' set of analyses as described by these columns. It will assess the combinations
+#' against the arguments used by the functionName. For any analysisGroup that
+#' does not provide the correct arguments for the functionName, these analysisGroups
+#' will be omitted for that particular function. For efficiency, the function will
+#' then assess if any of
 #' these has already been run. For those that have not been run, it will then
 #' run the \code{functionName} on arguments that it finds in the \code{metadata}
 #' slot of the map obj, as well as any arguments passed in here in the \code{...}.
@@ -60,6 +64,8 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
   combosAll <- expandAnalysisGroups(ags)
 
   # Cycle through for each analysisGroup, get each argument
+  # This is only for the first one to do, as it is just finding the columns required
+  # This will be run again inside the combosToDo section below
   args1 <- lapply(functionName, function(funName) {
     args <- getFormalsFromMetadata(metadata = m, combo = combosAll[1,],
                                    AGs = AGs, funName = funName)
@@ -117,7 +123,8 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
                 combos = combosToDo, function(funName, combos) {
                   out <- by(combos, combos$all, simplify = FALSE,
                             function(combo) {
-                              args <- unlist(unname(args1[[funName]]), recursive = FALSE)
+                              args1 <- getFormalsFromMetadata(metadata = map@metadata, combo = combo, AGs = AGs, funName = funName)
+                              args <- unlist(unname(args1), recursive = FALSE)
                               message("  Calculating ", funName, " for ", combo$all)
                               fnOut <- do.call(Cache, args = append(list(get(funName)), append(args,
                                                                                                otherFormalsInFunction[[funName]])))
