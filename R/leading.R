@@ -146,7 +146,6 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasse
           format(endTime - startTime, digits = 2))
 
   return(tabulated)
-
 }
 
 #' Fasterize with crop & spTransform first
