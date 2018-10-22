@@ -119,25 +119,26 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
 
     cl <- makeOptimalCluster(useParallel, maxNumClusters = NROW(combosToDoDT))
     on.exit(try(stopCluster(cl), silent = TRUE))
-    out3 <- Map2(funName = funNames, cl = cl,
-                combos = combosToDo, function(funName, combos) {
-                  out <- by(combos, combos$all, simplify = FALSE,
-                            function(combo) {
-                              args1 <- getFormalsFromMetadata(metadata = map@metadata, combo = combo, AGs = AGs, funName = funName)
-                              args <- unlist(unname(args1), recursive = FALSE)
-                              message("  Calculating ", funName, " for ", combo$all)
-                              fnOut <- do.call(Cache, args = append(list(get(funName)), append(args,
-                                                                                               otherFormalsInFunction[[funName]])))
-                              combosCompleted[[funName]] <<- unique(c(combosCompleted[[funName]], combo$all))
-                              list(dt = fnOut)
-                            })
-                  out$.Completed <- combosCompleted[[funName]]
-                  out
-                })
+
+    combosToDoList <- split(combosToDoDT, combosToDoDT$all)
+    out3 <- Map2(cl = cl,
+      combo = combosToDoList, function(combo) {
+        funName <- combo$functionName
+        args1 <- getFormalsFromMetadata(metadata = map@metadata,
+                                        combo = combo, AGs = AGs, funName = funName)
+        args <- unlist(unname(args1), recursive = FALSE)
+        message("  Calculating ", funName, " for ", combo$all)
+        fnOut <- do.call(Cache,
+                         args = append(list(get(funName)),
+                                       append(args,
+                                              otherFormalsInFunction[[funName]])))
+        fnOut
+      })
 
     for (funName in funNames) {
-      map@analysesData[[funName]][names(out3[[funName]])] <- unname(lapply(out3[[funName]], function(x) x))
-      map@analysesData[[funName]]$.Completed <- out3[[funName]]$.Completed
+      fromFunName <- combosToDoDT$functionName==funName
+      map@analysesData[[funName]][names(out3)[fromFunName]] <- out3[fromFunName]
+      map@analysesData[[funName]]$.Completed <- names(out3[fromFunName])
     }
   } else {
     message("  ", functionName, " already run on all layers")
