@@ -74,19 +74,22 @@ makeOptimalCluster <- function(useParallel = getOption("map.useParallel", FALSE)
 #' \code{makeForkCluster} with random seed set
 #'
 #' This will set different random seeds on the clusters (not the default)
-#' with \code{makeForkCluster}. It also defaults to creating a logfile with
-#' message of where it is.
+#' with \code{makeForkCluster}.
+#' It also defaults to creating a logfile with message of where it is.
 #'
 #' @param ... passed to \code{makeForkCluster}, e.g.,
 #' @param iseed passed to \code{clusterSetRNGStream}
+#'
+#' @importFrom magrittr %>%
+#' @importFrom reproducible checkPath
 makeForkClusterRandom <- function(..., iseed = NULL) {
   require(parallel)
   dots <- list(...)
   if (!("outfile" %in% names(dots))) {
-    dots$outfile <- "outputs/.log.txt"
-    for (i in 1:4)
-      cat(file = dots$outfile, "------------------------------------------------------------")
+    dots$outfile <- checkPath("outputs", create = TRUE) %>% file.path(., ".log.txt")
   }
+  for (i in 1:4)
+    cat(file = dots$outfile, "------------------------------------------------------------")
   cl <- do.call(makeForkCluster, args = dots)
   message("  Starting a cluster with ", length(cl)," threads")
   message("    Log file is ", dots$outfile, ". To prevent log file, pass outfile = ''")
