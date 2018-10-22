@@ -4,7 +4,7 @@
 \alias{optimalClusterNum}
 \title{Determine the number of nodes to use in a new cluster}
 \usage{
-optimalClusterNum(memRequiredMB = 5000, maxNumClusters = 1)
+optimalClusterNum(memRequiredMB = 500, maxNumClusters = 1)
 }
 \arguments{
 \item{memRequiredMB}{The amount of memory needed in MB}
