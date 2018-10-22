@@ -204,6 +204,7 @@ mapAddAnalysis <- function(map, functionName,
 #' @aliases mapAddPostHocAnalysis
 #' @importFrom fastdigest fastdigest
 #' @rdname postHoc
+#' @export
 mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NULL,
                                   postHocAnalyses = "all",
                                   useParallel = getOption("map.useParallel"),

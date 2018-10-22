@@ -199,7 +199,6 @@ mapAdd <- function(obj, map, layerName,
 #' @param useParallel Logical. If \code{TRUE}, then if there is more than one
 #'        calculation to do at any stage, it will create and use a parallel
 #'        cluster via \code{makeOptimalCluster}
-#' @param paths TODO: description needed
 #'
 #' @export
 #' @importFrom data.table rbindlist set copy
@@ -215,7 +214,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            leaflet = TRUE, isStudyArea = FALSE,
                            envir = NULL, useCache = TRUE,
                            useParallel = getOption("map.useParallel"),
-                           paths = getOption("map.paths"), ...) {
+                           ...) {
 
   dots <- list(...)
 

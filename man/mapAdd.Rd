@@ -12,8 +12,7 @@ mapAdd(obj, map, layerName, overwrite = getOption("map.overwrite",
   layerName = NULL, overwrite = getOption("map.overwrite"),
   columnNameForLabels = 1, leaflet = TRUE, isStudyArea = FALSE,
   envir = NULL, useCache = TRUE,
-  useParallel = getOption("map.useParallel"),
-  paths = getOption("map.paths"), ...)
+  useParallel = getOption("map.useParallel"), ...)
 }
 \arguments{
 \item{obj}{Optional spatial object, currently tested with \code{RasterLayer},
@@ -57,8 +56,6 @@ be used. Default is \code{TRUE}}
 \item{useParallel}{Logical. If \code{TRUE}, then if there is more than one
 calculation to do at any stage, it will create and use a parallel
 cluster via \code{makeOptimalCluster}}
-
-\item{paths}{TODO: description needed}
 
 \item{object}{Optional spatial object, currently \code{RasterLayer},
 \code{SpatialPolygons}}
