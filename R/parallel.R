@@ -80,14 +80,14 @@ makeOptimalCluster <- function(useParallel = getOption("map.useParallel", FALSE)
 #' @param ... passed to \code{makeForkCluster}, e.g.,
 #' @param iseed passed to \code{clusterSetRNGStream}
 #'
-#' @importFrom magrittr %>%
 #' @importFrom reproducible checkPath
 makeForkClusterRandom <- function(..., iseed = NULL) {
   require(parallel)
   dots <- list(...)
   if (!("outfile" %in% names(dots))) {
-    dots$outfile <- checkPath("outputs", create = TRUE) %>% file.path(., ".log.txt")
+    dots$outfile <- file.path("outputs", ".log.txt")
   }
+  checkPath(dirname(dots$outfile), create = TRUE)
   for (i in 1:4)
     cat(file = dots$outfile, "------------------------------------------------------------")
   cl <- do.call(makeForkCluster, args = dots)
