@@ -48,7 +48,7 @@ optimalClusterNum <- function(memRequiredMB = 500, maxNumClusters = 1) {
 #'            Only relevant for \code{iseed}.
 #' @export
 makeOptimalCluster <- function(useParallel = getOption("map.useParallel", FALSE),
-                               MBper = 5e3,
+                               MBper = 5e2,
                                maxNumClusters = parallel::detectCores(), ...) {
   cl <- NULL
   if (is.null(maxNumClusters)) maxNumClusters = parallel::detectCores()
