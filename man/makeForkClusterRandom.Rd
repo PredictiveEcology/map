@@ -13,6 +13,6 @@ makeForkClusterRandom(..., iseed = NULL)
 }
 \description{
 This will set different random seeds on the clusters (not the default)
-with \code{makeForkCluster}. It also defaults to creating a logfile with
-message of where it is.
+with \code{makeForkCluster}.
+It also defaults to creating a logfile with message of where it is.
 }
