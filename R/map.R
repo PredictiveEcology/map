@@ -230,7 +230,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     maxNumClus <- if (length(args1$argsMulti)) {
       max(unlist(lapply(args1$argsMulti, NROW)), na.rm = TRUE)
     } else {
-      NULL
+      0
     }
     cl <- makeOptimalCluster(maxNumClusters = maxNumClus)
     on.exit(try(stopCluster(cl), silent = TRUE))
@@ -561,21 +561,24 @@ studyAreaName.map <- function(map, layerName, layer = 1) {
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-studyArea <- function(map, layerName, layer) {
-  UseMethod("studyArea")
-}
+setGeneric("studyArea",function(map, layerName, layer = NA) {
+  standardGeneric("studyArea")
+})
 
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-studyArea.default <- function(map, layerName, layer = NA) {
+setMethod("studyArea", "ANY",
+          definition = function(map, layerName, layer = NA) {
   NULL
-}
+})
 
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-studyArea.map <- function(map, layerName, layer = NA) {
+setMethod("studyArea",
+          "map",
+          definition= function(map, layerName, layer = NA) {
   if (sum(map@metadata$studyArea, na.rm = TRUE)) {
     if (isTRUE(is.na(layer))) {
       layer <- max(map@metadata$studyArea, na.rm = TRUE)
@@ -585,7 +588,22 @@ studyArea.map <- function(map, layerName, layer = NA) {
   } else {
     NULL
   }
-}
+})
+
+setGeneric("studyArea<-",function(map, value) {
+  standardGeneric("studyArea<-")
+})
+
+#' @export
+#' @family mapMethods
+#' @rdname studyArea
+setReplaceMethod("studyArea", signature = "map",
+                 definition = function(map, value) {
+                   browser()
+                   metadata <- studyArea(map)
+                   ln <- metadata@layerName
+
+                 })
 
 #' Extract the rasterToMatch(s) from a \code{map}
 #'
