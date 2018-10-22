@@ -5,7 +5,7 @@
 #' @param memRequiredMB The amount of memory needed in MB
 #' @param maxNumClusters The maximum number of nodes to use
 #'
-optimalClusterNum <- function(memRequiredMB = 5000, maxNumClusters = 1) {
+optimalClusterNum <- function(memRequiredMB = 500, maxNumClusters = 1) {
   if (Sys.info()["sysname"] == "Linux") {
     detectedNumCores <- parallel::detectCores()
     shouldUseCluster <- (maxNumClusters > 0)
@@ -50,6 +50,9 @@ optimalClusterNum <- function(memRequiredMB = 5000, maxNumClusters = 1) {
 makeOptimalCluster <- function(useParallel = getOption("map.useParallel", FALSE),
                                MBper = 5e3,
                                maxNumClusters = parallel::detectCores(), ...) {
+  cl <- NULL
+  if (is.null(maxNumClusters)) maxNumClusters = parallel::detectCores()
+
   if (!identical("windows", .Platform$OS.type)) {
     numClus <- if (isTRUE(useParallel)) {
       numClus <- optimalClusterNum(MBper, maxNumClusters = maxNumClusters)
@@ -63,11 +66,7 @@ makeOptimalCluster <- function(useParallel = getOption("map.useParallel", FALSE)
 
     if (!is.null(numClus)) {
       cl <- makeForkClusterRandom(numClus, ...)
-    } else {
-      cl <- NULL
     }
-  } else {
-    cl <- NULL
   }
   return(cl)
 }

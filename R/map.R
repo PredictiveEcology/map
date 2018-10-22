@@ -228,8 +228,17 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     # Don't run postProcess because that will happen in next mapAdd when obj is
     #   in hand
     args1 <- identifyVectorArgs(fn = list(Cache, preProcess), ls(), environment(), dots)
-    obj <- MapOrLapply(prepInputs, multiple = args1$argsMulti,
+    maxNumClus <- if (length(args1$argsMulti)) {
+      max(unlist(lapply(args1$argsMulti, NROW)), na.rm = TRUE)
+    } else {
+      NULL
+    }
+    cl <- makeOptimalCluster(maxNumClusters = maxNumClus)
+    on.exit(try(stopCluster(cl), silent = TRUE))
+
+    obj <- MapOrLapply(prepInputs, multiple = args1$argsMulti, cl = cl,
                    single = args1$argsSingle, useCache = useCache)
+    tryCatch(stopCluster(cl), error = function(x) invisible())
     if (is(obj, "list")) # note is.list returns TRUE for data.frames ... BAD
       names(obj) <- layerName
   }
@@ -286,16 +295,12 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialObjects"),
                                             projectInputs, cropInputs, writeOutputs),
                                   ls(), environment(), dots = dots)
-      obj <- MapOrLapply(postProcess, multiple = args1$argsMulti,
+      cl <- makeOptimalCluster(maxNumClusters = length(obj))
+      on.exit(try(stopCluster(cl), silent = TRUE))
+      obj <- MapOrLapply(postProcess, multiple = args1$argsMulti, cl = cl,
                      single = args1$argsSingle, useCache = useCache)
+      try(stopCluster(cl), silent = TRUE)
     }
-  }
-
-  ## TODO: remove the block below
-  if (FALSE) {
-    aaa <<- 1
-    on.exit(rm(aaa, envir = .GlobalEnv))
-    browser(expr = exists("aaa"))
   }
 
   ###############################################
@@ -405,6 +410,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                        single = args1$argsSingle, useCache = FALSE, cl = cl)
                 # If the rasters are identical, then there may be
                               # errors
+    tryCatch(stopCluster(cl), error = function(x) invisible())
 
   }
 
