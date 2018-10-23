@@ -64,28 +64,4 @@ setMethod("initialize", "map",
             .Object
 })
 
-if (!isGeneric("paths")) {
-  setGeneric(
-    "paths",
-    function(object) {
-      standardGeneric("paths")
-    })
-}
-
-#' Get the paths of an object
-#'
-#' TODO: description needed
-#'
-#' @exportMethod paths
-#' @importFrom reproducible .tagsByClass
-#' @importFrom reproducible .grepSysCalls
-#' @importMethodsFrom reproducible .tagsByClass
-#' @rdname paths
-#'
-setMethod(
-  "paths",
-  signature = "map",
-  definition = function(object) {
-    object@paths
-})
 
