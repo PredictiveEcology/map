@@ -211,7 +211,8 @@ mapAdd <- function(obj, map, layerName,
 mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            overwrite = getOption("map.overwrite"),
                            columnNameForLabels = 1,
-                           leaflet = TRUE, isStudyArea = FALSE,
+                           leaflet = FALSE, isStudyArea = FALSE,
+                           isRasterToMatch = FALSE,
                            envir = NULL, useCache = TRUE,
                            useParallel = getOption("map.useParallel"),
                            ...) {
@@ -294,7 +295,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialObjects"),
                                             projectInputs, cropInputs, writeOutputs),
                                   ls(), environment(), dots = dots)
-      cl <- makeOptimalCluster(maxNumClusters = length(obj))
+      cl <- makeOptimalCluster(maxNumClusters = length(args1$argsMulti))
       on.exit(try(stopCluster(cl), silent = TRUE))
       obj <- MapOrLapply(postProcess, multiple = args1$argsMulti, cl = cl,
                      single = args1$argsSingle, useCache = useCache)
@@ -599,10 +600,10 @@ setGeneric("studyArea<-",function(map, value) {
 #' @rdname studyArea
 setReplaceMethod("studyArea", signature = "map",
                  definition = function(map, value) {
-                   browser()
-                   metadata <- studyArea(map)
-                   ln <- metadata@layerName
-
+                   metadata <- studyAreaName(map)
+                   ln <- metadata$layerName
+                   map[[ln]] <- value
+                   map
                  })
 
 #' Extract the rasterToMatch(s) from a \code{map}
@@ -631,7 +632,7 @@ rasterToMatch.map <- function(map, layerName, layer = NA) {
     if (isTRUE(is.na(layer))) {
       layer <- max(map@metadata$rasterToMatch, na.rm = TRUE)
     }
-    get(map@metadata[rasterToMatch == layer, layerName], map@.xData)
+    get(map@metadata[rasterToMatch == layer, ]$layerName, map@.xData)
   } else {
     NULL
   }
@@ -866,7 +867,8 @@ identifyVectorArgs <- function(fn, localFormalArgs, envir, dots) {
 
   allArgs <- getLocalArgsFor(fn, localFormalArgs, envir = envir, dots = dots)
 
-  specialTypes = c("environment", "SpatialPolygons")
+  # These types don't correctly work with "length", so omit them from search
+  specialTypes = c("environment", "SpatialPolygons", "RasterLayer", "RasterStack", "RasterBrick")
   lengthOne <- unlist(lapply(allArgs, is.null)) | unlist(lapply(allArgs, function(x) {
     if (any(unlist(lapply(specialTypes, is, obj = x))) | length(x)==1) {
       TRUE

@@ -2,6 +2,8 @@
 #'
 #' @param metadata TODO: description needed
 #' @param isStudyArea TODO: description needed
+#' @param isRasterToMatch Logical. Is this(these) layer(s) the \code{rasterToMatch} layers.
+#'        If \code{TRUE}, then this layer can be accessed by \code{rasterToMatch(map)}
 #' @param layerName TODO: description needed
 #' @param object TODO: description needed
 #' @param columnNameForLabels TODO: description needed
@@ -11,7 +13,8 @@
 #' @param ... Additional arguments.
 #'
 #' @rdname buildMetadata
-buildMetadata <- function(metadata, isStudyArea, layerName,
+buildMetadata <- function(metadata, isStudyArea, isRasterToMatch,
+                          layerName,
                           obj, columnNameForLabels, objHash,
                           leaflet, envir, ...) {
 
@@ -24,6 +27,12 @@ buildMetadata <- function(metadata, isStudyArea, layerName,
                                                (is.numeric(studyArea) & studyArea > 0)])
     set(b, NULL, "studyArea", studyAreaNumber)
   }
+  if (isTRUE(isRasterToMatch)) {
+    rasterToMatchNumber <- 1 + NROW(metadata[compareNA(rasterToMatch, TRUE) |
+                                           (is.numeric(rasterToMatch) & rasterToMatch > 0)])
+    set(b, NULL, "rasterToMatch", rasterToMatchNumber)
+  }
+
   if (!is.null(dots$url))
     set(b, NULL, "url", dots$url)
   set(b, NULL, "layerName", layerName)
