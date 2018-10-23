@@ -79,8 +79,7 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasse
   if (is(poly, "SpatialPolygons")) {
     if (!"shinyLabel" %in% colnames(poly@data))
       stop("poly must have a column 'shinyLabel'")
-    poly <- Cache(fasterize2, rasTsf, poly,
-                 field = "polygonNum")
+    poly <- Cache(fasterize2, rasTsf, poly, field = "polygonNum")
   }
   levs <- raster::levels(poly)[[1]]
 

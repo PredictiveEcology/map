@@ -218,6 +218,8 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            ...) {
 
   dots <- list(...)
+  if (is.null(layerName))
+    stop("layerName is not optional. Please specify.")
 
   # Some of the arguments will need to be passed into Cache
   ###########################################
@@ -628,13 +630,12 @@ setReplaceMethod("studyArea", signature = "map",
                  })
 
 
-if (!isGeneric("rasterToMatch")) {
-  setGeneric(
-    "rasterToMatch",
-    function(x, ...) {
-      standardGeneric("rasterToMatch")
-    })
-}
+#' @export
+setGeneric(
+  "rasterToMatch",
+  function(x, ...) {
+    standardGeneric("rasterToMatch")
+  })
 
 
 #' Extract the rasterToMatch(s) from a \code{x}
@@ -647,6 +648,7 @@ if (!isGeneric("rasterToMatch")) {
 #' @param layer TODO: describe this
 #'
 #' @export
+#' @exportMethod rasterToMatch
 #' @family mapMethods
 #' @rdname rasterToMatch
 setMethod("rasterToMatch", signature = "map",

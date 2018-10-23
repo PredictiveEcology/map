@@ -8,11 +8,11 @@
 \alias{studyArea<-,map-method}
 \title{Extract the studyArea(s) from a \code{map}}
 \usage{
-studyArea(map, layer = NA, largestFirst = FALSE)
+studyArea(map, layer = NA, sorted = FALSE)
 
-\S4method{studyArea}{ANY}(map, layer = NA, largestFirst = FALSE)
+\S4method{studyArea}{ANY}(map, layer = NA, sorted = FALSE)
 
-\S4method{studyArea}{map}(map, layer = NA, largestFirst = FALSE)
+\S4method{studyArea}{map}(map, layer = NA, sorted = FALSE)
 
 \S4method{studyArea}{map}(map, layer = NA) <- value
 }
@@ -21,7 +21,9 @@ studyArea(map, layer = NA, largestFirst = FALSE)
 
 \item{layer}{TODO: document this}
 
-\item{layerName}{TODO: document this}
+\item{sorted}{Logical. Should the numeric \code{layer} be referring to
+geographic area of the \code{area} or the order that
+the \code{studyArea} were placed into map object}
 }
 \description{
 If \code{layer} is not provided and there is more than one \code{studyArea},
