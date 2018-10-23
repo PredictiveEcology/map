@@ -562,7 +562,7 @@ studyAreaName.map <- function(map, layerName, layer = 1) {
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-setGeneric("studyArea",function(map, layerName, layer = NA) {
+setGeneric("studyArea",function(map, layer = NA) {
   standardGeneric("studyArea")
 })
 
@@ -570,7 +570,7 @@ setGeneric("studyArea",function(map, layerName, layer = NA) {
 #' @family mapMethods
 #' @rdname studyArea
 setMethod("studyArea", "ANY",
-          definition = function(map, layerName, layer = NA) {
+          definition = function(map, layer = NA) {
   NULL
 })
 
@@ -579,7 +579,7 @@ setMethod("studyArea", "ANY",
 #' @rdname studyArea
 setMethod("studyArea",
           "map",
-          definition= function(map, layerName, layer = NA) {
+          definition= function(map, layer = NA) {
   if (sum(map@metadata$studyArea, na.rm = TRUE)) {
     if (isTRUE(is.na(layer))) {
       layer <- max(map@metadata$studyArea, na.rm = TRUE)
@@ -613,21 +613,19 @@ setReplaceMethod("studyArea", signature = "map",
 #'
 #' @param map TODO: describe this
 #'
-#' @param layerName TODO: describe this
-#'
 #' @param layer TODO: describe this
 #'
 #' @export
 #' @family mapMethods
 #' @rdname rasterToMatch
-rasterToMatch <- function(map, layerName, layer) {
+rasterToMatch <- function(map, layer) {
   UseMethod("rasterToMatch")
 }
 
 #' @export
 #' @family mapMethods
 #' @rdname rasterToMatch
-rasterToMatch.map <- function(map, layerName, layer = NA) {
+rasterToMatch.map <- function(map, layer = NA) {
   if (sum(map@metadata$rasterToMatch, na.rm = TRUE)) {
     if (isTRUE(is.na(layer))) {
       layer <- max(map@metadata$rasterToMatch, na.rm = TRUE)
