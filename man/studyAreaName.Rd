@@ -3,23 +3,31 @@
 \name{studyAreaName}
 \alias{studyAreaName}
 \alias{studyAreaName.map}
+\alias{studyAreaName.data.table}
 \title{Map class methods}
 \usage{
-studyAreaName(map, layerName, layer)
+studyAreaName(x, layer)
 
-\method{studyAreaName}{map}(map, layerName, layer = 1)
+\method{studyAreaName}{map}(x, layer = 1)
+
+\method{studyAreaName}{data.table}(x, layer = 1)
 }
 \arguments{
-\item{map}{TODO: document this}
-
-\item{layerName}{TODO: document this}
+\item{x}{TODO: document this}
 
 \item{layer}{TODO: document this}
+
+\item{layerName}{TODO: document this}
 }
 \description{
 Tools for getting objects and metadata in and out of a \code{map} class.
 }
 \seealso{
+Other mapMethods: \code{\link{area,map-method}},
+  \code{\link{crs,map-method}}, \code{\link{mapRm}},
+  \code{\link{rasterToMatch,map-method}},
+  \code{\link{rasters}}, \code{\link{studyArea}}
+
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
   \code{\link{rasterToMatch,map-method}},

@@ -524,7 +524,7 @@ setMethod("crs",
 #'
 #' Tools for getting objects and metadata in and out of a \code{map} class.
 #'
-#' @param map TODO: document this
+#' @param x TODO: document this
 #'
 #' @param layerName TODO: document this
 #'
@@ -533,16 +533,33 @@ setMethod("crs",
 #' @export
 #' @family mapMethods
 #' @rdname studyAreaName
-studyAreaName <- function(map, layerName, layer) {
+studyAreaName <- function(x, layer) {
   UseMethod("studyAreaName")
 }
 
 #' @export
 #' @family mapMethods
 #' @rdname studyAreaName
-studyAreaName.map <- function(map, layerName, layer = 1) {
-  if (sum(map@metadata$studyArea)) {
-    map@metadata[studyArea == TRUE, layerName][layer]
+studyAreaName.map <- function(x, layer = 1) {
+  if (sum(x@metadata$studyArea, na.rm = TRUE)) {
+    if (isTRUE(is.na(layer))) {
+      layer <- max(x@metadata$studyArea, na.rm = TRUE)
+    }
+    x@metadata[studyArea == layer]$layerName
+  } else {
+    NULL
+  }
+}
+
+#' @export
+#' @family mapMethods
+#' @rdname studyAreaName
+studyAreaName.data.table <- function(x, layer = 1) {
+  if (sum(x$studyArea, na.rm = TRUE)) {
+    if (isTRUE(is.na(layer))) {
+      layer <- max(x$studyArea, na.rm = TRUE)
+    }
+    x[studyArea == layer]$layerName
   } else {
     NULL
   }
@@ -555,14 +572,16 @@ studyAreaName.map <- function(map, layerName, layer = 1) {
 #'
 #' @param map TODO: document this
 #'
-#' @param layerName TODO: document this
+#' @param sorted Logical. Should the numeric \code{layer} be referring to
+#'               geographic area of the \code{area} or the order that
+#'               the \code{studyArea} were placed into map object
 #'
 #' @param layer TODO: document this
 #'
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-setGeneric("studyArea",function(map, layer = NA) {
+setGeneric("studyArea",function(map, layer = NA, sorted = FALSE) {
   standardGeneric("studyArea")
 })
 
@@ -570,7 +589,7 @@ setGeneric("studyArea",function(map, layer = NA) {
 #' @family mapMethods
 #' @rdname studyArea
 setMethod("studyArea", "ANY",
-          definition = function(map, layer = NA) {
+          definition = function(map, layer = NA, sorted = FALSE) {
   NULL
 })
 
@@ -579,19 +598,22 @@ setMethod("studyArea", "ANY",
 #' @rdname studyArea
 setMethod("studyArea",
           "map",
-          definition= function(map, layer = NA) {
-  if (sum(map@metadata$studyArea, na.rm = TRUE)) {
-    if (isTRUE(is.na(layer))) {
-      layer <- max(map@metadata$studyArea, na.rm = TRUE)
-    }
-    get(map@metadata[studyArea == layer]$layerName,
-        map@metadata[studyArea == layer]$envir[[1]])
-  } else {
-    NULL
-  }
-})
+          definition= function(map, layer = NA, sorted = FALSE) {
+            if (isTRUE(sorted)) {
+              studyAreas <- map@metadata[!is.na(map@metadata$studyArea),]
+              mapSorted <- studyAreas[order(area, decreasing = FALSE), ][,studyArea := as.numeric(.I)]
+              san <- studyAreaName(mapSorted, layer = layer)
+            } else {
+              san <- studyAreaName(map, layer = layer)
+            }
+            if (length(san) > 0) {
+              get(san, map@metadata[layerName == san]$envir[[1]])
+            } else {
+              NULL
+            }
+          })
 
-setGeneric("studyArea<-",function(map, value) {
+setGeneric("studyArea<-",function(map, layer = NA, value) {
   standardGeneric("studyArea<-")
 })
 
@@ -599,9 +621,8 @@ setGeneric("studyArea<-",function(map, value) {
 #' @family mapMethods
 #' @rdname studyArea
 setReplaceMethod("studyArea", signature = "map",
-                 definition = function(map, value) {
-                   metadata <- studyAreaName(map)
-                   ln <- metadata$layerName
+                 definition = function(map, layer = NA, value) {
+                   ln <- studyAreaName(map, layer = layer)
                    map[[ln]] <- value
                    map
                  })

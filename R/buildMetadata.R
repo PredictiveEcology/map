@@ -23,9 +23,11 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch,
 
   # If it is studyArea
   if (isTRUE(isStudyArea)) {
+    area <- rgeos::gArea(obj)
     studyAreaNumber <- 1 + NROW(metadata[compareNA(studyArea, TRUE) |
                                                (is.numeric(studyArea) & studyArea > 0)])
     set(b, NULL, "studyArea", studyAreaNumber)
+    set(b, NULL, "area", area)
   }
   if (isTRUE(isRasterToMatch)) {
     rasterToMatchNumber <- 1 + NROW(metadata[compareNA(rasterToMatch, TRUE) |

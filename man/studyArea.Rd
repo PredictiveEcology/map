@@ -8,13 +8,13 @@
 \alias{studyArea<-,map-method}
 \title{Extract the studyArea(s) from a \code{map}}
 \usage{
-studyArea(map, layer = NA)
+studyArea(map, layer = NA, largestFirst = FALSE)
 
-\S4method{studyArea}{ANY}(map, layer = NA)
+\S4method{studyArea}{ANY}(map, layer = NA, largestFirst = FALSE)
 
-\S4method{studyArea}{map}(map, layer = NA)
+\S4method{studyArea}{map}(map, layer = NA, largestFirst = FALSE)
 
-\S4method{studyArea}{map}(map) <- value
+\S4method{studyArea}{map}(map, layer = NA) <- value
 }
 \arguments{
 \item{map}{TODO: document this}
