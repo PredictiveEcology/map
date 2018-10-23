@@ -4,13 +4,16 @@
 \alias{buildMetadata}
 \title{Build \code{map} obj metadata table}
 \usage{
-buildMetadata(metadata, isStudyArea, layerName, obj, columnNameForLabels,
-  objHash, leaflet, envir, ...)
+buildMetadata(metadata, isStudyArea, isRasterToMatch, layerName, obj,
+  columnNameForLabels, objHash, leaflet, envir, ...)
 }
 \arguments{
 \item{metadata}{TODO: description needed}
 
 \item{isStudyArea}{TODO: description needed}
+
+\item{isRasterToMatch}{Logical. Is this(these) layer(s) the \code{rasterToMatch} layers.
+If \code{TRUE}, then this layer can be accessed by \code{rasterToMatch(map)}}
 
 \item{layerName}{TODO: description needed}
 

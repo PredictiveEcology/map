@@ -606,35 +606,39 @@ setReplaceMethod("studyArea", signature = "map",
                    map
                  })
 
-#' Extract the rasterToMatch(s) from a \code{map}
+
+if (!isGeneric("rasterToMatch")) {
+  setGeneric(
+    "rasterToMatch",
+    function(x, ...) {
+      standardGeneric("rasterToMatch")
+    })
+}
+
+
+#' Extract the rasterToMatch(s) from a \code{x}
 #'
 #' If \code{layer} is not provided and there is more than one \code{studyArea},
 #' then this will extract the last one added.
 #'
-#' @param map TODO: describe this
+#' @param x TODO: describe this
 #'
 #' @param layer TODO: describe this
 #'
 #' @export
 #' @family mapMethods
 #' @rdname rasterToMatch
-rasterToMatch <- function(map, layer) {
-  UseMethod("rasterToMatch")
-}
-
-#' @export
-#' @family mapMethods
-#' @rdname rasterToMatch
-rasterToMatch.map <- function(map, layer = NA) {
-  if (sum(map@metadata$rasterToMatch, na.rm = TRUE)) {
+setMethod("rasterToMatch", signature = "map",
+          definition = function(x, layer = 1) {
+  if (sum(x@metadata$rasterToMatch, na.rm = TRUE)) {
     if (isTRUE(is.na(layer))) {
-      layer <- max(map@metadata$rasterToMatch, na.rm = TRUE)
+      layer <- max(x@metadata$rasterToMatch, na.rm = TRUE)
     }
-    get(map@metadata[rasterToMatch == layer, ]$layerName, map@.xData)
+    get(x@metadata[rasterToMatch == layer, ]$layerName, x@.xData)
   } else {
     NULL
   }
-}
+})
 
 #' Extract rasters in the \code{map} obj
 #' @export

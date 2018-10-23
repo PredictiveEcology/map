@@ -15,7 +15,8 @@ Calculate area of (named) objects the \code{map} obj
 }
 \seealso{
 Other mapMethods: \code{\link{crs,map-method}},
-  \code{\link{mapRm}}, \code{\link{rasterToMatch}},
+  \code{\link{mapRm}},
+  \code{\link{rasterToMatch,map-method}},
   \code{\link{rasters}}, \code{\link{studyAreaName}},
   \code{\link{studyArea}}
 }

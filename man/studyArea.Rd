@@ -8,20 +8,20 @@
 \alias{studyArea<-,map-method}
 \title{Extract the studyArea(s) from a \code{map}}
 \usage{
-studyArea(map, layerName, layer = NA)
+studyArea(map, layer = NA)
 
-\S4method{studyArea}{ANY}(map, layerName, layer = NA)
+\S4method{studyArea}{ANY}(map, layer = NA)
 
-\S4method{studyArea}{map}(map, layerName, layer = NA)
+\S4method{studyArea}{map}(map, layer = NA)
 
 \S4method{studyArea}{map}(map) <- value
 }
 \arguments{
 \item{map}{TODO: document this}
 
-\item{layerName}{TODO: document this}
-
 \item{layer}{TODO: document this}
+
+\item{layerName}{TODO: document this}
 }
 \description{
 If \code{layer} is not provided and there is more than one \code{studyArea},
@@ -30,22 +30,22 @@ then this will extract the last one added.
 \seealso{
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasterToMatch}}, \code{\link{rasters}},
-  \code{\link{studyAreaName}}
+  \code{\link{rasterToMatch,map-method}},
+  \code{\link{rasters}}, \code{\link{studyAreaName}}
 
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasterToMatch}}, \code{\link{rasters}},
-  \code{\link{studyAreaName}}
+  \code{\link{rasterToMatch,map-method}},
+  \code{\link{rasters}}, \code{\link{studyAreaName}}
 
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasterToMatch}}, \code{\link{rasters}},
-  \code{\link{studyAreaName}}
+  \code{\link{rasterToMatch,map-method}},
+  \code{\link{rasters}}, \code{\link{studyAreaName}}
 
 Other mapMethods: \code{\link{area,map-method}},
   \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasterToMatch}}, \code{\link{rasters}},
-  \code{\link{studyAreaName}}
+  \code{\link{rasterToMatch,map-method}},
+  \code{\link{rasters}}, \code{\link{studyAreaName}}
 }
 \concept{mapMethods}
