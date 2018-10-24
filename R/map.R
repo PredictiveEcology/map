@@ -235,7 +235,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     } else {
       0
     }
-    message("  Running prepInputs for: ", paste(layerNames, collapse = ", "))
+    message("  Running prepInputs for: ", paste(layerName, collapse = ", "))
     cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
     on.exit(try(stopCluster(cl), silent = TRUE))
 
@@ -304,7 +304,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
         0
       }
 
-      message("  Fixing, cropping, reprojecting, masking: ", paste(layerNames, collapse = ", "))
+      message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
       cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
       on.exit(try(stopCluster(cl), silent = TRUE))
       obj <- MapOrLapply(postProcess, multiple = args1$argsMulti, cl = cl,
