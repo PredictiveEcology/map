@@ -240,7 +240,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     on.exit(try(stopCluster(cl), silent = TRUE))
 
     obj <- MapOrLapply(prepInputs, multiple = args1$argsMulti, cl = cl,
-                   single = args1$argsSingle, useCache = useCache)
+                       single = args1$argsSingle, useCache = useCache)
     tryCatch(stopCluster(cl), error = function(x) invisible())
     if (is(obj, "list")) # note is.list returns TRUE for data.frames ... BAD
       names(obj) <- layerName
@@ -308,7 +308,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
       on.exit(try(stopCluster(cl), silent = TRUE))
       obj <- MapOrLapply(postProcess, multiple = args1$argsMulti, cl = cl,
-                     single = args1$argsSingle, useCache = useCache)
+                         single = args1$argsSingle, useCache = useCache)
       try(stopCluster(cl), silent = TRUE)
     }
   }
@@ -337,7 +337,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                               c(x = "obj", columnNameForLabels = "columnNameForLabels"),
                               environment(), dots = dots)
   obj <- MapOrLapply(addColumnNameForLabels, multiple = args1$argsMulti,
-              single = args1$argsSingle, useCache = useCache)
+                     single = args1$argsSingle, useCache = useCache)
 
   ####################################################
   # Assign obj to map@.xData
@@ -418,8 +418,8 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
     out <- MapOrLapply(makeTiles, multiple = args1$argsMulti,
                        single = args1$argsSingle, useCache = FALSE, cl = cl)
-                # If the rasters are identical, then there may be
-                              # errors
+    # If the rasters are identical, then there may be
+    # errors
     tryCatch(stopCluster(cl), error = function(x) invisible())
 
   }
@@ -600,8 +600,8 @@ setGeneric("studyArea",function(map, layer = NA, sorted = FALSE) {
 #' @rdname studyArea
 setMethod("studyArea", "ANY",
           definition = function(map, layer = NA, sorted = FALSE) {
-  NULL
-})
+            NULL
+          })
 
 #' @export
 #' @family mapMethods
@@ -661,15 +661,15 @@ setGeneric(
 #' @rdname rasterToMatch
 setMethod("rasterToMatch", signature = "map",
           definition = function(x, layer = 1) {
-  if (sum(x@metadata$rasterToMatch, na.rm = TRUE)) {
-    if (isTRUE(is.na(layer))) {
-      layer <- max(x@metadata$rasterToMatch, na.rm = TRUE)
-    }
-    get(x@metadata[rasterToMatch == layer, ]$layerName, x@.xData)
-  } else {
-    NULL
-  }
-})
+            if (sum(x@metadata$rasterToMatch, na.rm = TRUE)) {
+              if (isTRUE(is.na(layer))) {
+                layer <- max(x@metadata$rasterToMatch, na.rm = TRUE)
+              }
+              get(x@metadata[rasterToMatch == layer, ]$layerName, x@.xData)
+            } else {
+              NULL
+            }
+          })
 
 #' Extract rasters in the \code{map} obj
 #' @export
@@ -934,13 +934,13 @@ identifyVectorArgs <- function(fn, localFormalArgs, envir, dots) {
 MapOrLapply <- function(fn, multiple, single, useCache, cl = NULL) {
   if (length(multiple)) {
     obj <- do.call(Cache, args = append(multiple, list(Map2, fn,
-                                               MoreArgs = single,
-                                               cl = cl, useCache = useCache)))
+                                                       MoreArgs = single,
+                                                       cl = cl, useCache = useCache)))
   } else {
     if (!missing(useCache))
       single[["useCache"]] <- useCache
     obj <- do.call(Cache, args = append(list(fn),
-                                           single))
+                                        single))
   }
   obj
 
