@@ -235,7 +235,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     } else {
       0
     }
-    cl <- makeOptimalCluster(maxNumClusters = maxNumClus)
+    cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
     on.exit(try(stopCluster(cl), silent = TRUE))
 
     obj <- MapOrLapply(prepInputs, multiple = args1$argsMulti, cl = cl,
@@ -297,7 +297,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialObjects"),
                                             projectInputs, cropInputs, writeOutputs),
                                   ls(), environment(), dots = dots)
-      cl <- makeOptimalCluster(maxNumClusters = length(args1$argsMulti))
+      cl <- makeOptimalCluster(maxNumClusters = length(args1$argsMulti), useParallel = useParallel)
       on.exit(try(stopCluster(cl), silent = TRUE))
       obj <- MapOrLapply(postProcess, multiple = args1$argsMulti, cl = cl,
                      single = args1$argsSingle, useCache = useCache)
