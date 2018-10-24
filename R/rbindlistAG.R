@@ -26,7 +26,6 @@ rbindlistAG <- function(map, functionName, analysisGroups) {
   names(polys) <- polys
   out <- lapply(polys, function(poly) {
     postGroup <- lpNames[grep(paste0("\\._\\.", poly, "$"), lpNames)]
-    data.table::rbindlist(unlist(map@analysesData[[functionName]][postGroup], recursive = FALSE),
-                          idcol = "group")
+    data.table::rbindlist(map@analysesData[[functionName]][postGroup], idcol = "group")
   })
 }
