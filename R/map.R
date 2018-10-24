@@ -754,10 +754,16 @@ leafletTiles <- function(map) {
 #' @export
 #' @return
 #' A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
-maps <- function(map, class = NULL) {
-  x <- map@metadata$layerName
+maps <- function(map, class = NULL, layerName = NULL) {
+  if (!is.null(layerName)) {
+    layers <- layerName
+    meta <- map@metadata[layerName %in% layers]
+  } else {
+    meta <- map@metadata
+  }
+  x <- meta$layerName
   names(x) <- x
-  envirs <- map@metadata$envir
+  envirs <- meta$envir
   names(envirs) <- x
   out <- Map(envir = envirs, x = x,
              function(envir, x)
