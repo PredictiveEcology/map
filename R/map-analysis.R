@@ -141,7 +141,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
       map@analysesData[[funName]]$.Completed <- names(out3[fromFunName])
     }
   } else {
-    message("  ", functionName, " already run on all layers")
+    message("  ", paste(functionName, collapse = ", "), " already run on all layers")
   }
   map
 }
