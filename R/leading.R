@@ -40,8 +40,7 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasse
   rasTsf <- reclassify(
     timeSinceFireFilesRast,
     cbind(
-      from = ageClassCutOffs[-length(ageClassCutOffs)] -
-        0.1,
+      from = ageClassCutOffs[-length(ageClassCutOffs)] - 0.1,
       to = ageClassCutOffs[-1],
       seq_along(ageClasses)
     )
