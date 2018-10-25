@@ -15,7 +15,7 @@
 
 #' @export
 #' @importFrom data.table setnames
-#' @importFrom tools toTitleCases
+#' @importFrom tools toTitleCase
 runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
 
   allRepPolys <- na.omit(map@metadata[[analysisGroups]])
