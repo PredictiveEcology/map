@@ -34,6 +34,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
     dataCC <- dataCC[, c("group", "polygonID", "label", "NPixels") := list(NULL, NULL, NULL, NULL)]
 
     data2 <- dataCC[data, on = .(zone, vegCover, ageClass)]
+    write.csv(data2, file.path(Paths$outputPath, paste0("leading_", poly, ".csv")))
 
     saveDir <- checkPath(file.path(dPath, poly), create = TRUE)
     savePng <- quote(file.path(saveDir, paste0(unique(paste(zone, vegCover, collapse = " ")), ".png")))

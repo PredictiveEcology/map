@@ -143,8 +143,6 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasse
   message("    Leading cover calculation took ",
           format(endTime - startTime, digits = 2))
 
-  ## TODO: write csv of the data.table to polygon-specific file
-  #write.csv(tabulated, file.path(Paths$outputPath, paste0("leading", polyName, ".csv")))
   return(tabulated)
 }
 
