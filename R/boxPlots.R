@@ -14,8 +14,7 @@
 }
 
 #' @export
-runBoxPlotsVegCover <- function(map, dt, analysisGroups, dPath) {
-  browser()
+runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
 
   allRepPolys <- na.omit(map@metadata[[analysisGroups]])
   names(allRepPolys) <- allRepPolys
@@ -23,20 +22,22 @@ runBoxPlotsVegCover <- function(map, dt, analysisGroups, dPath) {
   CCpnts <- "" ## TODO: points from CC
 
   lapply(allRepPolys, function(poly) {
-    data <- map@analysesData[[dt]][["LeadingVegTypeByAgeClass"]][[poly]]
+    data <- map@analysesData[[functionName]][["LeadingVegTypeByAgeClass"]][[poly]]
     #par(mfrow = c(3,4))
     saveDir <- checkPath(file.path(dPath, poly), create = TRUE)
+    savePng <- quote(file.path(saveDir, paste0(unique(paste(zone, vegCover, collapse = " ")), ".png")))
+    slices <- c("zone", "vegCover")
     out <- data[, .doPlotBoxplot(data = .SD,
                                  authStatus = TRUE,
                                  CCpnts = CCpnts,
                                  col = "limegreen",
-                                 fname = file.path(saveDir, paste0(unique(paste(zone, vegCover, collapse = " "))), ".png"),
+                                 fname = eval(savePng),
                                  horizontal = TRUE,
                                  main = unique(paste(zone, vegCover, collapse = "_")),
                                  xlab = paste0("Proportion of of forest area (total ", sum(NPixels, na.rm = TRUE) * res(rasterToMatch(ml))[1]^2/1e4 , " ha)"),
                                  ylab = "Age class",
                                  ylim = c(0, 1)),
-                .SDcols = c("ageClass", "proportion", "NPixels"), by = c("zone", "vegCover")]
-    out
+                .SDcols = c("ageClass", "proportion", "NPixels"), by = slices]
+    data[, eval(savePng), by = slices]
   })
 }
