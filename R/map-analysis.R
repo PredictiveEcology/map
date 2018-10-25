@@ -117,7 +117,6 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
       }
     })
 
-    browser()
     cl <- makeOptimalCluster(useParallel, maxNumClusters = NROW(combosToDoDT))
     on.exit(try(stopCluster(cl), silent = TRUE))
 
