@@ -78,7 +78,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
   AGsByFunName <- lapply(functionName, function(funName) {
     names(args1[[funName]])
   })
-browser()
+
   # Corrected for analysis groups that are relevant to each functionName
   combosAll <- Map(agsByFunName = AGsByFunName,
                    MoreArgs = list(ags = ags),
@@ -141,7 +141,7 @@ browser()
       map@analysesData[[funName]]$.Completed <- names(out3[fromFunName])
     }
   } else {
-    message("  ", functionName, " already run on all layers")
+    message("  ", paste(functionName, collapse = ", "), " already run on all layers")
   }
   map
 }
@@ -214,11 +214,10 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
   if (is.null(postHocAnalysisGroups))
     stop("postHocAnalysisGroups cannot be NULL. It should be one of the column names ",
          "in metadata(map) that starts with 'analysisGroup'")
-  b <- if (length(dots)) {
-    data.table(functionName = functionName, t(dots))
-  } else {
-    data.table(functionName = functionName, postHocAnalysisGroups = postHocAnalysisGroups,
-               postHocAnalyses = postHocAnalyses, postHoc = TRUE)
+  b <- data.table(functionName = functionName, postHocAnalysisGroups = postHocAnalysisGroups,
+                  postHocAnalyses = postHocAnalyses, postHoc = TRUE)
+  if (length(dots)) {
+    b <- data.table(b, t(dots))
   }
   prevEntry <- map@analyses$functionName == functionName
   purgeAnalyses <- NULL # Set default as NULL
@@ -257,6 +256,8 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
   } else {
     compareNA(map@analyses$postHoc, TRUE)
   }
+
+  # First run all primary analyses
   if (NROW(map@analyses[!isPostHoc])) {
     funName <- map@analyses$functionName[!isPostHoc]
     map <- mapAnalysis(map, funName, purgeAnalyses = purgeAnalyses)
@@ -267,6 +268,9 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
     out <- tryCatch(
       by(map@analyses[isPostHoc], map@analyses$functionName[isPostHoc],
          function(x) {
+           fn <- get(x$functionName)
+           forms <- formalArgs(fn)
+           forms <- forms[!forms %in% c("map", "functionName", "analysisGroups")]
            phas <- if (identical(x$postHocAnalyses, "all")) {
              map@analyses[!isPostHoc]$functionName
            } else {
@@ -275,8 +279,10 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
            names(phas) <- phas
            out2 <- lapply(phas, function(pha) {
              message("    Running ", x$functionName, " on ", pha)
-             ma <- get(x$functionName)(map = map, pha,
-                                       analysisGroups = x$postHocAnalysisGroups)
+             ma <- do.call(get(x$functionName), append(list(map = map,
+                                                      functionName = pha,
+                                                      analysisGroups = x$postHocAnalysisGroups),
+                                               unlist(as.list(x[ , forms, with = FALSE]))))
            })
            out2
          }),
@@ -313,6 +319,7 @@ getFormalsFromMetadata <- function(metadata, combo, AGs, funName) {
 }
 
 expandAnalysisGroups <- function(ags) {
+  combosAll <- NULL
    if (any(unlist(lapply(ags, function(x) length(x > 0))))) {
      combosAll <- do.call(expand.grid, args = append(list(stringsAsFactors = FALSE),
                                                      lapply(ags, function(x) x)))
