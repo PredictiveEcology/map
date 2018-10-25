@@ -14,30 +14,41 @@
 }
 
 #' @export
+#' @importFrom data.table setnames
+#' @importFrom tools toTitleCases
 runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
 
   allRepPolys <- na.omit(map@metadata[[analysisGroups]])
   names(allRepPolys) <- allRepPolys
 
-  CCpnts <- "" ## TODO: points from CC
-
   lapply(allRepPolys, function(poly) {
-    data <- map@analysesData[[functionName]][["LeadingVegTypeByAgeClass"]][[poly]]
-    #par(mfrow = c(3,4))
+    allData <- map@analysesData[[functionName]][["LeadingVegTypeByAgeClass"]][[poly]]
+    allData$vegCover <- gsub(" leading", "", allData$vegCover) %>%
+      tools::toTitleCase() %>%
+      as.factor() ## match CC raster names
+
+    data <- allData[!grepl("CC", group)]
+
+    dataCC <- allData[grepl("CC", group)]
+    setnames(dataCC, "proportion", "proportionCC") ## rename the column to proportionCC
+    dataCC <- dataCC[, c("group", "polygonID", "label", "NPixels") := list(NULL, NULL, NULL, NULL)]
+
+    data2 <- dataCC[data, on = .(zone, vegCover, ageClass)]
+
     saveDir <- checkPath(file.path(dPath, poly), create = TRUE)
     savePng <- quote(file.path(saveDir, paste0(unique(paste(zone, vegCover, collapse = " ")), ".png")))
     slices <- c("zone", "vegCover")
-    out <- data[, .doPlotBoxplot(data = .SD,
-                                 authStatus = TRUE,
-                                 CCpnts = CCpnts,
-                                 col = "limegreen",
-                                 fname = eval(savePng),
-                                 horizontal = TRUE,
-                                 main = unique(paste(zone, vegCover, collapse = "_")),
-                                 xlab = paste0("Proportion of of forest area (total ", sum(NPixels, na.rm = TRUE) * res(rasterToMatch(ml))[1]^2/1e4 , " ha)"),
-                                 ylab = "Age class",
-                                 ylim = c(0, 1)),
-                .SDcols = c("ageClass", "proportion", "NPixels"), by = slices]
+    out <- data2[, .doPlotBoxplot(data = .SD,
+                                  authStatus = TRUE,
+                                  CCpnts = unique(proportionCC),
+                                  col = "limegreen",
+                                  fname = eval(savePng),
+                                  horizontal = TRUE,
+                                  main = unique(paste(zone, vegCover, collapse = "_")),
+                                  xlab = paste0("Proportion of of forest area (total ", sum(NPixels, na.rm = TRUE) * res(rasterToMatch(ml))[1]^2/1e4 , " ha)"),
+                                  ylab = "Age class",
+                                  ylim = c(0, 1)),
+                 .SDcols = c("ageClass", "proportion", "proportionCC", "NPixels"), by = slices]
     data[, list(filename = eval(savePng)), by = slices]
   })
 }
