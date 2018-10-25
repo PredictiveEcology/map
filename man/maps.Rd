@@ -28,7 +28,7 @@ spatialPolygons(map)
 
 spatialPoints(map)
 
-maps(map, class = NULL)
+maps(map, class = NULL, layerName = NULL)
 }
 \arguments{
 \item{map}{A \code{map} class obj}
