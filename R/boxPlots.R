@@ -38,6 +38,6 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
                                  ylab = "Age class",
                                  ylim = c(0, 1)),
                 .SDcols = c("ageClass", "proportion", "NPixels"), by = slices]
-    data[, eval(savePng), by = slices]
+    data[, filename = eval(savePng), by = slices]
   })
 }
