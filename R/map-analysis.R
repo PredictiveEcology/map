@@ -94,10 +94,10 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
   })
 
   combosToDo <- Map(ctd = combosToDo, fn = functionName,
-      function(ctd, fn) ctd[, functionName:=fn])
+      function(ctd, fn) ctd[, functionName := fn])
   combosToDoDT <- rbindlist(combosToDo)
   # clear out empty ones
-  combosToDo <- combosToDo[!unlist(lapply(combosToDo, function(ctd) NROW(ctd)==0))]
+  combosToDo <- combosToDo[!unlist(lapply(combosToDo, function(ctd) NROW(ctd) == 0))]
 
   if (NROW(combosToDoDT)) {
     funNames <- unique(combosToDoDT$functionName)
@@ -136,7 +136,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
       })
 
     for (funName in funNames) {
-      fromFunName <- combosToDoDT$functionName==funName
+      fromFunName <- combosToDoDT$functionName == funName
       map@analysesData[[funName]][names(out3)[fromFunName]] <- out3[fromFunName]
       map@analysesData[[funName]]$.Completed <- names(out3[fromFunName])
     }
@@ -180,7 +180,6 @@ mapAddAnalysis <- function(map, functionName,
   map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
 
   map
-
 }
 
 
@@ -265,7 +264,7 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
 
   # run postHoc analyses
   if (NROW(map@analyses[isPostHoc])) {
-    out <- tryCatch(
+    out <- try(
       by(map@analyses[isPostHoc], map@analyses$functionName[isPostHoc],
          function(x) {
            fn <- get(x$functionName)
@@ -280,13 +279,13 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
            out2 <- lapply(phas, function(pha) {
              message("    Running ", x$functionName, " on ", pha)
              ma <- do.call(get(x$functionName), append(list(map = map,
-                                                      functionName = pha,
-                                                      analysisGroups = x$postHocAnalysisGroups),
-                                               unlist(as.list(x[ , forms, with = FALSE]))))
+                                                        functionName = pha,
+                                                        analysisGroups = x$postHocAnalysisGroups),
+                                                   unlist(as.list(x[ , forms, with = FALSE]))))
            })
            out2
-         }),
-      error = function(x) NULL)
+         })
+    )
     if (!is.null(out)) {
       map@analysesData[names(out)] <- lapply(out, function(x) x)
     } else {
