@@ -1,32 +1,34 @@
 #' Generic analysis for map objects
 #'
 #' This is the workhorse function that runs any analyses described in
-#' \code{map@analyses}. It uses hashing, and will not rerun any analysis that
+#' \code{map@@analyses}. It uses hashing, and will not rerun any analysis that
 #' already ran on identical inputs.
 #'
 #' @inheritParams mapAdd
-#' @importFrom data.table setDT
+#'
 #' @param functionName A function name that will be run on combinations of
-#'   inputs in the map obj. See details.
+#'   inputs in the map object. See details.
 #' @param purgeAnalyses A character string indicating which analysis group
 #'   combination or part thereof (e.g., the name entered into the row under
-#'   \code{analysisGroup2} column of the \code{map@metadata} or a \code{functionName}.
+#'   \code{analysisGroup2} column of the \code{map@@metadata} or a \code{functionName}.
 #'
 #' @details
-#' This function will do a sequence of things. First, it will run \code{expand.grid}
-#' on any columns whose names start with \code{analysisGroup}, creating a factorial
-#' set of analyses as described by these columns. It will assess the combinations
-#' against the arguments used by the functionName. For any analysisGroup that
-#' does not provide the correct arguments for the functionName, these analysisGroups
-#' will be omitted for that particular function. For efficiency, the function will
-#' then assess if any of
-#' these has already been run. For those that have not been run, it will then
-#' run the \code{functionName} on arguments that it finds in the \code{metadata}
-#' slot of the map obj, as well as any arguments passed in here in the \code{...}.
-#' In general, the arguments being passed in here should be fixed across all analyses,
-#' while any that vary by analysis should be entered into the metadata table at the
-#' time of adding the layer to the map, via \code{mapAdd}.
+#' This function will do a sequence of things. First, it will run
+#' \code{expand.grid} on any columns whose names start with
+#' \code{analysisGroup}, creating a factorial set of analyses as described by
+#' these columns. It will assess the combinations against the arguments used by
+#' the \code{functionName}. For any \code{analysisGroup} that does not provide
+#' the correct arguments for the \code{functionName}, these
+#' \code{analysisGroups} will be omitted for that particular function. For
+#' efficiency, the function will then assess if any of these has already been
+#' run. For those that have not been run, it will then run the
+#' \code{functionName} on arguments that it finds in the \code{metadata} slot of
+#' the map obj, as well as any arguments passed in here in the \code{...}. In
+#' general, the arguments being passed in here should be fixed across all
+#' analyses, while any that vary by analysis should be entered into the metadata
+#' table at the time of adding the layer to the map, via \code{mapAdd}.
 #'
+#' @importFrom data.table setDT
 #' @importFrom stats na.omit
 mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
                         useParallel = getOption("map.useParallel"),
@@ -67,24 +69,22 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
   # This is only for the first one to do, as it is just finding the columns required
   # This will be run again inside the combosToDo section below
   args1 <- lapply(functionName, function(funName) {
-    args <- getFormalsFromMetadata(metadata = m, combo = combosAll[1,],
+    args <- getFormalsFromMetadata(metadata = m, combo = combosAll[1, ],
                                    AGs = AGs, funName = funName)
     keepArgs <- unlist(lapply(args, function(arg) length(arg) > 0))
     args[keepArgs]
-
   })
 
   AGsByFunName <- lapply(functionName, function(funName) {
     names(args1[[funName]])
   })
-
+browser()
   # Corrected for analysis groups that are relevant to each functionName
-  combosAll <-Map(agsByFunName = AGsByFunName,
-      MoreArgs = list(ags = ags),
-      function(agsByFunName, ags) {
-    expandAnalysisGroups(ags[agsByFunName])
+  combosAll <- Map(agsByFunName = AGsByFunName,
+                   MoreArgs = list(ags = ags),
+                   function(agsByFunName, ags) {
+                     expandAnalysisGroups(ags[agsByFunName])
   })
-
 
   combosToDo <- Map(cc = combosCompleted, ca = combosAll, function(cc, ca) {
     if (!is.null(cc))
