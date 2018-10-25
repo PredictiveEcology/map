@@ -1,7 +1,6 @@
 
 #' @export
-LargePatches <- function(tsf, vtm, poly, labelColumn,
-                              id, ageClassCutOffs, ageClasses) {
+LargePatches <- function(tsf, vtm, poly, labelColumn, id, ageClassCutOffs, ageClasses) {
   timeSinceFireFilesRast <- Cache(.rasterToMemory, tsf)
 
   tsf <- reclassify(timeSinceFireFilesRast,
@@ -88,6 +87,9 @@ LargePatches <- function(tsf, vtm, poly, labelColumn,
     out <- data.table(polygonID = character(), sizeInHa = numeric(), vegCover = character(),
                       rep = numeric(), ageClass = numeric(), polygonName = numeric())
   }
+
+  ## TODO: write csv of the data.table to polygon-specific file
+  #write.csv(out, file.path(Paths$outputPath, paste0("largePatches_", poly, ".csv")))
   out
 }
 
