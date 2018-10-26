@@ -24,6 +24,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
 
   lapply(allRepPolys, function(poly) {
     allData <- map@analysesData[[functionName]][["LeadingVegTypeByAgeClass"]][[poly]]
+    allData <- unique(allData) ## remove duplicates; resolves LandWeb#89
     allData$vegCover <- gsub(" leading", "", allData$vegCover) %>%
       tools::toTitleCase() %>%
       as.factor() ## match CC raster names
@@ -35,7 +36,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
     setnames(dataCC, "proportion", "proportionCC") ## rename the column to proportionCC
     dataCC <- dataCC[, c("group", "polygonID", "label", "NPixels") := list(NULL, NULL, NULL, NULL)]
 
-    data2 <- dataCC[data, on = .(zone, vegCover, ageClass)] ## TODO: LandWeb#89
+    data2 <- dataCC[data, on = .(zone, vegCover, ageClass)]
     try(write.csv(data2, file.path(Paths$outputPath, paste0("leading_", poly, ".csv"))))
     saveDir <- checkPath(file.path(dPath, poly), create = TRUE)
     savePng <- quote(file.path(saveDir, paste0(unique(paste(zone, vegCover, collapse = " ")), ".png")))
