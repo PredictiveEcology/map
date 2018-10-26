@@ -18,6 +18,7 @@
 #' @importFrom tools toTitleCase
 runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
 
+  ageClasses <- c("Young", "Immature", "Mature", "Old")
   allRepPolys <- na.omit(map@metadata[[analysisGroups]])
   names(allRepPolys) <- allRepPolys
 
@@ -26,6 +27,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
     allData$vegCover <- gsub(" leading", "", allData$vegCover) %>%
       tools::toTitleCase() %>%
       as.factor() ## match CC raster names
+    allData$ageClass <- factor(allData$ageClass, ageClasses)
 
     data <- allData[!grepl("CC", group)]
 
