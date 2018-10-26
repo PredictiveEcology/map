@@ -112,10 +112,13 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasse
 
   tabulated <- rbindlist(list(tabulated, tabulated2), use.names = TRUE, fill = TRUE)
 
+  coverClasses <- raster::levels(rasVeg)[[1]]$Factor
+  coverClasses <- c(levels(coverClasses), "All species")
+
   allCombos <- expand.grid(
     ageClass = ageClasses,
     stringsAsFactors = FALSE,
-    vegCover = raster::levels(rasVeg)[[1]]$Factor,
+    vegCover = coverClasses,
     zone = levs$shinyLabel
   )
   allCombos$polygonID <- match(allCombos$zone, levs$shinyLabel)
