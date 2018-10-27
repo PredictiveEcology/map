@@ -23,7 +23,8 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
   names(allRepPolys) <- allRepPolys
 
   lapply(allRepPolys, function(poly) {
-    allData <- map@analysesData[[functionName]][["LeadingVegTypeByAgeClass"]][[poly]]
+    #allData <- map@analysesData[[functionName]][["LeadingVegTypeByAgeClass"]][[poly]]
+    allData <- map@analysesData[[functionName]][[poly]]
     allData <- unique(allData) ## remove duplicates; resolves LandWeb#89
     allData$vegCover <- gsub(" leading", "", allData$vegCover) %>%
       tools::toTitleCase() %>%
