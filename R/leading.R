@@ -24,7 +24,7 @@
 #' @importFrom utils tail
 #' @importFrom data.table setDT
 #' @export
-LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasses) {
+LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs, ageClasses) {
   # main function code
   startTime <- Sys.time()
   if (tail(ageClassCutOffs, 1) != Inf)
@@ -101,12 +101,14 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasse
   bb[, c("ageClass", "vegCover") := factorValues(ras, ras[][bb$cell], att = c("ageClass", "vegCover"))]
   bb <- na.omit(bb)
 
-  # One species at a time
-  tabulated <- bb[, list(NPixels = .N), by = c("zone", "polygonID", "ageClass", "vegCover")]
+  # One species at a time -- collapse polygons with same 'zone' name
+  #tabulated <- bb[, list(NPixels = .N), by = c("zone", "polygonID", "ageClass", "vegCover")] ## keeps polyID
+  tabulated <- bb[, list(NPixels = .N), by = c("zone", "ageClass", "vegCover")] ## dedupes the zones
   tabulated[, proportion := round(NPixels / sum(NPixels), 4), by = c("zone", "vegCover")]
 
-  # All species
-  tabulated2 <- bb[, list(NPixels = .N), by = c("zone", "polygonID", "ageClass")]
+  # All species -- collapse polygons with same 'zone' name
+  #tabulated2 <- bb[, list(NPixels = .N), by = c("zone", "polygonID", "ageClass")] ## keeps polyID
+  tabulated2 <- bb[, list(NPixels = .N), by = c("zone", "ageClass")] ## dedupes the zones
   tabulated2[, proportion := round(NPixels / sum(NPixels), 4), by = c("zone")]
   set(tabulated2, NULL, "vegCover", "All species")
 
@@ -118,17 +120,18 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasse
 
   allCombos <- expand.grid(
     ageClass = ageClasses,
-    stringsAsFactors = FALSE,
     vegCover = coverClasses,
-    zone = levs$shinyLabel
+    zone = levs$shinyLabel,
+    stringsAsFactors = FALSE
   )
-  allCombos$polygonID <- match(allCombos$zone, levs$shinyLabel)
+  #allCombos$polygonID <- match(allCombos$zone, levs$shinyLabel)
   data.table::setDT(allCombos)
 
   tabulated <- merge(
     tabulated,
     allCombos,
-    by = c("zone", "vegCover", "ageClass", "polygonID"),
+    #by = c("zone", "vegCover", "ageClass", "polygonID"),
+    by = c("zone", "vegCover", "ageClass"),
     all.y = TRUE
   )
   # fill in zeros where there is no value
@@ -138,10 +141,10 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs,  ageClasse
       "label",
       paste(
         tabulated$ageClass,
-        paste(gsub(basename(dirname(tsf)), pattern = "\\.", replacement = ""),
-              basename(tsf), sep = "_"),
+        paste(gsub(basename(dirname(tsf[1])), pattern = "\\.", replacement = ""),
+              basename(tsf[1]), sep = "_"),
         sep = "."
-      ))
+  ))
 
   endTime <- Sys.time()
   message("    Leading cover calculation took ",
