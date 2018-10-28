@@ -7,7 +7,7 @@
     if (length(CCpnts) == 4) {
       points(CCpnts, factor(ageClasses), col = "red", pch = 20, cex = 3)
     } else {
-      message(CCpnts)
+      warning("length(CCpnts) != 4 :\n", CCpnts)
     }
   }
   if (!is.null(fname)) dev.off()
@@ -42,19 +42,19 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
     saveDir <- checkPath(file.path(dPath, poly), create = TRUE)
     savePng <- quote(file.path(saveDir, paste0(unique(paste(zone, vegCover, collapse = " ")), ".png")))
     slices <- c("zone", "vegCover")
-    out <- data2[, tryCatch(.doPlotBoxplot(data = .SD,
-                                      authStatus = TRUE,
-                                      CCpnts = unique(proportionCC),
-                                      col = "limegreen",
-                                      fname = eval(savePng),
-                                      horizontal = TRUE,
-                                      main = unique(paste(zone, vegCover, collapse = "_")),
-                                      xlab = paste0("Proportion of of forest area (total ",
-                                                    sum(NPixels, na.rm = TRUE) *
-                                                      res(rasterToMatch(ml))[1]^2/1e4,
-                                                    " ha)"),
-                                      ylab = "Age class",
-                                      ylim = c(0, 1)),
+    data2[, tryCatch(.doPlotBoxplot(data = .SD,
+                                    authStatus = TRUE,
+                                    CCpnts = unique(proportionCC),
+                                    col = "limegreen",
+                                    fname = eval(savePng),
+                                    horizontal = TRUE,
+                                    main = unique(paste(zone, vegCover, collapse = "_")),
+                                    xlab = paste0("Proportion of of forest area (total ",
+                                                  sum(NPixels, na.rm = TRUE) *
+                                                    res(rasterToMatch(ml))[1]^2/1e4,
+                                                  " ha)"),
+                                    ylab = "Age class",
+                                    ylim = c(0, 1)),
       error = function(e) warning(e)),
       .SDcols = c("ageClass", "proportion", "proportionCC", "NPixels"), by = slices]
     data[, list(filename = eval(savePng)), by = slices]
