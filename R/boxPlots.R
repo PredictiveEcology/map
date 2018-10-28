@@ -4,11 +4,8 @@
   boxplot(proportion~as.factor(ageClass), data, ...)
 
   if (isTRUE(authStatus)) {
-    if (length(CCpnts) == 4) {
-      points(CCpnts, factor(ageClasses), col = "red", pch = 20, cex = 3)
-    } else {
-      warning("length(CCpnts) != 4 :\n", CCpnts)
-    }
+    if (length(CCpnts) == 4) warning("length(CCpnts) != 4; only the first 4 will be used")
+    points(CCpnts[1:4], factor(ageClasses), col = "red", pch = 20, cex = 3)
   }
   if (!is.null(fname)) dev.off()
 }
@@ -23,8 +20,9 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
   names(allRepPolys) <- allRepPolys
 
   lapply(allRepPolys, function(poly) {
-    #allData <- map@analysesData[[functionName]][["LeadingVegTypeByAgeClass"]][[poly]]
-    allData <- map@analysesData[[functionName]][[poly]]
+    allData <- map@analysesData[[functionName]][["LeadingVegTypeByAgeClass"]][[poly]]
+    if (is.null(allData))
+      allData <- map@analysesData[[functionName]][[poly]]
     allData <- unique(allData) ## remove duplicates; with LandWeb#89
     allData$vegCover <- gsub(" leading", "", allData$vegCover) %>%
       tools::toTitleCase() %>%
@@ -44,14 +42,14 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
     slices <- c("zone", "vegCover")
     data2[, tryCatch(.doPlotBoxplot(data = .SD,
                                     authStatus = TRUE,
-                                    CCpnts = unique(proportionCC),
+                                    CCpnts = proportionCC,
                                     col = "limegreen",
                                     fname = eval(savePng),
                                     horizontal = TRUE,
                                     main = unique(paste(zone, vegCover, collapse = "_")),
                                     xlab = paste0("Proportion of of forest area (total ",
                                                   sum(NPixels, na.rm = TRUE) *
-                                                    res(rasterToMatch(ml))[1]^2/1e4,
+                                                    res(rasterToMatch(map))[1]^2/1e4,
                                                   " ha)"),
                                     ylab = "Age class",
                                     ylim = c(0, 1)),
