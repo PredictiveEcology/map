@@ -114,7 +114,8 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs, ageClasses
 
   tabulated <- rbindlist(list(tabulated, tabulated2), use.names = TRUE, fill = TRUE)
 
-  coverClasses <- levels(raster::levels(rasVeg)[[1]]$Factor)
+  coverClasses <- raster::levels(rasVeg)[[1]]$Factor
+  if (is.factor(coverClasses)) coverClasses <- levels(coverClasses)
   if (!("All species" %in% levels(coverClasses)))
     coverClasses <- c(coverClasses, "All species")
 
