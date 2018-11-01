@@ -34,6 +34,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
     dataCC <- allData[grepl("CC", group)]
     setnames(dataCC, "proportion", "proportionCC") ## rename the column to proportionCC
     dataCC <- dataCC[, c("group", "label", "NPixels") := list(NULL, NULL, NULL)]
+
     data2 <- dataCC[data, on = .(zone, vegCover, ageClass)]
     data2[, totalPixels := base::sum(.SD, na.rm = TRUE) / 2, .SDcols = c("NPixels"), by = c("zone")]
 
