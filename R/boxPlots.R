@@ -49,12 +49,13 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
                                     main = unique(paste(zone, vegCover, collapse = "_")),
                                     xlab = paste0("Proportion of of forest area (total ",
                                                   sum(NPixels, na.rm = TRUE) *
-                                                    res(rasterToMatch(map))[1]^2/1e4,
+                                                    res(rasterToMatch(map))[1] *
+                                                    res(rasterToMatch(map))[2] / 1e4,
                                                   " ha)"),
                                     ylab = "Age class",
                                     ylim = c(0, 1)),
       error = function(e) warning(e)),
       .SDcols = c("ageClass", "proportion", "proportionCC", "NPixels"), by = slices]
-    data[, list(filename = eval(savePng)), by = slices]
+    data2[, list(filename = eval(savePng)), by = slices]
   })
 }
