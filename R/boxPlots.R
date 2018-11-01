@@ -20,9 +20,9 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
   names(allRepPolys) <- allRepPolys
 
   lapply(allRepPolys, function(poly) {
-    allData <- map@analysesData[[functionName]][["LeadingVegTypeByAgeClass"]][[poly]]
+    allData <- map@analysesData[[functionName]][["LeadingVegTypeByAgeClass"]][[poly]] ## TODO: remove this old way
     if (is.null(allData))
-      allData <- map@analysesData[[functionName]][[poly]]
+      allData <- map@analysesData[[functionName]][[poly]] ## new way
     allData <- unique(allData) ## remove duplicates; with LandWeb#89
     allData$vegCover <- gsub(" leading", "", allData$vegCover) %>%
       tools::toTitleCase() %>%
@@ -34,8 +34,9 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
     dataCC <- allData[grepl("CC", group)]
     setnames(dataCC, "proportion", "proportionCC") ## rename the column to proportionCC
     dataCC <- dataCC[, c("group", "label", "NPixels") := list(NULL, NULL, NULL)]
-
     data2 <- dataCC[data, on = .(zone, vegCover, ageClass)]
+    data2[, totalPixels := base::sum(.SD, na.rm = TRUE) / 2, .SDcols = c("NPixels"), by = c("zone")]
+
     try(write.csv(data2, file.path(Paths$outputPath, paste0("leading_", poly, ".csv"))))
     saveDir <- checkPath(file.path(dPath, poly), create = TRUE)
     savePng <- quote(file.path(saveDir, paste0(unique(paste(zone, vegCover, collapse = " ")), ".png")))
@@ -48,9 +49,10 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
                                     horizontal = TRUE,
                                     main = unique(paste(zone, vegCover, collapse = "_")),
                                     xlab = paste0("Proportion of of forest area (total ",
-                                                  sum(NPixels, na.rm = TRUE) *
+                                                  format(unique(totalPixels) *
                                                     res(rasterToMatch(map))[1] *
                                                     res(rasterToMatch(map))[2] / 1e4,
+                                                    big.mark = ","),
                                                   " ha)"),
                                     ylab = "Age class",
                                     ylim = c(0, 1)),
