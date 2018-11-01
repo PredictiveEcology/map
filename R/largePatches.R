@@ -1,7 +1,7 @@
 
 #' @export
 LargePatches <- function(tsf, vtm, poly, labelColumn, id, ageClassCutOffs, ageClasses) {
-  timeSinceFireFilesRast <- Cache(.rasterToMemory, tsf)
+  timeSinceFireFilesRast <- Cache(.rasterToMemory, tsf[1])
 
   tsf <- reclassify(timeSinceFireFilesRast,
                     cbind(from = ageClassCutOffs - 0.1,
