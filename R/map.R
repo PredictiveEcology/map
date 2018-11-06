@@ -296,7 +296,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       list2env(dots, envir = environment()) # put any arguments from the ... into this local env
       x <- obj # put it into memory so identifyVectorArgs finds it
       args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialObjects"),
-                                            projectInputs, cropInputs, writeOutputs),
+                                            projectInputs, cropInputs, projectRaster, writeOutputs),
                                   ls(), environment(), dots = dots)
       maxNumClus <- if (length(args1$argsMulti)) {
         max(unlist(lapply(args1$argsMulti, NROW)), na.rm = TRUE)
@@ -661,10 +661,12 @@ setGeneric(
 #' @rdname rasterToMatch
 setMethod("rasterToMatch", signature = "map",
           definition = function(x, layer = 1) {
-            if (sum(x@metadata$rasterToMatch, na.rm = TRUE)) {
+            rtms <- x@metadata$rasterToMatch
+            if (sum(rtms, na.rm = TRUE)) {
               if (isTRUE(is.na(layer))) {
                 layer <- max(x@metadata$rasterToMatch, na.rm = TRUE)
               }
+              if (!layer %in% rtms) layer <- min(rtms, na.rm = TRUE)
               get(x@metadata[rasterToMatch == layer, ]$layerName, x@.xData)
             } else {
               NULL
