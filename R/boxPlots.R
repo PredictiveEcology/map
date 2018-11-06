@@ -14,7 +14,6 @@
 #' @importFrom data.table setnames
 #' @importFrom tools toTitleCase
 runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
-
   ageClasses <- c("Young", "Immature", "Mature", "Old")
   allRepPolys <- na.omit(map@metadata[[analysisGroups]])
   names(allRepPolys) <- allRepPolys

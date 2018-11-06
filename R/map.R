@@ -867,7 +867,7 @@ metadata.map <- function(x) {
 #' be found because it matches the \code{x} argument in \code{fn}.
 #'
 #' @param localFormalArgs A (named) character vector or arguments to
-#' @importFrom reproducible .formalsNotInCurrentDots
+#'
 #' @return List of named objects. The names are the formals in fn, and
 #' the objects are the values for those formals. This can easily
 #' be passed to do.call(fn, args1)
@@ -881,10 +881,10 @@ getLocalArgsFor <- function(fn, localFormalArgs, envir, dots) {
     names(localFormalArgs) <- localFormalArgs
 
   if (length(fn) > 1) {
-    forms <- unlist(lapply(fn, reproducible::.formalsNotInCurrentDots, dots = dots))
+    forms <- unlist(lapply(fn, reproducible:::.formalsNotInCurrentDots, dots = dots))
     forms <- forms[duplicated(forms)]
   } else {
-    forms <- reproducible::.formalsNotInCurrentDots(fn, dots = dots)
+    forms <- reproducible:::.formalsNotInCurrentDots(fn, dots = dots)
   }
   args <- dots[!(names(dots) %in% forms)]
   localFormals <- if (length(fn) > 1) {
@@ -898,18 +898,15 @@ getLocalArgsFor <- function(fn, localFormalArgs, envir, dots) {
   objsFromLocal <- mget(localFormals, envir = envir)
   names(objsFromLocal) <- names(localFormals)
   args <- append(args, objsFromLocal)
-
 }
 
-
 identifyVectorArgs <- function(fn, localFormalArgs, envir, dots) {
-
   allArgs <- getLocalArgsFor(fn, localFormalArgs, envir = envir, dots = dots)
 
   # These types don't correctly work with "length", so omit them from search
   specialTypes = c("environment", "SpatialPolygons", "RasterLayer", "RasterStack", "RasterBrick")
   lengthOne <- unlist(lapply(allArgs, is.null)) | unlist(lapply(allArgs, function(x) {
-    if (any(unlist(lapply(specialTypes, is, obj = x))) | length(x)==1) {
+    if (any(unlist(lapply(specialTypes, is, obj = x))) | length(x) == 1) {
       TRUE
     } else {
       FALSE
@@ -923,7 +920,6 @@ identifyVectorArgs <- function(fn, localFormalArgs, envir, dots) {
   }
 
   list(argsSingle = argsSingle, argsMulti = argsMulti)
-
 }
 
 #' \code{Map}/\code{lapply} all in one
