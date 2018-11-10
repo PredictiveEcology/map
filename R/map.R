@@ -239,7 +239,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
     on.exit(try(stopCluster(cl), silent = TRUE))
 
-    obj <- MapOrLapply(prepInputs, multiple = args1$argsMulti, cl = cl,
+    obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti, cl = cl,
                        single = args1$argsSingle, useCache = useCache)
     tryCatch(stopCluster(cl), error = function(x) invisible())
     if (is(obj, "list")) # note is.list returns TRUE for data.frames ... BAD
@@ -308,7 +308,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
       cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
       on.exit(try(stopCluster(cl), silent = TRUE))
-      obj <- MapOrLapply(postProcess, multiple = args1$argsMulti, cl = cl,
+      obj <- MapOrDoCall(postProcess, multiple = args1$argsMulti, cl = cl,
                          single = args1$argsSingle, useCache = useCache)
       try(stopCluster(cl), silent = TRUE)
     }
@@ -337,7 +337,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   args1 <- identifyVectorArgs(fn = addColumnNameForLabels,
                               c(x = "obj", columnNameForLabels = "columnNameForLabels"),
                               environment(), dots = dots)
-  obj <- MapOrLapply(addColumnNameForLabels, multiple = args1$argsMulti,
+  obj <- MapOrDoCall(addColumnNameForLabels, multiple = args1$argsMulti,
                      single = args1$argsSingle, useCache = useCache)
 
   ####################################################
@@ -417,7 +417,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     on.exit(try(stopCluster(cl), silent = TRUE))
     tilePath <- dts$leafletTiles
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
-    out <- MapOrLapply(makeTiles, multiple = args1$argsMulti,
+    out <- MapOrDoCall(makeTiles, multiple = args1$argsMulti,
                        single = args1$argsSingle, useCache = FALSE, cl = cl)
     # If the rasters are identical, then there may be
     # errors
@@ -903,6 +903,27 @@ getLocalArgsFor <- function(fn, localFormalArgs, envir, dots) {
   args <- append(args, objsFromLocal)
 }
 
+#' Identify the source for arguments passed to an arbitrary function
+#'
+#' When running arbitrary functions inside other functions, there is a common
+#' construct in R to use \code{...}. It does not work, however, in the general case
+#' to write \code{do.call(fn, list(...))} because not all \code{fn} themselves
+#' accept \code{...}. So this will fail if too many arguments are supplied to
+#' the \code{...}. In the general case, we want to write:
+#' \code{do.call(fn, list(onlyTheArgumentsThatAreNeeded))}. This function helps
+#' to find the \code{onlyTheArgumentsThatAreNeeded} by determining a) what is needed
+#' by the \code{fn} (which can be a list of many \code{fn}), and b) where to find
+#' values, either in an arbitrary environment or passed in via \code{dots}.
+#'
+#' @param fn A function or list of functions from which to run \code{formalArgs}
+#' @param localFormalArgs A vector of possible objects, e.g., from \code{ls()}
+#' @param envir The environment to find the objects named in \code{localFormalArgs}
+#' @param dots Generally list(...), which would be an alternative place to find
+#'             \code{localFormalArgs}
+#' @return A list of length 2, named \code{argsSingle} and \code{argsMulti}, which
+#'         can be passed to e.g.,
+#'         \code{MapOrDoCall(fn, multiple = args1$argsMulti, single = args1$argsSingle)}
+#' @export
 identifyVectorArgs <- function(fn, localFormalArgs, envir, dots) {
   allArgs <- getLocalArgsFor(fn, localFormalArgs, envir = envir, dots = dots)
 
@@ -927,7 +948,12 @@ identifyVectorArgs <- function(fn, localFormalArgs, envir, dots) {
 
 #' \code{Map}/\code{lapply} all in one
 #'
-#' Usually run after \code{identifyVectorArgs}
+#' Usually run after \code{identifyVectorArgs} which will separate the arguments
+#' into vectors of values for a call to \code{Map}, and arguments that have
+#' only one value (passed to \code{MoreArgs} in \code{Map}). If all are single
+#' length arguments, then it will pass to \code{lapply}. If a \code{cl} is provided
+#' and is non-NULL, then it will pass all arguments to \code{clusterMap} or
+#' \code{clusterApply}
 #'
 #' @param multiple This a list the arguments that Map will cycle over.
 #' @param single Passed to \code{MoreArgs} in the \code{mapply} function.
@@ -935,8 +961,9 @@ identifyVectorArgs <- function(fn, localFormalArgs, envir, dots) {
 #' @param useCache Logical indicating whether to use the cache.
 #' @param cl A cluster object or \code{NULL}.
 #'
+#' @export
 #' @seealso \code{identifyVectorArgs}
-MapOrLapply <- function(fn, multiple, single, useCache, cl = NULL) {
+MapOrDoCall <- function(fn, multiple, single, useCache, cl = NULL) {
   if (length(multiple)) {
     obj <- do.call(Cache, args = append(multiple, list(Map2, fn,
                                                        MoreArgs = single,
