@@ -662,7 +662,6 @@ if (!isGeneric("rasterToMatch")) {
 #' @family mapMethods
 #' @rdname rasterToMatch
 #' @importMethodsFrom pemisc rasterToMatch
-#' @exportMethod rasterToMatch
 setMethod("rasterToMatch", signature = "map",
           definition = function(x, layer = 1) {
             rtms <- x@metadata$rasterToMatch
