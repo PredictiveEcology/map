@@ -206,7 +206,7 @@ mapAdd <- function(obj, map, layerName,
 #' @importFrom reproducible fixErrors projectInputs postProcess .robustDigest asPath Cache compareNA
 #' @importFrom raster crs projectRaster writeRaster
 #' @importFrom sp CRS
-#'
+#' @importFrom pemisc MapOrDoCall makeOptimalCluster getLocalArgsFor identifyVectorArgs
 #' @rdname mapAdd
 mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            overwrite = getOption("map.overwrite"),
@@ -639,13 +639,6 @@ setReplaceMethod("studyArea", signature = "map",
                  })
 
 
-#' @export
-setGeneric(
-  "rasterToMatch",
-  function(x, ...) {
-    standardGeneric("rasterToMatch")
-  })
-
 
 #' Extract the rasterToMatch(s) from a \code{x}
 #'
@@ -660,6 +653,8 @@ setGeneric(
 #' @exportMethod rasterToMatch
 #' @family mapMethods
 #' @rdname rasterToMatch
+#' @importMethodsFrom pemisc rasterToMatch
+#' @exportMethod rasterToMatch
 setMethod("rasterToMatch", signature = "map",
           definition = function(x, layer = 1) {
             rtms <- x@metadata$rasterToMatch
@@ -858,125 +853,6 @@ metadata.map <- function(x) {
   x@metadata
 }
 
-
-#' Find sources for arguments in arbitrary function(s)
-#'
-#' Search among local objects (which will often be arguments passed
-#' into a function) as well as dot objects to match the
-#' formals needed by \code{fn}. If \code{localFormalArgs} is named,
-#' then it will match the formal (name of localFormaArgs) with the
-#' local object, e.g., localFormalArgs = c(x = "obj") will find
-#' the object in the local environment called "obj", and this will
-#' be found because it matches the \code{x} argument in \code{fn}.
-#'
-#' @param localFormalArgs A (named) character vector or arguments to
-#'
-#' @return List of named objects. The names are the formals in fn, and
-#' the objects are the values for those formals. This can easily
-#' be passed to do.call(fn, args1)
-getLocalArgsFor <- function(fn, localFormalArgs, envir, dots) {
-  if (missing(envir))
-    envir <- parent.frame()
-  if (missing(localFormalArgs))
-    localFormalArgs <- ls(envir = envir)
-
-  if (is.null(names(localFormalArgs)))
-    names(localFormalArgs) <- localFormalArgs
-
-  if (length(fn) > 1) {
-    forms <- unlist(lapply(fn, reproducible:::.formalsNotInCurrentDots, dots = dots))
-    forms <- forms[duplicated(forms)]
-  } else {
-    forms <- reproducible:::.formalsNotInCurrentDots(fn, dots = dots)
-  }
-  args <- dots[!(names(dots) %in% forms)]
-  localFormals <- if (length(fn) > 1) {
-    a <- lapply(fn, function(f)
-      localFormalArgs[names(localFormalArgs) %in% formalArgs(f)]
-    )
-    unlist(a)[!duplicated(unlist(a))] # unique strips names
-  } else {
-    localFormalArgs[names(localFormalArgs) %in% formalArgs(fn)]
-  }
-  objsFromLocal <- mget(localFormals, envir = envir)
-  names(objsFromLocal) <- names(localFormals)
-  args <- append(args, objsFromLocal)
-}
-
-#' Identify the source for arguments passed to an arbitrary function
-#'
-#' When running arbitrary functions inside other functions, there is a common
-#' construct in R to use \code{...}. It does not work, however, in the general case
-#' to write \code{do.call(fn, list(...))} because not all \code{fn} themselves
-#' accept \code{...}. So this will fail if too many arguments are supplied to
-#' the \code{...}. In the general case, we want to write:
-#' \code{do.call(fn, list(onlyTheArgumentsThatAreNeeded))}. This function helps
-#' to find the \code{onlyTheArgumentsThatAreNeeded} by determining a) what is needed
-#' by the \code{fn} (which can be a list of many \code{fn}), and b) where to find
-#' values, either in an arbitrary environment or passed in via \code{dots}.
-#'
-#' @param fn A function or list of functions from which to run \code{formalArgs}
-#' @param localFormalArgs A vector of possible objects, e.g., from \code{ls()}
-#' @param envir The environment to find the objects named in \code{localFormalArgs}
-#' @param dots Generally list(...), which would be an alternative place to find
-#'             \code{localFormalArgs}
-#' @return A list of length 2, named \code{argsSingle} and \code{argsMulti}, which
-#'         can be passed to e.g.,
-#'         \code{MapOrDoCall(fn, multiple = args1$argsMulti, single = args1$argsSingle)}
-#' @export
-identifyVectorArgs <- function(fn, localFormalArgs, envir, dots) {
-  allArgs <- getLocalArgsFor(fn, localFormalArgs, envir = envir, dots = dots)
-
-  # These types don't correctly work with "length", so omit them from search
-  specialTypes = c("environment", "SpatialPolygons", "RasterLayer", "RasterStack", "RasterBrick")
-  lengthOne <- unlist(lapply(allArgs, is.null)) | unlist(lapply(allArgs, function(x) {
-    if (any(unlist(lapply(specialTypes, is, obj = x))) | length(x) == 1) {
-      TRUE
-    } else {
-      FALSE
-    }}))
-  if (sum(lengthOne)) {
-    argsSingle <- allArgs[lengthOne]
-    argsMulti <- allArgs[!lengthOne]
-  } else {
-    argsSingle <- list()
-    argsMulti <- allArgs
-  }
-
-  list(argsSingle = argsSingle, argsMulti = argsMulti)
-}
-
-#' \code{Map}/\code{lapply} all in one
-#'
-#' Usually run after \code{identifyVectorArgs} which will separate the arguments
-#' into vectors of values for a call to \code{Map}, and arguments that have
-#' only one value (passed to \code{MoreArgs} in \code{Map}). If all are single
-#' length arguments, then it will pass to \code{lapply}. If a \code{cl} is provided
-#' and is non-NULL, then it will pass all arguments to \code{clusterMap} or
-#' \code{clusterApply}
-#'
-#' @param multiple This a list the arguments that Map will cycle over.
-#' @param single Passed to \code{MoreArgs} in the \code{mapply} function.
-#' @param fn The function that will be run via \code{Map}/\code{clusterMap}.
-#' @param useCache Logical indicating whether to use the cache.
-#' @param cl A cluster object or \code{NULL}.
-#'
-#' @export
-#' @seealso \code{identifyVectorArgs}
-MapOrDoCall <- function(fn, multiple, single, useCache, cl = NULL) {
-  if (length(multiple)) {
-    obj <- do.call(Cache, args = append(multiple, list(Map2, fn,
-                                                       MoreArgs = single,
-                                                       cl = cl, useCache = useCache)))
-  } else {
-    if (!missing(useCache))
-      single[["useCache"]] <- useCache
-    obj <- do.call(Cache, args = append(list(fn),
-                                        single))
-  }
-  obj
-
-}
 
 addColumnNameForLabels <- function(x, columnNameForLabels) {
   if (is(x, "SpatialPolygonsDataFrame")) {

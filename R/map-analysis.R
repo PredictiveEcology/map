@@ -30,6 +30,7 @@
 #'
 #' @importFrom data.table setDT
 #' @importFrom stats na.omit
+#' @importFrom pemisc makeOptimalCluster
 mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
                         useParallel = getOption("map.useParallel"),
                         ...) {
