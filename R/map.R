@@ -639,6 +639,14 @@ setReplaceMethod("studyArea", signature = "map",
                  })
 
 
+if (!isGeneric("rasterToMatch")) {
+  setGeneric(
+    "rasterToMatch",
+    function(x, ...) {
+      standardGeneric("rasterToMatch")
+    })
+}
+
 
 #' Extract the rasterToMatch(s) from a \code{x}
 #'
