@@ -206,7 +206,7 @@ mapAdd <- function(obj, map, layerName,
 #' @importFrom reproducible fixErrors projectInputs postProcess .robustDigest asPath Cache compareNA
 #' @importFrom raster crs projectRaster writeRaster
 #' @importFrom sp CRS
-#'
+#' @importFrom pemisc MapOrDoCall makeOptimalCluster getLocalArgsFor identifyVectorArgs
 #' @rdname mapAdd
 mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            overwrite = getOption("map.overwrite"),
@@ -239,7 +239,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
     on.exit(try(stopCluster(cl), silent = TRUE))
 
-    obj <- MapOrLapply(prepInputs, multiple = args1$argsMulti, cl = cl,
+    obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti, cl = cl,
                        single = args1$argsSingle, useCache = useCache)
     tryCatch(stopCluster(cl), error = function(x) invisible())
     if (is(obj, "list")) # note is.list returns TRUE for data.frames ... BAD
@@ -296,6 +296,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       list2env(dots, envir = environment()) # put any arguments from the ... into this local env
       x <- obj # put it into memory so identifyVectorArgs finds it
       args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialObjects"),
+                                            getS3method("maskInputs", "Raster"),
                                             projectInputs, cropInputs, projectRaster, writeOutputs),
                                   ls(), environment(), dots = dots)
       maxNumClus <- if (length(args1$argsMulti)) {
@@ -307,7 +308,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
       cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
       on.exit(try(stopCluster(cl), silent = TRUE))
-      obj <- MapOrLapply(postProcess, multiple = args1$argsMulti, cl = cl,
+      obj <- MapOrDoCall(postProcess, multiple = args1$argsMulti, cl = cl,
                          single = args1$argsSingle, useCache = useCache)
       try(stopCluster(cl), silent = TRUE)
     }
@@ -336,7 +337,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   args1 <- identifyVectorArgs(fn = addColumnNameForLabels,
                               c(x = "obj", columnNameForLabels = "columnNameForLabels"),
                               environment(), dots = dots)
-  obj <- MapOrLapply(addColumnNameForLabels, multiple = args1$argsMulti,
+  obj <- MapOrDoCall(addColumnNameForLabels, multiple = args1$argsMulti,
                      single = args1$argsSingle, useCache = useCache)
 
   ####################################################
@@ -416,7 +417,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     on.exit(try(stopCluster(cl), silent = TRUE))
     tilePath <- dts$leafletTiles
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
-    out <- MapOrLapply(makeTiles, multiple = args1$argsMulti,
+    out <- MapOrDoCall(makeTiles, multiple = args1$argsMulti,
                        single = args1$argsSingle, useCache = FALSE, cl = cl)
     # If the rasters are identical, then there may be
     # errors
@@ -638,12 +639,13 @@ setReplaceMethod("studyArea", signature = "map",
                  })
 
 
-#' @export
-setGeneric(
-  "rasterToMatch",
-  function(x, ...) {
-    standardGeneric("rasterToMatch")
-})
+if (!isGeneric("rasterToMatch")) {
+  setGeneric(
+    "rasterToMatch",
+    function(x, ...) {
+      standardGeneric("rasterToMatch")
+  })
+}
 
 #' Extract the rasterToMatch(s) from a \code{x}
 #'
@@ -658,6 +660,7 @@ setGeneric(
 #' @exportMethod rasterToMatch
 #' @family mapMethods
 #' @rdname rasterToMatch
+#' @importMethodsFrom pemisc rasterToMatch
 setMethod("rasterToMatch", signature = "map",
           definition = function(x, layer = 1) {
             rtms <- x@metadata$rasterToMatch
@@ -856,98 +859,6 @@ metadata.map <- function(x) {
   x@metadata
 }
 
-
-#' Find sources for arguments in arbitrary function(s)
-#'
-#' Search among local objects (which will often be arguments passed
-#' into a function) as well as dot objects to match the
-#' formals needed by \code{fn}. If \code{localFormalArgs} is named,
-#' then it will match the formal (name of localFormaArgs) with the
-#' local object, e.g., localFormalArgs = c(x = "obj") will find
-#' the object in the local environment called "obj", and this will
-#' be found because it matches the \code{x} argument in \code{fn}.
-#'
-#' @param localFormalArgs A (named) character vector or arguments to
-#'
-#' @return List of named objects. The names are the formals in fn, and
-#' the objects are the values for those formals. This can easily
-#' be passed to do.call(fn, args1)
-getLocalArgsFor <- function(fn, localFormalArgs, envir, dots) {
-  if (missing(envir))
-    envir <- parent.frame()
-  if (missing(localFormalArgs))
-    localFormalArgs <- ls(envir = envir)
-
-  if (is.null(names(localFormalArgs)))
-    names(localFormalArgs) <- localFormalArgs
-
-  if (length(fn) > 1) {
-    forms <- unlist(lapply(fn, reproducible:::.formalsNotInCurrentDots, dots = dots))
-    forms <- forms[duplicated(forms)]
-  } else {
-    forms <- reproducible:::.formalsNotInCurrentDots(fn, dots = dots)
-  }
-  args <- dots[!(names(dots) %in% forms)]
-  localFormals <- if (length(fn) > 1) {
-    a <- lapply(fn, function(f)
-      localFormalArgs[names(localFormalArgs) %in% formalArgs(f)]
-    )
-    unlist(a)[!duplicated(unlist(a))] # unique strips names
-  } else {
-    localFormalArgs[names(localFormalArgs) %in% formalArgs(fn)]
-  }
-  objsFromLocal <- mget(localFormals, envir = envir)
-  names(objsFromLocal) <- names(localFormals)
-  args <- append(args, objsFromLocal)
-}
-
-identifyVectorArgs <- function(fn, localFormalArgs, envir, dots) {
-  allArgs <- getLocalArgsFor(fn, localFormalArgs, envir = envir, dots = dots)
-
-  # These types don't correctly work with "length", so omit them from search
-  specialTypes = c("environment", "SpatialPolygons", "RasterLayer", "RasterStack", "RasterBrick")
-  lengthOne <- unlist(lapply(allArgs, is.null)) | unlist(lapply(allArgs, function(x) {
-    if (any(unlist(lapply(specialTypes, is, obj = x))) | length(x) == 1) {
-      TRUE
-    } else {
-      FALSE
-    }}))
-  if (sum(lengthOne)) {
-    argsSingle <- allArgs[lengthOne]
-    argsMulti <- allArgs[!lengthOne]
-  } else {
-    argsSingle <- list()
-    argsMulti <- allArgs
-  }
-
-  list(argsSingle = argsSingle, argsMulti = argsMulti)
-}
-
-#' \code{Map}/\code{lapply} all in one
-#'
-#' Usually run after \code{identifyVectorArgs}
-#'
-#' @param multiple This a list the arguments that Map will cycle over.
-#' @param single Passed to \code{MoreArgs} in the \code{mapply} function.
-#' @param fn The function that will be run via \code{Map}/\code{clusterMap}.
-#' @param useCache Logical indicating whether to use the cache.
-#' @param cl A cluster object or \code{NULL}.
-#'
-#' @seealso \code{identifyVectorArgs}
-MapOrLapply <- function(fn, multiple, single, useCache, cl = NULL) {
-  if (length(multiple)) {
-    obj <- do.call(Cache, args = append(multiple, list(Map2, fn,
-                                                       MoreArgs = single,
-                                                       cl = cl, useCache = useCache)))
-  } else {
-    if (!missing(useCache))
-      single[["useCache"]] <- useCache
-    obj <- do.call(Cache, args = append(list(fn),
-                                        single))
-  }
-  obj
-
-}
 
 addColumnNameForLabels <- function(x, columnNameForLabels) {
   if (is(x, "SpatialPolygonsDataFrame")) {

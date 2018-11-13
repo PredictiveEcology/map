@@ -26,6 +26,7 @@ Imports:
     fasterize,
     gdalUtils,
     methods,
+    pemisc,
     quickPlot,
     reproducible,
     raster,
@@ -42,6 +43,7 @@ Suggests:
     SpaDES.tools,
     testthat
 Remotes:
+    PredictiveEcology/pemisc,
     PredictiveEcology/reproducible@development,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
@@ -61,6 +63,5 @@ Collate:
     'map-class.R'
     'map-package.R'
     'map.R'
-    'parallel.R'
     'rbindlistAG.R'
     'zzz.R'
