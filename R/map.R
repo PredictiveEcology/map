@@ -643,8 +643,7 @@ setGeneric(
   "rasterToMatch",
   function(x, ...) {
     standardGeneric("rasterToMatch")
-  })
-
+})
 
 #' Extract the rasterToMatch(s) from a \code{x}
 #'
@@ -671,7 +670,7 @@ setMethod("rasterToMatch", signature = "map",
             } else {
               NULL
             }
-          })
+})
 
 #' Extract rasters in the \code{map} obj
 #' @export
