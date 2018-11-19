@@ -201,12 +201,12 @@ mapAdd <- function(obj, map, layerName,
 #'        cluster via \code{makeOptimalCluster}
 #'
 #' @export
-#' @importFrom data.table rbindlist set copy
+#' @importFrom data.table copy rbindlist set
+#' @importFrom pemisc getLocalArgsFor identifyVectorArgs makeOptimalCluster MapOrDoCall
 #' @importFrom quickPlot whereInStack
-#' @importFrom reproducible fixErrors projectInputs postProcess .robustDigest asPath Cache compareNA
 #' @importFrom raster crs projectRaster writeRaster
+#' @importFrom reproducible asPath Cache compareNA fixErrors projectInputs postProcess .robustDigest
 #' @importFrom sp CRS
-#' @importFrom pemisc MapOrDoCall makeOptimalCluster getLocalArgsFor identifyVectorArgs
 #' @rdname mapAdd
 mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            overwrite = getOption("map.overwrite"),
@@ -216,7 +216,6 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            envir = NULL, useCache = TRUE,
                            useParallel = getOption("map.useParallel"),
                            ...) {
-
   dots <- list(...)
   if (is.null(layerName))
     stop("layerName is not optional. Please specify.")
@@ -273,7 +272,6 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
         argsProjectInputs <- getLocalArgsFor(list(Cache, projectInputs), dots = dots)
         obj <- do.call(Cache, append(list(projectInputs, obj), argsProjectInputs))
       }
-
     } else {
       dots[["targetCRS"]] <- crs(map)
       args <- dots
@@ -326,7 +324,6 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       if (any(startsWith(colnames(map@metadata), "analysisGroup")))
         purgeAnalyses <- map@metadata[layerName %in% ln, get(colnames(map@metadata)[
           startsWith(colnames(map@metadata), "analysisGroup")])]
-
     }
     map@metadata <- map@metadata[!(layerName %in% ln)]
   }
@@ -375,18 +372,17 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                               dots = dots)
   if (length(dots)) {
     howLong <- unlist(lapply(dots, length))
-    args1$argsSingle[names(dots)[howLong<=1]] <- dots[howLong<=1]
-    args1$argsMulti[names(dots)[howLong>1]] <- dots[howLong>1]
+    args1$argsSingle[names(dots)[howLong <= 1]] <- dots[howLong <= 1]
+    args1$argsMulti[names(dots)[howLong > 1]] <- dots[howLong > 1]
   }
   MoreArgs = append(args1$argsSingle, list(metadata = map@metadata))
-  if (length(args1$argsMulti)==0) {
+  if (length(args1$argsMulti) == 0) {
     dts <- do.call(buildMetadata, MoreArgs)
   } else {
     dtsList <- do.call(Map, args = append(args1$argsMulti,
                                           list(f = buildMetadata, MoreArgs = MoreArgs)))
     dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE)
   }
-
 
   ########################################################
   # make tiles, if it is leaflet
@@ -422,7 +418,6 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     # If the rasters are identical, then there may be
     # errors
     tryCatch(stopCluster(cl), error = function(x) invisible())
-
   }
 
   ###################################
@@ -529,7 +524,7 @@ setMethod("crs",
               x@CRS
             else
               NA
-          })
+})
 
 #' Map class methods
 #'
@@ -602,17 +597,18 @@ setGeneric("studyArea",function(map, layer = NA, sorted = FALSE) {
 setMethod("studyArea", "ANY",
           definition = function(map, layer = NA, sorted = FALSE) {
             NULL
-          })
+})
 
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
 setMethod("studyArea",
           "map",
-          definition= function(map, layer = NA, sorted = FALSE) {
+          definition = function(map, layer = NA, sorted = FALSE) {
             if (isTRUE(sorted)) {
               studyAreas <- map@metadata[!is.na(map@metadata$studyArea),]
-              mapSorted <- studyAreas[order(area, decreasing = FALSE), ][,studyArea := as.numeric(.I)]
+              mapSorted <- studyAreas[order(area, decreasing = FALSE), ][
+                , studyArea := as.numeric(.I)]
               san <- studyAreaName(mapSorted, layer = layer)
             } else {
               san <- studyAreaName(map, layer = layer)
@@ -622,7 +618,7 @@ setMethod("studyArea",
             } else {
               NULL
             }
-          })
+})
 
 setGeneric("studyArea<-",function(map, layer = NA, value) {
   standardGeneric("studyArea<-")
@@ -636,8 +632,7 @@ setReplaceMethod("studyArea", signature = "map",
                    ln <- studyAreaName(map, layer = layer)
                    map[[ln]] <- value
                    map
-                 })
-
+})
 
 if (!isGeneric("rasterToMatch")) {
   setGeneric(
@@ -782,7 +777,6 @@ maps <- function(map, class = NULL, layerName = NULL) {
   out
 }
 
-
 #' @keywords internal
 .singleMetadataNAEntry <- data.table::data.table(
   layerName = NA_character_, layerType = NA_character_, #url = NA_character_,
@@ -814,7 +808,7 @@ setMethod("area",
             } else {
               NULL
             }
-          })
+})
 
 #' Show method for map class objects
 #'
@@ -827,7 +821,7 @@ setMethod(
   signature = "map",
   definition = function(object) {
     show(object@metadata)
-  })
+})
 
 .formalsReproducible <- unique(c(formalArgs(reproducible::preProcess),
                                  formalArgs(reproducible::postProcess),
@@ -859,7 +853,6 @@ metadata.Raster <- function(x) {
 metadata.map <- function(x) {
   x@metadata
 }
-
 
 addColumnNameForLabels <- function(x, columnNameForLabels) {
   if (is(x, "SpatialPolygonsDataFrame")) {
