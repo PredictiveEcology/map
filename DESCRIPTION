@@ -43,7 +43,7 @@ Suggests:
     SpaDES.tools,
     testthat
 Remotes:
-    PredictiveEcology/pemisc,
+    PredictiveEcology/pemisc@master,
     PredictiveEcology/reproducible@development,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
