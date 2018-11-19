@@ -35,7 +35,9 @@ maps(map, class = NULL, layerName = NULL)
 
 \item{class}{If supplied, this will be the class of objects returned. Default
 is \code{NULL} which is "all", meaning all objects in the \code{map}
-obj}
+object.}
+
+\item{layerName}{TODO: description needed}
 }
 \value{
 A list of maps (i.e., sp, raster, or sf objects) of class \code{class}

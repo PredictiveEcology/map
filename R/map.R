@@ -1,5 +1,5 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(".", ":=", ".I", ".N", ".SD","objectHash"))
+  utils::globalVariables(c(".", ":=", ".I", ".N", ".SD", "envir", "layerName", "objectHash"))
 }
 
 #' Append a spatial object to map
@@ -9,7 +9,7 @@ if (getRversion() >= "3.1.0") {
 #' set to \code{max(studyArea(map)) + 1}. \item update CRS slot to be the CRS of
 #' the study area. }
 #'
-#' @param object    Optional spatial object, currently \code{RasterLayer},
+#' @param obj    Optional spatial object, currently \code{RasterLayer},
 #'  \code{SpatialPolygons}
 #' @param map       Optional map object. If not provided, then one will be
 #'  created. If provided, then the present \code{object} or options passed to
@@ -17,7 +17,8 @@ if (getRversion() >= "3.1.0") {
 #' @param layerName Required. A label for this map layer. This can be the same as
 #'  the object name.
 #' @param overwrite Logical. If \code{TRUE} and this \code{layerName} exists in
-#'  the \code{map}, then it will replace the existing object.
+#'  the \code{map}, then it will replace the existing object. Default is
+#'  \code{getOption("map.overwrite")}
 #' @param columnNameForLabels A character string indicating which column to use
 #'  for labels. This is currently only used if the object is a
 #'  \code{SpatialPolygonsDataFram}.
@@ -36,8 +37,10 @@ if (getRversion() >= "3.1.0") {
 #' @rdname mapAdd
 #'
 #' @examples
+#' \dontrun{
 #' library(sp)
 #' library(raster)
+#' library(reproducible)
 #' cwd <- getwd()
 #' setwd(tempdir())
 #' coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98,
@@ -53,10 +56,10 @@ if (getRversion() >= "3.1.0") {
 #'                            match.ID = FALSE)
 #'
 #' ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area",
-#'                poly = TRUE, analysisGroup2 = "Small Study Area")
+#'              poly = TRUE, analysisGroup2 = "Small Study Area")
 #'
-#'# if (require("SpaDES.tools")) {
-#' require("SpaDES.tools")
+#' if (require("SpaDES.tools")) {
+#'   options(map.useParallel = FALSE)
 #'   smallStudyArea <- randomPolygon(studyArea(ml), 1e5)
 #'   smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,
 #'                            data = data.frame(ID = 1, shinyLabel = "zone1"),
@@ -93,14 +96,14 @@ if (getRversion() >= "3.1.0") {
 #'   #    LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
 #'   #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
 #'   ml <- mapAddAnalysis(ml, functionName ="LeadingVegTypeByAgeClass",
-#'                         ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
+#'                        ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
 #'   # add an analysis -- this will trigger analyses because there are already objects in the map
 #'   #    This will trigger 2 more analyses:
 #'   #    largePatches on each raster x polygon combo (only 1 currently)
 #'   #    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
 #'   ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
-#'                     id = "1", labelColumn = "shinyLabel",
-#'                     ageClassCutOffs = ageClassCutOffs)
+#'                        id = "1", labelColumn = "shinyLabel",
+#'                        ageClassCutOffs = ageClassCutOffs)
 #'
 #'   # Add a second polygon, trigger
 #'   smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
@@ -146,50 +149,25 @@ if (getRversion() >= "3.1.0") {
 #'   # post hoc analysis of data
 #'   #  use or create a specialized function that can handle the analysesData slot
 #'   ml <- mapAddPostHocAnalysis(map = ml, functionName = "rbindlistAG",
-#'               postHocAnalysisGroups = "analysisGroup2",
-#'               postHocAnalyses = "all")
+#'                               postHocAnalysisGroups = "analysisGroup2",
+#'                               postHocAnalyses = "all")
+#' }
 #'
 #' ## cleanup
 #' setwd(cwd)
 #' unlink(tempdir(), recursive = TRUE)
-#' #}
-#'@param obj    Optional spatial object, currently tested with \code{RasterLayer},
-#'  \code{SpatialPolygons*}
-#'@param map       Optional map object. If not provided, then one will be
-#'  created. If provided, then the present \code{obj} or options passed to
-#'  prepInputs e.g., \code{url}, will be appended to this \code{map}
-#'@param layerName Required. A label for this map layer. This can be the same as
-#'  the object name.
-#'@param overwrite Logical. If \code{TRUE} and this \code{layerName} exists in
-#'  the \code{map}, then it will replace the existing object. Default is
-#'  \code{getOption("map.overwrite")}
-#'@param columnNameForLabels A character string indicating which column to use
-#'  for labels. This is currently only used if the object is a
-#'  \code{SpatialPolygonsDataFram}.
-#'@param leaflet Logical or Character vector of path(s) to write tiles.
-#'  If \code{TRUE} or a character vector, then this layer will be added to a
-#'  leaflet map. For \code{RasterLayer} object, this will trigger a call to
-#'  \code{gdal2tiles}, making tiles. If path is not specified, it will be
-#'  the current path. The tile base file path will be the
-#'  \code{paste0(layerName, "_", rndstr(1,6))}
-#'@param isStudyArea Logical. If \code{TRUE}, this will be assigned the label,
-#'  "StudyArea", and will be passed into \code{prepInputs} for any future layers
-#'  added.
-#'@include map-class.R
-#'
-#'@export
-#'@rdname mapAdd
+#' }
 #'
 mapAdd <- function(obj, map, layerName,
                    overwrite = getOption("map.overwrite", FALSE), ...) {
   UseMethod("mapAdd")
 }
 
-#' @export
-#' @rdname mapAdd
-#' @importFrom reproducible prepInputs preProcess
-#' @param ... passed to reproducible::postProcess and reproducible::projectInputs and
-#'            reproducible::fixErrors and reproducible::prepInputs
+#' @param ... Additonal arguments passed to \code{\link[reproducible]{postProcess}},
+#'            \code{\link[reproducible]{projectInputs}},
+#'            \code{\link[reproducible]{fixErrors}}, and
+#'            \code{\link[reproducible]{prepInputs}}.
+#' @param isRasterToMatch  Logical indicating ... TODO: need description
 #' @param envir An optional environment. If supplied, then the obj
 #'        will not be placed "into" the maps slot, rather the environment label will
 #'        be placed into the maps slot. Upon re
@@ -201,11 +179,12 @@ mapAdd <- function(obj, map, layerName,
 #'
 #' @export
 #' @importFrom data.table copy rbindlist set
+#' @importFrom parallel stopCluster
 #' @importFrom pemisc getLocalArgsFor identifyVectorArgs makeOptimalCluster MapOrDoCall
 #' @importFrom quickPlot whereInStack
-#' @importFrom raster crs projectRaster writeRaster
-#' @importFrom reproducible asPath Cache compareNA cropInputs fixErrors
-#' @importFrom reproducible projectInputs postProcess .robustDigest writeOutputs
+#' @importFrom raster crs ncell projectRaster writeRaster
+#' @importFrom reproducible .robustDigest asPath Cache compareNA cropInputs fixErrors
+#' @importFrom reproducible prepInputs preProcess projectInputs postProcess writeOutputs
 #' @importFrom sp CRS
 #' @importFrom utils getS3method
 #' @rdname mapAdd
@@ -480,8 +459,7 @@ mapRm <- function(map, layer, ask = TRUE, ...) {
 #' @aliases mapRm
 #' @family mapMethods
 #' @rdname mapRm
-mapRm.default <- function(map = NULL,
-                          layer = NULL, ask = TRUE, ...) {
+mapRm.default <- function(map = NULL, layer = NULL, ask = TRUE, ...) {
   if (is.null(map)) {
     stop("Must pass a map")
   }
@@ -493,8 +471,8 @@ mapRm.default <- function(map = NULL,
     stop("There are more than obj in map with that layer name, '",
          layerName,"'. Please indicate layer by row number in map@metadata.")
 
-  rm(list = layerName, envir = map@metadata[ layer , envir][[1]])
-  map@metadata <- map@metadata[ -layer , ]
+  rm(list = layerName, envir = map@metadata[layer, envir][[1]])
+  map@metadata <- map@metadata[-layer, ]
 
   if (NROW(map@analyses))
     message("Layer ", layerName, " has been removed, but not any analysis that ",
@@ -532,8 +510,6 @@ setMethod("crs",
 #' Tools for getting objects and metadata in and out of a \code{map} class.
 #'
 #' @param x TODO: document this
-#'
-#' @param layerName TODO: document this
 #'
 #' @param layer TODO: document this
 #'
@@ -588,7 +564,7 @@ studyAreaName.data.table <- function(x, layer = 1) {
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-setGeneric("studyArea",function(map, layer = NA, sorted = FALSE) {
+setGeneric("studyArea", function(map, layer = NA, sorted = FALSE) {
   standardGeneric("studyArea")
 })
 
@@ -621,7 +597,11 @@ setMethod("studyArea",
             }
 })
 
-setGeneric("studyArea<-",function(map, layer = NA, value) {
+#' @param value The value to assign to the object.
+#'
+#' @export
+#' @rdname studyArea
+setGeneric("studyArea<-", function(map, layer = NA, value) {
   standardGeneric("studyArea<-")
 })
 
@@ -744,17 +724,18 @@ leafletTiles <- function(map) {
   tiles
 }
 
-#' Extract maps from a \code{map} obj
+#' Extract maps from a \code{map} object
 #'
 #' This will extract all objects in or pointed to within the \code{map}.
 #'
 #' @param map A \code{map} class obj
 #' @param class If supplied, this will be the class of objects returned. Default
 #'              is \code{NULL} which is "all", meaning all objects in the \code{map}
-#'              obj
+#'              object.
+#' @param layerName TODO: description needed
+#' @return A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
+#'
 #' @export
-#' @return
-#' A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
 maps <- function(map, class = NULL, layerName = NULL) {
   if (!is.null(layerName)) {
     layers <- layerName
@@ -813,7 +794,7 @@ setMethod("area",
 
 #' Show method for map class objects
 #'
-#' @param obj TODO: describe this
+#' @param object TODO: describe this
 #'
 #' @export
 #' @rdname show

@@ -8,7 +8,7 @@
 \S4method{show}{map}(object)
 }
 \arguments{
-\item{obj}{TODO: describe this}
+\item{object}{TODO: describe this}
 }
 \description{
 Show method for map class objects

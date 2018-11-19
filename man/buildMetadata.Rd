@@ -17,6 +17,8 @@ If \code{TRUE}, then this layer can be accessed by \code{rasterToMatch(map)}}
 
 \item{layerName}{TODO: description needed}
 
+\item{obj}{TODO: description needed}
+
 \item{columnNameForLabels}{TODO: description needed}
 
 \item{objHash}{TODO: description needed}
@@ -26,8 +28,6 @@ If \code{TRUE}, then this layer can be accessed by \code{rasterToMatch(map)}}
 \item{envir}{TODO: description needed}
 
 \item{...}{Additional arguments.}
-
-\item{object}{TODO: description needed}
 }
 \description{
 Build \code{map} obj metadata table

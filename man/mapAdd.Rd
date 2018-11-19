@@ -15,8 +15,8 @@ mapAdd(obj, map, layerName, overwrite = getOption("map.overwrite",
   useParallel = getOption("map.useParallel"), ...)
 }
 \arguments{
-\item{obj}{Optional spatial object, currently tested with \code{RasterLayer},
-\code{SpatialPolygons*}}
+\item{obj}{Optional spatial object, currently \code{RasterLayer},
+\code{SpatialPolygons}}
 
 \item{map}{Optional map object. If not provided, then one will be
 created. If provided, then the present \code{object} or options passed to
@@ -26,10 +26,13 @@ prepInputs e.g., \code{url}, will be appended to this \code{map}}
 the object name.}
 
 \item{overwrite}{Logical. If \code{TRUE} and this \code{layerName} exists in
-the \code{map}, then it will replace the existing object.}
+the \code{map}, then it will replace the existing object. Default is
+\code{getOption("map.overwrite")}}
 
-\item{...}{passed to reproducible::postProcess and reproducible::projectInputs and
-reproducible::fixErrors and reproducible::prepInputs}
+\item{...}{Additonal arguments passed to \code{\link[reproducible]{postProcess}},
+\code{\link[reproducible]{projectInputs}},
+\code{\link[reproducible]{fixErrors}}, and
+\code{\link[reproducible]{prepInputs}}.}
 
 \item{columnNameForLabels}{A character string indicating which column to use
 for labels. This is currently only used if the object is a
@@ -45,6 +48,8 @@ the current path. The tile base file path will be the
 \item{isStudyArea}{Logical. If \code{TRUE}, this will be assigned the label,
 "StudyArea", and will be passed into \code{prepInputs} for any future layers
 added.}
+
+\item{isRasterToMatch}{Logical indicating ... TODO: need description}
 
 \item{envir}{An optional environment. If supplied, then the obj
 will not be placed "into" the maps slot, rather the environment label will
@@ -56,35 +61,6 @@ be used. Default is \code{TRUE}}
 \item{useParallel}{Logical. If \code{TRUE}, then if there is more than one
 calculation to do at any stage, it will create and use a parallel
 cluster via \code{makeOptimalCluster}}
-
-\item{object}{Optional spatial object, currently \code{RasterLayer},
-\code{SpatialPolygons}}
-
-\item{map}{Optional map object. If not provided, then one will be
-created. If provided, then the present \code{obj} or options passed to
-prepInputs e.g., \code{url}, will be appended to this \code{map}}
-
-\item{layerName}{Required. A label for this map layer. This can be the same as
-the object name.}
-
-\item{overwrite}{Logical. If \code{TRUE} and this \code{layerName} exists in
-the \code{map}, then it will replace the existing object. Default is
-\code{getOption("map.overwrite")}}
-
-\item{columnNameForLabels}{A character string indicating which column to use
-for labels. This is currently only used if the object is a
-\code{SpatialPolygonsDataFram}.}
-
-\item{leaflet}{Logical or Character vector of path(s) to write tiles.
-If \code{TRUE} or a character vector, then this layer will be added to a
-leaflet map. For \code{RasterLayer} object, this will trigger a call to
-\code{gdal2tiles}, making tiles. If path is not specified, it will be
-the current path. The tile base file path will be the
-\code{paste0(layerName, "_", rndstr(1,6))}}
-
-\item{isStudyArea}{Logical. If \code{TRUE}, this will be assigned the label,
-"StudyArea", and will be passed into \code{prepInputs} for any future layers
-added.}
 }
 \description{
 If \code{isStudyArea = TRUE}, then several things will be triggered:
@@ -93,8 +69,10 @@ set to \code{max(studyArea(map)) + 1}. \item update CRS slot to be the CRS of
 the study area. }
 }
 \examples{
+\dontrun{
 library(sp)
 library(raster)
+library(reproducible)
 cwd <- getwd()
 setwd(tempdir())
 coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98,
@@ -110,10 +88,10 @@ StudyArea <- SpatialPolygonsDataFrame(StudyArea,
                            match.ID = FALSE)
 
 ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area",
-               poly = TRUE, analysisGroup2 = "Small Study Area")
+             poly = TRUE, analysisGroup2 = "Small Study Area")
 
-# if (require("SpaDES.tools")) {
-require("SpaDES.tools")
+if (require("SpaDES.tools")) {
+  options(map.useParallel = FALSE)
   smallStudyArea <- randomPolygon(studyArea(ml), 1e5)
   smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,
                            data = data.frame(ID = 1, shinyLabel = "zone1"),
@@ -150,14 +128,14 @@ require("SpaDES.tools")
   #    LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
   #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
   ml <- mapAddAnalysis(ml, functionName ="LeadingVegTypeByAgeClass",
-                        ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
+                       ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
   # add an analysis -- this will trigger analyses because there are already objects in the map
   #    This will trigger 2 more analyses:
   #    largePatches on each raster x polygon combo (only 1 currently)
   #    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
   ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
-                    id = "1", labelColumn = "shinyLabel",
-                    ageClassCutOffs = ageClassCutOffs)
+                       id = "1", labelColumn = "shinyLabel",
+                       ageClassCutOffs = ageClassCutOffs)
 
   # Add a second polygon, trigger
   smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
@@ -203,11 +181,13 @@ require("SpaDES.tools")
   # post hoc analysis of data
   #  use or create a specialized function that can handle the analysesData slot
   ml <- mapAddPostHocAnalysis(map = ml, functionName = "rbindlistAG",
-              postHocAnalysisGroups = "analysisGroup2",
-              postHocAnalyses = "all")
+                              postHocAnalysisGroups = "analysisGroup2",
+                              postHocAnalyses = "all")
+}
 
 ## cleanup
 setwd(cwd)
 unlink(tempdir(), recursive = TRUE)
-#}
+}
+
 }

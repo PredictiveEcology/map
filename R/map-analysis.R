@@ -1,3 +1,7 @@
+if (getRversion() >= "3.1.0") {
+  utils::globalVariables(c("envir"))
+}
+
 #' Generic analysis for map objects
 #'
 #' This is the workhorse function that runs any analyses described in
@@ -30,10 +34,10 @@
 #'
 #' @importFrom data.table setDT
 #' @importFrom stats na.omit
-#' @importFrom pemisc makeOptimalCluster
+#' @importFrom parallel stopCluster
+#' @importFrom pemisc makeOptimalCluster Map2
 mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
-                        useParallel = getOption("map.useParallel"),
-                        ...) {
+                        useParallel = getOption("map.useParallel"), ...) {
   m <- map@metadata
   dots <- list(...)
 
@@ -147,11 +151,21 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
   map
 }
 
+#' Add an analysis to a \code{map} object
+#'
+#' TODO: description neeeded
+#'
+#' @param map A \code{map} object
+#' @param functionName The name of the analysis function to add
+#' @param useParallel Logical indicating whether to use multiple threads.
+#'                    Defaults to \code{getOption("map.useParallel", FALSE)}.
+#' @param ... Additional arguments TODO: description needed
+#'
 #' @export
 #' @importFrom data.table data.table
 #' @importFrom fastdigest fastdigest
 mapAddAnalysis <- function(map, functionName,
-                           useParallel = getOption("map.useParallel"), ...) {
+                           useParallel = getOption("map.useParallel", FALSE), ...) {
   dots <- list(...)
   b <- data.table(functionName = functionName, t(dots))
   prevEntry <- map@analyses$functionName == functionName

@@ -5,7 +5,7 @@
 #' @param isRasterToMatch Logical. Is this(these) layer(s) the \code{rasterToMatch} layers.
 #'        If \code{TRUE}, then this layer can be accessed by \code{rasterToMatch(map)}
 #' @param layerName TODO: description needed
-#' @param object TODO: description needed
+#' @param obj TODO: description needed
 #' @param columnNameForLabels TODO: description needed
 #' @param objHash TODO: description needed
 #' @param leaflet TODO: description needed
@@ -13,10 +13,8 @@
 #' @param ... Additional arguments.
 #'
 #' @rdname buildMetadata
-buildMetadata <- function(metadata, isStudyArea, isRasterToMatch,
-                          layerName,
-                          obj, columnNameForLabels, objHash,
-                          leaflet, envir, ...) {
+buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj,
+                          columnNameForLabels, objHash, leaflet, envir, ...) {
 
   b <- copy(.singleMetadataNAEntry)
   dots <- list(...)

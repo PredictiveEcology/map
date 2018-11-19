@@ -23,8 +23,10 @@ combination or part thereof (e.g., the name entered into the row under
 calculation to do at any stage, it will create and use a parallel
 cluster via \code{makeOptimalCluster}}
 
-\item{...}{passed to reproducible::postProcess and reproducible::projectInputs and
-reproducible::fixErrors and reproducible::prepInputs}
+\item{...}{Additonal arguments passed to \code{\link[reproducible]{postProcess}},
+\code{\link[reproducible]{projectInputs}},
+\code{\link[reproducible]{fixErrors}}, and
+\code{\link[reproducible]{prepInputs}}.}
 }
 \description{
 This is the workhorse function that runs any analyses described in

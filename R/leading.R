@@ -1,3 +1,7 @@
+if (getRversion() >= "3.1.0") {
+  utils::globalVariables(c("NPixels", "proportion"))
+}
+
 #' Calculate proportion of landscape occupied by each vegetation class
 #'
 #' This function is recursive.
@@ -20,9 +24,10 @@
 #' @return A \code{data.table} with proportion of the pixels in each vegetation class,
 #'         for each given age class within each polygon.
 #'
+#' @importFrom data.table setDT
+#' @importFrom raster factorValues ncell
 #' @importFrom stats na.omit
 #' @importFrom utils tail
-#' @importFrom data.table setDT
 #' @export
 LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs, ageClasses) {
   # main function code

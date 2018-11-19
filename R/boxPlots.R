@@ -1,7 +1,11 @@
+if (getRversion() >= "3.1.0") {
+  utils::globalVariables(c("ageClass", "group", "proportionCC", "totalPixels", "vegCover", "zone"))
+}
+
 #' @export
 #' @importFrom graphics boxplot points
 #' @importFrom grDevices dev.off png
-.doPlotBoxplot <- function(data, CCpnts = NULL, authStatus, fname = NULL, ...) {
+.doPlotBoxplot <- function(data, CCpnts = NULL, authStatus, fname = NULL, ageClasses, ...) {
   if (!is.null(fname)) png(fname, height = 600, width = 800, units = "px")
   boxplot(proportion~as.factor(ageClass), data, ...)
 
@@ -12,9 +16,19 @@
   if (!is.null(fname)) dev.off()
 }
 
+#' Generate box and whisker plots for leading vegetation cover
+#'
+#' TODO: description needed
+#'
+#' @param map A \code{map} object.
+#' @param functionName TODO: description needed
+#' @param analysisGroups TODO: description needed
+#' @param dPath Destination path for the resulting png files.
+#'
 #' @export
 #' @importFrom data.table setnames
 #' @importFrom magrittr %>%
+#' @importFrom raster res
 #' @importFrom reproducible checkPath
 #' @importFrom tools toTitleCase
 #' @importFrom utils write.csv
@@ -42,7 +56,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
     data2 <- dataCC[data, on = .(zone, vegCover, ageClass)]
     data2[, totalPixels := base::sum(.SD, na.rm = TRUE) / 2, .SDcols = c("NPixels"), by = c("zone")]
 
-    try(write.csv(data2, file.path(Paths$outputPath, paste0("leading_", poly, ".csv"))))
+    try(write.csv(data2, file.path(dPath, paste0("leading_", poly, ".csv"))))
     saveDir <- checkPath(file.path(dPath, poly), create = TRUE)
     savePng <- quote(file.path(saveDir, paste0(unique(paste(zone, vegCover, collapse = " ")), ".png")))
     slices <- c("zone", "vegCover")

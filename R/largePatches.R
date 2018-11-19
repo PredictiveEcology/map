@@ -1,5 +1,23 @@
+if (getRversion() >= "3.1.0") {
+  utils::globalVariables(c("sizeInHa"))
+}
 
+#' Calculate proportion of large patches in NRV
+#'
+#' TODO: needs description
+#'
+#' @param tsf TODO: description needed
+#' @param vtm TODO: description needed
+#' @param poly TODO: description needed
+#' @param labelColumn TODO: description needed
+#' @param id TODO: description needed
+#' @param ageClassCutOffs TODO: description needed
+#' @param ageClasses TODO: description needed
+#'
 #' @export
+#' @importFrom data.table data.table
+#' @importFrom raster levels raster reclassify
+#' @importFrom reproducible Cache
 LargePatches <- function(tsf, vtm, poly, labelColumn, id, ageClassCutOffs, ageClasses) {
   timeSinceFireFilesRast <- Cache(.rasterToMemory, tsf[1])
 
@@ -145,7 +163,6 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile",
            call. = FALSE)
   }
   if (is(x, "Raster")) {
-    require(raster)
     f <- tempfile(fileext = ".tif")
     rastpath <- normalizePath(f, mustWork = FALSE)
     writeRaster(x, rastpath, datatype = assessDataType(x))

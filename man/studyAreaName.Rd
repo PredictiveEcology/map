@@ -16,8 +16,6 @@ studyAreaName(x, layer)
 \item{x}{TODO: document this}
 
 \item{layer}{TODO: document this}
-
-\item{layerName}{TODO: document this}
 }
 \description{
 Tools for getting objects and metadata in and out of a \code{map} class.
