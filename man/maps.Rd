@@ -10,7 +10,7 @@
 \alias{spatialPolygons}
 \alias{spatialPoints}
 \alias{maps}
-\title{Extract rasters in the \code{map} obj}
+\title{Extract rasters in the \code{map} object}
 \usage{
 rasters(map)
 

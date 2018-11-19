@@ -675,7 +675,8 @@ setMethod("rasterToMatch", signature = "map",
             }
 })
 
-#' Extract rasters in the \code{map} obj
+#' Extract rasters in the \code{map} object
+#'
 #' @export
 #' @family mapMethods
 #' @rdname maps
@@ -690,7 +691,7 @@ rasters.map <- function(map) {
   maps(map, "RasterLayer")
 }
 
-#' Extract sp class objects from the \code{map} obj
+#' Extract \code{sp} class objects from the \code{map} obj
 #' @export
 #' @family mapMethods
 #' @rdname maps
