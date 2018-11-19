@@ -1,7 +1,6 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(".N", "objectHash"))
+  utils::globalVariables(c(".", ":=", ".I", ".N", ".SD","objectHash"))
 }
-
 
 #' Append a spatial object to map
 #'
@@ -205,8 +204,10 @@ mapAdd <- function(obj, map, layerName,
 #' @importFrom pemisc getLocalArgsFor identifyVectorArgs makeOptimalCluster MapOrDoCall
 #' @importFrom quickPlot whereInStack
 #' @importFrom raster crs projectRaster writeRaster
-#' @importFrom reproducible asPath Cache compareNA fixErrors projectInputs postProcess .robustDigest
+#' @importFrom reproducible asPath Cache compareNA cropInputs fixErrors
+#' @importFrom reproducible projectInputs postProcess .robustDigest writeOutputs
 #' @importFrom sp CRS
+#' @importFrom utils getS3method
 #' @rdname mapAdd
 mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            overwrite = getOption("map.overwrite"),

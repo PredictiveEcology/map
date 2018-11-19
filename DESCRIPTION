@@ -25,6 +25,7 @@ Imports:
     fastdigest,
     fasterize,
     gdalUtils,
+    magrittr,
     methods,
     pemisc,
     quickPlot,

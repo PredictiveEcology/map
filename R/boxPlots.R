@@ -1,4 +1,6 @@
 #' @export
+#' @importFrom graphics boxplot points
+#' @importFrom grDevices dev.off png
 .doPlotBoxplot <- function(data, CCpnts = NULL, authStatus, fname = NULL, ...) {
   if (!is.null(fname)) png(fname, height = 600, width = 800, units = "px")
   boxplot(proportion~as.factor(ageClass), data, ...)
@@ -12,7 +14,10 @@
 
 #' @export
 #' @importFrom data.table setnames
+#' @importFrom magrittr %>%
+#' @importFrom reproducible checkPath
 #' @importFrom tools toTitleCase
+#' @importFrom utils write.csv
 runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
   ageClasses <- c("Young", "Immature", "Mature", "Old")
   allRepPolys <- na.omit(map@metadata[[analysisGroups]])
