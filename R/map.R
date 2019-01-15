@@ -218,8 +218,11 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
     on.exit(try(stopCluster(cl), silent = TRUE))
 
-    obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti, cl = cl,
-                       single = args1$argsSingle, useCache = useCache)
+    mess <- capture.output(type = "message",
+                            obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti,
+                                               cl = cl,
+                                               single = args1$argsSingle,
+                                               useCache = useCache))
     tryCatch(stopCluster(cl), error = function(x) invisible())
     if (is(obj, "list")) # note is.list returns TRUE for data.frames ... BAD
       names(obj) <- layerName
