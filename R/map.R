@@ -244,7 +244,9 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ####################################################
   if (is.null(studyArea(map)) && is.null(rasterToMatch(map))) {
     argsFixErrors <- getLocalArgsFor(list(Cache, fixErrors), dots = dots)
-    obj <- do.call(Cache, append(list(fixErrors, obj), argsFixErrors))
+    theList <- append(list(FUN = quote(fixErrors), x = quote(obj)), argsFixErrors)
+    obj <- do.call(Cache, theList)
+    #obj <- do.call(Cache, append(list(FUN = fixErrors, obj), argsFixErrors))
     if (isFALSE(isStudyArea)) {
       message("There is no studyArea in map; consider adding one with 'isStudyArea = TRUE'")
     }
@@ -253,7 +255,8 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
         message("No crs already in map, so no reprojection")
       } else {
         argsProjectInputs <- getLocalArgsFor(list(Cache, projectInputs), dots = dots)
-        obj <- do.call(Cache, append(list(projectInputs, obj), argsProjectInputs))
+        obj <- do.call(Cache, append(list(FUN = quote(projectInputs), x = quote(obj)),
+                                     argsProjectInputs))
       }
     } else {
       dots[["targetCRS"]] <- crs(map)
