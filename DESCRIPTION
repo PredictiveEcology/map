@@ -7,7 +7,7 @@ Description: The map class is a collection of map objects (sp, raster, sf), with
 URL: 
     http://map.predictiveecology.org,
     https://github.com/PredictiveEcology/map
-Date: 2019-01-16
+Date: 2019-01-24
 Version: 0.0.1
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
@@ -30,7 +30,7 @@ Imports:
     pemisc,
     quickPlot,
     reproducible,
-    raster,
+    raster (>= 2.8.4),
     rgeos,
     sf,
     sp,
