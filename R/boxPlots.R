@@ -38,9 +38,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
   names(allRepPolys) <- allRepPolys
 
   lapply(allRepPolys, function(poly) {
-    allData <- map@analysesData[[functionName]][["LeadingVegTypeByAgeClass"]][[poly]] ## TODO: remove this old way
-    if (is.null(allData))
-      allData <- map@analysesData[[functionName]][[poly]] ## new way
+    allData <- map@analysesData[[functionName]][[poly]]
     allData <- unique(allData) ## remove duplicates; with LandWeb#89
     allData$vegCover <- gsub(" leading", "", allData$vegCover) %>%
       tools::toTitleCase() %>%
@@ -65,6 +63,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
                                     CCpnts = proportionCC,
                                     col = "limegreen",
                                     fname = eval(savePng),
+                                    ageClasses = ageClasses,
                                     horizontal = TRUE,
                                     main = unique(paste(zone, vegCover, collapse = "_")),
                                     xlab = paste0("Proportion of of forest area (total ",
