@@ -36,6 +36,9 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs, ageClasses
     ageClassCutOffs <- c(ageClassCutOffs, Inf)
 
   # prepare tsf rasters
+  if (basename(vtm[1]) == "CurrentConditionVTM.tif") ## TODO: LandWeb workaround
+    tsf <- file.path(dirname(vtm), "CurrentConditionTSF.tif")
+
   timeSinceFireFilesRast <- raster(tsf[1])
   timeSinceFireFilesRast[] <- timeSinceFireFilesRast[]
 
