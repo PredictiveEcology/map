@@ -125,7 +125,8 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs, ageClasses
   ## column containing the factor names varies, so we need to search for the right one
   colID <- which(colnames(raster::levels(rasVeg)[[1]]) %in% c("category", "Factor", "VALUE"))
   coverClasses <- raster::levels(rasVeg)[[1]][[colID]]
-  if (is.factor(coverClasses)) coverClasses <- levels(coverClasses)
+  if (is.factor(coverClasses))
+    coverClasses <- levels(coverClasses)
 
   coverClasses <- as.character(coverClasses)
   emptyID <- which(coverClasses == "")
