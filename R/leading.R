@@ -128,7 +128,9 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs, ageClasses
   if (is.factor(coverClasses)) coverClasses <- levels(coverClasses)
 
   coverClasses <- as.character(coverClasses)
-  coverClasses <- coverClasses[-which(coverClasses == "")]
+  emptyID <- which(coverClasses == "")
+  if (length(emptyID))
+    coverClasses <- coverClasses[-emptyID]
 
   if (!("All species" %in% levels(coverClasses)))
     coverClasses <- c(coverClasses, "All species")
