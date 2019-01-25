@@ -108,13 +108,15 @@ LargePatches <- function(tsf, vtm, poly, labelColumn, id, ageClassCutOffs, ageCl
 
     out <- rbindlist(list(outBySpecies, outAllSpecies))
     out <- out[sizeInHa >= 100] # never will need patches smaller than 100 ha
+
+    ## TODO: write data for each study area
+    #f <- file.path(Paths$outputPath, "boxplots", paste0("largePatches_", STUDYAREA, ".csv"))
+    #write.csv(out, f)
   } else {
     out <- data.table(polygonID = character(), sizeInHa = numeric(), vegCover = character(),
                       rep = numeric(), ageClass = numeric(), polygonName = numeric())
   }
 
-  ## TODO: write csv of the data.table to polygon-specific file
-  #write.csv(out, file.path(Paths$outputPath, paste0("largePatches_", poly, ".csv")))
   out
 }
 
