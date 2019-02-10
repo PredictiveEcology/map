@@ -56,7 +56,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
     data2 <- dataCC[data, on = .(zone, vegCover, ageClass)]
     data2[, totalPixels := base::sum(.SD, na.rm = TRUE) / 2, .SDcols = c("NPixels"), by = c("zone")]
 
-    try(write.csv(data2, file.path(dPath, paste0("leading_", poly, ".csv"))))
+    try(write.csv(data2, file.path(dPath, paste0("leading_", gsub(" ", "_", poly), ".csv"))))
     saveDir <- checkPath(file.path(dPath, poly), create = TRUE)
     savePng <- quote(file.path(saveDir, paste0(unique(paste(zone, vegCover, collapse = " ")), ".png")))
     slices <- c("zone", "vegCover")
