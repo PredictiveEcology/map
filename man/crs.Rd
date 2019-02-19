@@ -10,7 +10,7 @@
 \arguments{
 \item{x}{Raster* or Spatial object }
 
-\item{...}{additional arguments (not implemented)}
+\item{...}{additional arguments. None implemented}
 }
 \description{
 Extract the crs of a \code{map}

@@ -186,7 +186,7 @@ mapAdd <- function(obj, map, layerName,
 #' @importFrom reproducible .robustDigest asPath Cache compareNA cropInputs fixErrors
 #' @importFrom reproducible prepInputs preProcess projectInputs postProcess writeOutputs
 #' @importFrom sp CRS
-#' @importFrom utils getS3method
+#' @importFrom utils capture.output getS3method
 #' @rdname mapAdd
 mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            overwrite = getOption("map.overwrite"),
