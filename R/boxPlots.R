@@ -54,7 +54,11 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
     dataCC <- dataCC[, c("group", "label", "NPixels") := list(NULL, NULL, NULL)]
 
     data2 <- dataCC[data, on = .(zone, vegCover, ageClass)]
-    data2[, totalPixels := base::sum(.SD, na.rm = TRUE) / 2, .SDcols = c("NPixels"), by = c("zone")]
+
+    ## sum = all species + each indiv species = 2 * totalPixels
+    ## NOTE: this is number of TREED pixels, which is likely smaller than the polygon area
+    data2[, totalPixels := base::sum(.SD, na.rm = TRUE) / 2,
+          .SDcols = c("NPixels"), by = c("group", "zone")]
 
     try(write.csv(data2, file.path(dPath, paste0("leading_", gsub(" ", "_", poly), ".csv"))))
     saveDir <- checkPath(file.path(dPath, poly), create = TRUE)
