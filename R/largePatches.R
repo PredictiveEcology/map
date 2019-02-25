@@ -19,6 +19,11 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom raster levels raster reclassify
 #' @importFrom reproducible Cache
 LargePatches <- function(tsf, vtm, poly, labelColumn, id, ageClassCutOffs, ageClasses) {
+  vtm <- vtm[1]
+
+  if (basename(vtm) == "CurrentConditionVTM.tif") ## TODO: LandWeb workaround
+    tsf <- file.path(dirname(vtm), "CurrentConditionTSF.tif")
+
   timeSinceFireFilesRast <- Cache(.rasterToMemory, tsf[1])
 
   tsf <- reclassify(timeSinceFireFilesRast,
@@ -36,7 +41,7 @@ LargePatches <- function(tsf, vtm, poly, labelColumn, id, ageClassCutOffs, ageCl
   )
 
   # 3rd raster
-  rasVeg <- Cache(.rasterToMemory, vtm)#,
+  rasVeg <- Cache(.rasterToMemory, vtm)
 
   splitVal <- paste0("_", 75757575, "_") # unlikely to occur for any other reason
 
@@ -48,7 +53,9 @@ LargePatches <- function(tsf, vtm, poly, labelColumn, id, ageClassCutOffs, ageCl
 
   if (!isTRUE(all(nas))) {
     name1 <- as.character(raster::levels(tsf)[[1]]$Factor)[tsf[][!nas]]
-    name2 <- as.character(raster::levels(rasVeg)[[1]]$Factor)[rasVeg[][!nas]]
+
+    colID <- which(colnames(raster::levels(rasVeg)[[1]]) %in% c("category", "Factor", "VALUE"))
+    name2 <- as.character(raster::levels(rasVeg)[[1]][[colID]])[rasVeg[][!nas]]
 
     # rasRepPoly will have the numeric values of the *factor* in poly$tmp, NOT
     #   the raster::levels(rasRepPoly)[[1]])
@@ -101,16 +108,17 @@ LargePatches <- function(tsf, vtm, poly, labelColumn, id, ageClassCutOffs, ageCl
 
     out <- rbindlist(list(outBySpecies, outAllSpecies))
     out <- out[sizeInHa >= 100] # never will need patches smaller than 100 ha
+
+    ## TODO: write data for each study area
+    #f <- file.path(Paths$outputPath, "boxplots", paste0("largePatches_", STUDYAREA, ".csv"))
+    #write.csv(out, f)
   } else {
     out <- data.table(polygonID = character(), sizeInHa = numeric(), vegCover = character(),
                       rep = numeric(), ageClass = numeric(), polygonName = numeric())
   }
 
-  ## TODO: write csv of the data.table to polygon-specific file
-  #write.csv(out, file.path(Paths$outputPath, paste0("largePatches_", poly, ".csv")))
   out
 }
-
 
 areaAndPolyValue <- function(ras) {
   polyIndivSpecies <- gdal_polygonizeR(ras) # 99 seconds with full ras

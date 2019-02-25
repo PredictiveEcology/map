@@ -186,7 +186,7 @@ mapAdd <- function(obj, map, layerName,
 #' @importFrom reproducible .robustDigest asPath Cache compareNA cropInputs fixErrors
 #' @importFrom reproducible prepInputs preProcess projectInputs postProcess writeOutputs
 #' @importFrom sp CRS
-#' @importFrom utils getS3method
+#' @importFrom utils capture.output getS3method
 #' @rdname mapAdd
 mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            overwrite = getOption("map.overwrite"),
@@ -218,8 +218,11 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
     on.exit(try(stopCluster(cl), silent = TRUE))
 
-    obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti, cl = cl,
-                       single = args1$argsSingle, useCache = useCache)
+    mess <- capture.output(type = "message",
+                            obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti,
+                                               cl = cl,
+                                               single = args1$argsSingle,
+                                               useCache = useCache))
     tryCatch(stopCluster(cl), error = function(x) invisible())
     if (is(obj, "list")) # note is.list returns TRUE for data.frames ... BAD
       names(obj) <- layerName
@@ -241,7 +244,9 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ####################################################
   if (is.null(studyArea(map)) && is.null(rasterToMatch(map))) {
     argsFixErrors <- getLocalArgsFor(list(Cache, fixErrors), dots = dots)
-    obj <- do.call(Cache, append(list(fixErrors, obj), argsFixErrors))
+    theList <- append(list(FUN = quote(fixErrors), x = quote(obj)), argsFixErrors)
+    obj <- do.call(Cache, theList)
+    #obj <- do.call(Cache, append(list(FUN = fixErrors, obj), argsFixErrors))
     if (isFALSE(isStudyArea)) {
       message("There is no studyArea in map; consider adding one with 'isStudyArea = TRUE'")
     }
@@ -250,7 +255,8 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
         message("No crs already in map, so no reprojection")
       } else {
         argsProjectInputs <- getLocalArgsFor(list(Cache, projectInputs), dots = dots)
-        obj <- do.call(Cache, append(list(projectInputs, obj), argsProjectInputs))
+        obj <- do.call(Cache, append(list(FUN = quote(projectInputs), x = quote(obj)),
+                                     argsProjectInputs))
       }
     } else {
       dots[["targetCRS"]] <- crs(map)

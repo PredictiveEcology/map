@@ -36,6 +36,9 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs, ageClasses
     ageClassCutOffs <- c(ageClassCutOffs, Inf)
 
   # prepare tsf rasters
+  if (basename(vtm[1]) == "CurrentConditionVTM.tif") ## TODO: LandWeb workaround
+    tsf <- file.path(dirname(vtm), "CurrentConditionTSF.tif")
+
   timeSinceFireFilesRast <- raster(tsf[1])
   timeSinceFireFilesRast[] <- timeSinceFireFilesRast[]
 
@@ -83,6 +86,7 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs, ageClasses
   if (is(poly, "SpatialPolygons")) {
     if (!"shinyLabel" %in% colnames(poly@data))
       stop("poly must have a column 'shinyLabel'")
+
     poly <- Cache(fasterize2, rasTsf, poly, field = "polygonNum")
   }
   levs <- raster::levels(poly)[[1]]
@@ -119,8 +123,17 @@ LeadingVegTypeByAgeClass <- function(tsf, vtm, poly, ageClassCutOffs, ageClasses
 
   tabulated <- rbindlist(list(tabulated, tabulated2), use.names = TRUE, fill = TRUE)
 
-  coverClasses <- raster::levels(rasVeg)[[1]]$Factor
-  if (is.factor(coverClasses)) coverClasses <- levels(coverClasses)
+  ## column containing the factor names varies, so we need to search for the right one
+  colID <- which(colnames(raster::levels(rasVeg)[[1]]) %in% c("category", "Factor", "VALUE"))
+  coverClasses <- raster::levels(rasVeg)[[1]][[colID]]
+  if (is.factor(coverClasses))
+    coverClasses <- levels(coverClasses)
+
+  coverClasses <- as.character(coverClasses)
+  emptyID <- which(coverClasses == "")
+  if (length(emptyID))
+    coverClasses <- coverClasses[-emptyID]
+
   if (!("All species" %in% levels(coverClasses)))
     coverClasses <- c(coverClasses, "All species")
 
