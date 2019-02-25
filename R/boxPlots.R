@@ -7,7 +7,7 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom grDevices dev.off png
 .doPlotBoxplot <- function(data, CCpnts = NULL, authStatus, fname = NULL, ageClasses, ...) {
   if (!is.null(fname)) png(fname, height = 600, width = 800, units = "px")
-  boxplot(proportion~as.factor(ageClass), data, ...)
+  boxplot(proportion ~ as.factor(ageClass), data, ...)
 
   if (isTRUE(authStatus)) {
     if (length(CCpnts) == 4) warning("length(CCpnts) != 4; only the first 4 will be used")
@@ -58,7 +58,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
     ## sum = all species + each indiv species = 2 * totalPixels
     ## NOTE: this is number of TREED pixels, which is likely smaller than the polygon area
     data2[, totalPixels := base::sum(.SD, na.rm = TRUE) / 2,
-          .SDcols = c("NPixels"), by = c("group", "zone")]
+          .SDcols = c("NPixels"), by = c("group", "vegcover", "zone")]
 
     try(write.csv(data2, file.path(dPath, paste0("leading_", gsub(" ", "_", poly), ".csv"))))
     saveDir <- checkPath(file.path(dPath, poly), create = TRUE)
