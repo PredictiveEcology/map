@@ -57,7 +57,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
 
     ## sum = all species + each indiv species = 2 * totalPixels
     ## NOTE: this is number of TREED pixels, which is likely smaller than the polygon area
-    data2[, totalPixels := mean(base::sum(.SD, na.rm = TRUE) / 2),
+    data2[, totalPixels := base::sum(.SD, na.rm = TRUE) / 2,
           .SDcols = c("NPixels"), by = c("group", "vegCover", "zone")]
 
     try(write.csv(data2, file.path(dPath, paste0("leading_", gsub(" ", "_", poly), ".csv"))))
@@ -73,7 +73,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
                                     horizontal = TRUE,
                                     main = unique(paste(zone, vegCover, collapse = "_")),
                                     xlab = paste0("Proportion of of forest area (total ",
-                                                  format(unique(totalPixels) *
+                                                  format(mean(totalPixels) *
                                                     res(rasterToMatch(map))[1] *
                                                     res(rasterToMatch(map))[2] / 1e4,
                                                     big.mark = ","),
