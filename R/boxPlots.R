@@ -58,8 +58,8 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
 
     ## sum = all species + each indiv species = 2 * totalPixels
     ## NOTE: this is number of TREED pixels, which is likely smaller than the polygon area
-    data2[, totalPixels := as.double(base::sum(.SD, na.rm = TRUE)),
-          .SDcols = c("NPixels"), by = c("group", "vegCover", "zone")]
+    data2[, totalPixels := as.double(base::sum(NPixels, na.rm = TRUE)),
+          by = c("group", "vegCover", "zone")]
     data2[, totalPixels2 := as.double(base::mean(totalPixels, na.rm = TRUE)),
           by = c("vegCover", "zone")] ## use mean for plot labels below
 
