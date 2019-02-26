@@ -54,11 +54,14 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
     dataCC <- dataCC[, c("group", "label", "NPixels") := list(NULL, NULL, NULL)]
 
     data2 <- dataCC[data, on = .(zone, vegCover, ageClass)]
+    data2[is.na(NPixels), NPixels := 0]
 
     ## sum = all species + each indiv species = 2 * totalPixels
     ## NOTE: this is number of TREED pixels, which is likely smaller than the polygon area
-    data2[, totalPixels := base::sum(.SD, na.rm = TRUE) / 2,
+    data2[, totalPixels := as.double(base::sum(.SD, na.rm = TRUE)),
           .SDcols = c("NPixels"), by = c("group", "vegCover", "zone")]
+    data2[, totalPixels2 := as.double(base::mean(totalPixels, na.rm = TRUE)),
+          by = c("vegCover", "zone")] ## use mean for plot labels below
 
     try(write.csv(data2, file.path(dPath, paste0("leading_", gsub(" ", "_", poly), ".csv"))))
     saveDir <- checkPath(file.path(dPath, poly), create = TRUE)
@@ -73,9 +76,8 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
                                     horizontal = TRUE,
                                     main = unique(paste(zone, vegCover, collapse = "_")),
                                     xlab = paste0("Proportion of of forest area (total ",
-                                                  format(mean(totalPixels) *
-                                                    res(rasterToMatch(map))[1] *
-                                                    res(rasterToMatch(map))[2] / 1e4,
+                                                  format(unique(totalPixels2) *
+                                                    prod(res(rasterToMatch(map))) / 1e4,
                                                     big.mark = ","),
                                                   " ha)"),
                                     ylab = "Age class",
