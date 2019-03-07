@@ -259,7 +259,6 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
 
   map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
   map
-
 }
 
 ## TODO: needs documentation?

@@ -11,7 +11,8 @@ if (getRversion() >= "3.1.0") {
 
   if (isTRUE(authStatus)) {
     if (length(CCpnts) == 4) warning("length(CCpnts) != 4; only the first 4 will be used")
-    points(CCpnts[1:4], factor(ageClasses), col = "red", pch = 20, cex = 3)
+    ids <- match(factor(ageClasses), data[1:4, ]$ageClass)
+    points(CCpnts[ids], factor(ageClasses), col = "red", pch = 20, cex = 3)
   }
   if (!is.null(fname)) dev.off()
 }
