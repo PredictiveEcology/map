@@ -74,7 +74,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
                                     ageClasses = ageClasses,
                                     horizontal = TRUE,
                                     main = unique(paste(zone, vegCover, collapse = "_")),
-                                    xlab = paste0("Proportion of of forest area (total ",
+                                    xlab = paste0("Proportion of forest area (total ",
                                                   format(unique(totalPixels2) *
                                                     prod(res(rasterToMatch(map))) / 1e4,
                                                     big.mark = ","),
@@ -120,7 +120,6 @@ runHistsLargePatches <- function(map, functionName, analysisGroups, dPath) {
     allData$ageClass <- factor(allData$ageClass, ageClasses)
 
     data <- allData[!grepl("CC", group)]
-
     dataCC <- allData[grepl("CC", group)]
     #setnames(dataCC, "proportion", "proportionCC") ## rename the column to proportionCC
     #dataCC <- dataCC[, c("group", "label", "NPixels") := list(NULL, NULL, NULL)]
