@@ -24,6 +24,7 @@ if (getRversion() >= "3.1.0") {
 #' @param functionName TODO: description needed
 #' @param analysisGroups TODO: description needed
 #' @param dPath Destination path for the resulting png files.
+#' @param ageClasses Character vector of vegetation class names.
 #'
 #' @export
 #' @importFrom data.table setnames
@@ -32,8 +33,8 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom reproducible checkPath
 #' @importFrom tools toTitleCase
 #' @importFrom utils write.csv
-runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
-  ageClasses <- c("Young", "Immature", "Mature", "Old")
+runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath,
+                                ageClasses = c("Young", "Immature", "Mature", "Old")) {
   allRepPolys <- na.omit(map@metadata[[analysisGroups]])
   names(allRepPolys) <- allRepPolys
 
@@ -87,7 +88,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
   })
 }
 
-#' Generate box and whisker plots for large patches
+#' Generate histograms for large patches
 #'
 #' TODO: description needed
 #'
@@ -95,6 +96,7 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
 #' @param functionName TODO: description needed
 #' @param analysisGroups TODO: description needed
 #' @param dPath Destination path for the resulting png files.
+#' @param ageClasses Character vector of vegetation class names.
 #'
 #' @export
 #' @importFrom data.table setnames
@@ -103,9 +105,9 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
 #' @importFrom reproducible checkPath
 #' @importFrom tools toTitleCase
 #' @importFrom utils write.csv
-runHistsLargePatches <- function(map, functionName, analysisGroups, dPath) {
+runHistsLargePatches <- function(map, functionName, analysisGroups, dPath,
+                                 ageClasses = c("Young", "Immature", "Mature", "Old")) {
   browser()
-  ageClasses <- c("Young", "Immature", "Mature", "Old")
   allRepPolys <- na.omit(map@metadata[[analysisGroups]])
   names(allRepPolys) <- allRepPolys
 
@@ -114,10 +116,10 @@ runHistsLargePatches <- function(map, functionName, analysisGroups, dPath) {
     if (is.null(allData))
       allData <- map@analysesData[[functionName]][[poly]] ## TODO: fix upstream
     #allData <- unique(allData) ## remove duplicates; with LandWeb#89
-    allData$vegCover <- gsub(" leading", "", allData$vegCover) %>%
-      tools::toTitleCase() %>%
-      as.factor() ## match CC raster names
-    allData$ageClass <- factor(allData$ageClass, ageClasses)
+    #allData$vegCover <- gsub(" leading", "", allData$vegCover) %>%
+    #  tools::toTitleCase() %>%
+    #  as.factor() ## match CC raster names
+    #allData$ageClass <- factor(allData$ageClass, ageClasses)
 
     data <- allData[!grepl("CC", group)]
     dataCC <- allData[grepl("CC", group)]
