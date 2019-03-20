@@ -224,7 +224,6 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
                                   postHocAnalyses = "all",
                                   useParallel = getOption("map.useParallel"),
                                   ...) {
-  browser()
   dots <- list(...)
 
   if (is.null(postHocAnalysisGroups))

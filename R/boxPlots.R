@@ -1,5 +1,6 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c("ageClass", "group", "proportionCC", "totalPixels", "vegCover", "zone"))
+  utils::globalVariables(c("ageClass", "group", "N", "NCC", "polygonName", "proportionCC",
+                           "totalPixels", "totalPixels2", "vegCover", "zone"))
 }
 
 #' @export
@@ -35,6 +36,7 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom utils write.csv
 runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
                                 #ageClasses = c("Young", "Immature", "Mature", "Old")
+  ageClasses <- c("Young", "Immature", "Mature", "Old")
   allRepPolys <- na.omit(map@metadata[[analysisGroups]])
   names(allRepPolys) <- allRepPolys
 
@@ -88,34 +90,35 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
   })
 }
 
-.doPlotHistogram <- function(data, fname = NULL, ...) {
+#' @importFrom graphics abline axis barplot hist
+#' @importFrom pemisc factorValues2
+.doPlotHistogram <- function(data, xlim, fname = NULL, ...) {
   minNumBars <- 6
   maxNumBars <- 30
-  rangeNClusters <- range(c(0, data$NCC, data$N, minNumBars)) ## TODO: verify
+  rangeNClusters <- range(c(0, xlim, minNumBars)) ## TODO: verify
   attemptedNumBars <- max(minNumBars, min(maxNumBars, diff(rangeNClusters)))
+
   breaksRaw <- seq(rangeNClusters[1], rangeNClusters[2], length.out = attemptedNumBars)
   prettyBreaks <- pretty(breaksRaw, n = attemptedNumBars, min.n = min(attemptedNumBars, minNumBars))
-  dataForBreaks <- hist(data$N, plot = FALSE, breaks = prettyBreaks)
-  breaksLabels <- dataForBreaks$breaks
-  breaksInterval <- diff(breaksLabels)[1]
-  dataForHistogram <- if (NROW(data) == 0) {
+
+  dataForBreaks <- dataForHistogram <- if (NROW(data) == 0) {
     # add a bar at zero if there are no patches
     hist(0, plot = FALSE, breaks = prettyBreaks)
   } else {
     hist(data$N, plot = FALSE, breaks = prettyBreaks)
   }
-  histogramData <- dataForHistogram$counts / sum(dataForHistogram$counts)
+
+  breaksLabels <- dataForBreaks$breaks
+  breaksInterval <- diff(breaksLabels)[1]
+
+  histogramData <- dataForHistogram$counts / sum(dataForHistogram$counts) ## use proportion
   histogramData[is.na(histogramData)] <- 0 # NA means that there were no large patches in dt
 
-  breaks <- breaksLabels - breaksInterval / 2
-  barplotBreaks <- seq_along(breaksLabels) - 0.5 # (breaksLabels + breaksInterval / 2)
-  ticksAt <- barplotBreaks - min(breaksLabels)
-  browser()
-  xlim <- range(ticksAt) - 0.5 # breaksInterval / 2
+  barplotBreaks <- seq_along(breaksLabels) - 0.5
   addAxisParams <- list(side = 1, labels = breaksLabels, at = barplotBreaks - min(breaksLabels))
-  verticalLineAtX <- unique(data$NCC)[1] + 0.5# breaksInterval / 2 # The barplot xaxis is 1/2 a barwidth off
+  verticalLineAtX <- round(unique(data$NCC)[1] / breaksInterval) + 0.5 # The barplot xaxis is 1/2 a barwidth off
 
-  if (!is.null(fname)) png(fname, width = 400, height = 400, units = "px")
+  if (!is.null(fname)) png(fname, width = 600, height = 400, units = "px")
   barplot(histogramData, ...)
   if (!is.null(addAxisParams)) do.call(axis, addAxisParams)
   if (!is.null(verticalLineAtX)) abline(v = verticalLineAtX, col = "red", lwd = 3)
@@ -130,7 +133,6 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
 #' @param functionName TODO: description needed
 #' @param analysisGroups TODO: description needed
 #' @param dPath Destination path for the resulting png files.
-# @param ageClasses Character vector of vegetation class names.
 #'
 #' @export
 #' @importFrom data.table setnames
@@ -140,7 +142,6 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
 #' @importFrom tools toTitleCase
 #' @importFrom utils write.csv
 runHistsLargePatches <- function(map, functionName, analysisGroups, dPath) {
-                                 #ageClasses = c("Young", "Immature", "Mature", "Old")
   allRepPolys <- na.omit(map@metadata[[analysisGroups]])
   names(allRepPolys) <- allRepPolys
 
@@ -148,18 +149,12 @@ runHistsLargePatches <- function(map, functionName, analysisGroups, dPath) {
     allData <- map@analysesData[[functionName]][["LargePatches"]][[poly]]
     if (is.null(allData))
       allData <- map@analysesData[[functionName]][[poly]] ## TODO: fix upstream
-    #allData <- unique(allData) ## remove duplicates; with LandWeb#89
-    #allData$vegCover <- gsub(" leading", "", allData$vegCover) %>%
-    #  tools::toTitleCase() %>%
-    #  as.factor() ## match CC raster names
-    #allData$ageClass <- factor(allData$ageClass, ageClasses)
 
     data <- allData[!grepl("CC", group)]
     dataCC <- allData[grepl("CC", group)]
 
     slices <- c("ageClass", "polygonName", "vegCover", "rep")
     slicesNoRep <- slices[slices != "rep"]
-    #out <- data[, .N, by = c(slices, "rep")]
 
     data <- data[!ageClass == "NA" | !vegCover == "NA"]
     emptyDT <- data.table(expand.grid(ageClass = unique(data$ageClass),
@@ -169,19 +164,15 @@ runHistsLargePatches <- function(map, functionName, analysisGroups, dPath) {
 
     patchSizes <- c(100, 500, 1000, 5000) ## minPatchSize <- 100
 
-    lapply(patchSizes, function(minPatchSize) {
+    fout <- lapply(patchSizes, function(minPatchSize) {
       nClustersDT <- data[sizeInHa >= minPatchSize, .N, by = slices]
       nClustersDT <- nClustersDT[emptyDT, on = slices, nomatch = NA]
       nClustersDT[is.na(N), N := 0]
-
-      # nClusters <- nClustersDT$N ## move to internal
 
       nClustersDT_CC <- dataCC[sizeInHa >= minPatchSize, .N, by = slices]
       setnames(nClustersDT_CC, "N", "NCC")
       nClustersDT_CC <- nClustersDT_CC[emptyDT, on = slices, nomatch = NA]
       nClustersDT_CC[is.na(NCC), NCC := 0]
-
-      # verticalLineAtX <- max(0, nClustersDT_CC$N) ## move to internal
 
       nClustersDT <- nClustersDT[nClustersDT_CC, on = slices]
 
@@ -190,10 +181,13 @@ runHistsLargePatches <- function(map, functionName, analysisGroups, dPath) {
                                                          "_", minPatchSize, ".csv"))))
 
       saveDir <- checkPath(file.path(dPath, poly, "largePatches", minPatchSize), create = TRUE)
-      savePng <- quote(file.path(saveDir, paste0(unique(paste(polygonName, ageClass, vegCover, collapse = " ")), ".png")))
+      savePng <- quote(file.path(saveDir, paste0(unique(paste(polygonName,
+                                                              vegCover,
+                                                              ageClass,
+                                                              collapse = " ")), ".png")))
 
-      browser()
-      xlim <- c(0,max(nClustersDT$N))
+      #browser()
+      xlim <- c(0, max(nClustersDT$N))
       nClustersDT[, tryCatch(.doPlotHistogram(data = .SD,
                                               fname = eval(savePng),
                                               # ccLine = NCC,
@@ -209,12 +203,8 @@ runHistsLargePatches <- function(map, functionName, analysisGroups, dPath) {
                              error = function(e) warning(e)),
                   .SDcols = c(slices, "N", "NCC"), by = slicesNoRep]
 
+      nClustersDT[, list(filename = eval(savePng)), by = slicesNoRep]
     })
-
-
-
-    ###
-
-    data2[, list(filename = eval(savePng)), by = slices]
+    unlist(fout)
   })
 }
