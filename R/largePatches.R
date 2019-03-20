@@ -75,7 +75,7 @@ LargePatches <- function(tsf, vtm, poly, labelColumn, id, ageClassCutOffs, ageCl
     types <- do.call(rbind, types)
 
     facPolygonID <- factor(types[areaAndPolyOut$polyID,3])
-
+browser()
     outBySpecies <- data.table(polygonID = as.numeric(facPolygonID),
                                sizeInHa = areaAndPolyOut$sizeInHa,
                                vegCover = types[areaAndPolyOut$polyID, 2],
