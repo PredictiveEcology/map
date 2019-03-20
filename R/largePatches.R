@@ -18,7 +18,8 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom data.table data.table
 #' @importFrom raster levels raster reclassify
 #' @importFrom reproducible Cache
-LargePatches <- function(tsf, vtm, poly, labelColumn, id, ageClassCutOffs, ageClasses) {
+LargePatches <- function(tsf, vtm, poly, labelColumn, id, ageClassCutOffs, ageClasses,
+                         sppEquivCol, sppEquivalencies_CA) {
   vtm <- vtm[1]
 
   if (basename(vtm) == "CurrentConditionVTM.tif") ## TODO: LandWeb workaround
@@ -47,15 +48,18 @@ LargePatches <- function(tsf, vtm, poly, labelColumn, id, ageClassCutOffs, ageCl
 
   # Individual species
   nas3 <- is.na(rasRepPoly[])
-  nas2 <- is.na(rasVeg[]) | rasVeg[] == 0
+  nas2 <- is.na(rasVeg[]) | (factorValues2(rasVeg, rasVeg[], att = 1) == 0)
   nas1 <- is.na(tsf[])
   nas <- nas3 | nas2 | nas1
 
   if (!isTRUE(all(nas))) {
-    name1 <- as.character(raster::levels(tsf)[[1]]$Factor)[tsf[][!nas]]
+    #name1a <- as.character(raster::levels(tsf)[[1]]$Factor)[tsf[][!nas]]
+    name1 <- as.character(factorValues2(tsf, tsf[], att = 2)[!nas])
 
     colID <- which(colnames(raster::levels(rasVeg)[[1]]) %in% c("category", "Factor", "VALUE"))
-    name2 <- as.character(raster::levels(rasVeg)[[1]][[colID]])[rasVeg[][!nas]]
+
+    #name2 <- as.character(raster::levels(rasVeg)[[1]][[colID]])[rasVeg[][!nas]]
+    name2 <- as.character(factorValues2(rasVeg, rasVeg[], att = colID)[!nas])
 
     # rasRepPoly will have the numeric values of the *factor* in poly$tmp, NOT
     #   the raster::levels(rasRepPoly)[[1]])
@@ -75,7 +79,6 @@ LargePatches <- function(tsf, vtm, poly, labelColumn, id, ageClassCutOffs, ageCl
     types <- do.call(rbind, types)
 
     facPolygonID <- factor(types[areaAndPolyOut$polyID,3])
-browser()
     outBySpecies <- data.table(polygonID = as.numeric(facPolygonID),
                                sizeInHa = areaAndPolyOut$sizeInHa,
                                vegCover = types[areaAndPolyOut$polyID, 2],
@@ -117,6 +120,8 @@ browser()
                       rep = numeric(), ageClass = numeric(), polygonName = numeric())
   }
 
+  out[!is.na(equivalentName(out$vegCover, sppEquivalencies_CA, sppEquivCol)),
+      vegCover := equivalentName(vegCover, sppEquivalencies_CA, sppEquivCol)]
   out
 }
 

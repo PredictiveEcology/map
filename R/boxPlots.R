@@ -88,36 +88,36 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
   })
 }
 
-.doPlotHistogram <- function(data, outCC, fname = NULL, ...) {
-  browser()
+.doPlotHistogram <- function(data, fname = NULL, ...) {
   minNumBars <- 6
   maxNumBars <- 30
-  rangeNClusters <- range(c(0, outCC$N, data$N, minNumBars)) ## TODO: verify
+  rangeNClusters <- range(c(0, data$NCC, data$N, minNumBars)) ## TODO: verify
   attemptedNumBars <- max(minNumBars, min(maxNumBars, diff(rangeNClusters)))
   breaksRaw <- seq(rangeNClusters[1], rangeNClusters[2], length.out = attemptedNumBars)
   prettyBreaks <- pretty(breaksRaw, n = attemptedNumBars, min.n = min(attemptedNumBars, minNumBars))
-  dataForBreaks <- hist(nClusters, plot = FALSE, breaks = prettyBreaks)
+  dataForBreaks <- hist(data$N, plot = FALSE, breaks = prettyBreaks)
   breaksLabels <- dataForBreaks$breaks
   breaksInterval <- diff(breaksLabels)[1]
-  dataForHistogram <- if (NROW(out) == 0) {
+  dataForHistogram <- if (NROW(data) == 0) {
     # add a bar at zero if there are no patches
     hist(0, plot = FALSE, breaks = prettyBreaks)
   } else {
-    hist(out, plot = FALSE, breaks = prettyBreaks)
+    hist(data$N, plot = FALSE, breaks = prettyBreaks)
   }
   histogramData <- dataForHistogram$counts / sum(dataForHistogram$counts)
   histogramData[is.na(histogramData)] <- 0 # NA means that there were no large patches in dt
 
   breaks <- breaksLabels - breaksInterval / 2
-  barplotBreaks <- breaksLabels + breaksInterval / 2
+  barplotBreaks <- seq_along(breaksLabels) - 0.5 # (breaksLabels + breaksInterval / 2)
   ticksAt <- barplotBreaks - min(breaksLabels)
-  xlim <- range(ticksAt) - breaksInterval / 2
+  browser()
+  xlim <- range(ticksAt) - 0.5 # breaksInterval / 2
   addAxisParams <- list(side = 1, labels = breaksLabels, at = barplotBreaks - min(breaksLabels))
-  verticalLineAtX <- verticalLineAtX + breaksInterval / 2 # The barplot xaxis is 1/2 a barwidth off
+  verticalLineAtX <- unique(data$NCC)[1] + 0.5# breaksInterval / 2 # The barplot xaxis is 1/2 a barwidth off
 
   if (!is.null(fname)) png(fname, width = 400, height = 400, units = "px")
-  barplot(hst, ...)
-  if (!is.null(axps)) do.call(axis, axps)
+  barplot(histogramData, ...)
+  if (!is.null(addAxisParams)) do.call(axis, addAxisParams)
   if (!is.null(verticalLineAtX)) abline(v = verticalLineAtX, col = "red", lwd = 3)
   if (!is.null(fname)) dev.off()
 }
@@ -141,7 +141,6 @@ runBoxPlotsVegCover <- function(map, functionName, analysisGroups, dPath) {
 #' @importFrom utils write.csv
 runHistsLargePatches <- function(map, functionName, analysisGroups, dPath) {
                                  #ageClasses = c("Young", "Immature", "Mature", "Old")
-  browser()
   allRepPolys <- na.omit(map@metadata[[analysisGroups]])
   names(allRepPolys) <- allRepPolys
 
@@ -158,26 +157,33 @@ runHistsLargePatches <- function(map, functionName, analysisGroups, dPath) {
     data <- allData[!grepl("CC", group)]
     dataCC <- allData[grepl("CC", group)]
 
-    slices <- c("ageClass", "polygonName", "vegCover")
+    slices <- c("ageClass", "polygonName", "vegCover", "rep")
+    slicesNoRep <- slices[slices != "rep"]
     #out <- data[, .N, by = c(slices, "rep")]
 
-    emptyDT <- data.table(vegCover = unique(data[]$vegCover), N = 0) ## move to internal
+    data <- data[!ageClass == "NA" | !vegCover == "NA"]
+    emptyDT <- data.table(expand.grid(ageClass = unique(data$ageClass),
+                          vegCover = unique(data$vegCover),
+                          polygonName = unique(data$polygonName),
+                          rep = unique(data$rep))) ## move to internal
 
     patchSizes <- c(100, 500, 1000, 5000) ## minPatchSize <- 100
 
     lapply(patchSizes, function(minPatchSize) {
-      nClustersDT <- data[sizeInHa >= minPatchSize, .N, by = c(slices, "rep")]
-      nClustersDT <- nClustersDT[emptyDT, on = c("vegCover"), nomatch = NA]
+      nClustersDT <- data[sizeInHa >= minPatchSize, .N, by = slices]
+      nClustersDT <- nClustersDT[emptyDT, on = slices, nomatch = NA]
       nClustersDT[is.na(N), N := 0]
-      nClustersDT[, i.N := NULL]
 
-      nClusters <- nClustersDT$N ## move to internal
+      # nClusters <- nClustersDT$N ## move to internal
 
-      outCC <- dataCC[sizeInHa >= minPatchSize, .N, by = c(slices, "rep")]
-      setnames(outCC, "N", "NCC")
-      verticalLineAtX <- max(0, outCC$N) ## move to internal
+      nClustersDT_CC <- dataCC[sizeInHa >= minPatchSize, .N, by = slices]
+      setnames(nClustersDT_CC, "N", "NCC")
+      nClustersDT_CC <- nClustersDT_CC[emptyDT, on = slices, nomatch = NA]
+      nClustersDT_CC[is.na(NCC), NCC := 0]
 
-      nClustersDT[outCC, on = slices]
+      # verticalLineAtX <- max(0, nClustersDT_CC$N) ## move to internal
+
+      nClustersDT <- nClustersDT[nClustersDT_CC, on = slices]
 
       try(write.csv(nClustersDT, file.path(dPath, paste0("largePatches_",
                                                          gsub(" ", "_", poly),
@@ -186,9 +192,11 @@ runHistsLargePatches <- function(map, functionName, analysisGroups, dPath) {
       saveDir <- checkPath(file.path(dPath, poly, "largePatches", minPatchSize), create = TRUE)
       savePng <- quote(file.path(saveDir, paste0(unique(paste(polygonName, ageClass, vegCover, collapse = " ")), ".png")))
 
+      browser()
+      xlim <- c(0,max(nClustersDT$N))
       nClustersDT[, tryCatch(.doPlotHistogram(data = .SD,
                                               fname = eval(savePng),
-                                              ccLine = NCC,
+                                              # ccLine = NCC,
                                               border = "grey",
                                               col = "darkgrey",
                                               main = paste(polygonName, ageClass, vegCover, collapse = " "),
@@ -196,9 +204,10 @@ runHistsLargePatches <- function(map, functionName, analysisGroups, dPath) {
                                               xlab = paste0("Number of patches greater than ",
                                                             minPatchSize, " ha"),
                                               ylab = "Proportion in NRV",
-                                              xlim = xlim, ylim = c(0, 1)),
+                                              xlim = xlim,
+                                              ylim = c(0, 1)),
                              error = function(e) warning(e)),
-                  .SDcols = c("ageClass", "polygonName", "vegCover", "rep", "N"), by = slices]
+                  .SDcols = c(slices, "N", "NCC"), by = slicesNoRep]
 
     })
 
