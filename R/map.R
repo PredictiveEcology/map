@@ -215,6 +215,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       0
     }
     message("  Running prepInputs for: ", paste(layerName, collapse = ", "))
+    browser()
     cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
     on.exit(try(stopCluster(cl), silent = TRUE))
 
@@ -290,6 +291,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       }
 
       message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
+      browser()
       cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
       on.exit(try(stopCluster(cl), silent = TRUE))
       obj <- MapOrDoCall(postProcess, multiple = args1$argsMulti, cl = cl,
@@ -393,6 +395,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                                  !identical("windows", .Platform$OS.type))
       }
     }
+    browser()
     cl <- makeOptimalCluster(useParallel = useParallel,
                              MBper = MBper,
                              maxNumClusters = length(obj))

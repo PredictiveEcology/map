@@ -1,13 +1,13 @@
 Package: map
 Type: Package
 Title: Defines a meta class of geographical objects, the 'map' class, and associated tools
-Description: The map class is a collection of map objects (sp, raster, sf), with a 
+Description: The map class is a collection of map objects ('sp', 'raster', 'sf'), with a 
     number of metadata additions to enable powerful methods, e.g., 
     for leaflet, reproducible GIS etc.
 URL: 
     http://map.predictiveecology.org,
     https://github.com/PredictiveEcology/map
-Date: 2019-01-24
+Date: 2019-03-20
 Version: 0.0.1
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
@@ -56,10 +56,9 @@ BugReports: https://github.com/PredictiveEcology/map/issues
 ByteCompile: yes
 RoxygenNote: 6.1.0.9000
 Collate: 
+    'GIS.R'
     'boxPlots.R'
     'buildMetadata.R'
-    'largePatches.R'
-    'leading.R'
     'makeTiles.R'
     'map-analysis.R'
     'map-class.R'
