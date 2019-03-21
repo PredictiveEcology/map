@@ -199,7 +199,7 @@ mapAddAnalysis <- function(map, functionName,
 }
 
 
-#' Add a post hoc analysis function to a map obj
+#' Add a post hoc analysis function to a \code{map} object
 #'
 #' @inheritParams mapAdd
 #'
