@@ -336,7 +336,6 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     a[layerName] <- objTmp
     list2env(a, envir = envir)
   } else {
-
     if (exists(layerName, envir = envir)) {
       a <- list()
       envir1 <- if (is(envir, "list")) obj else list(envir)
