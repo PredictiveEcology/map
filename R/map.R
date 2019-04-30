@@ -217,13 +217,12 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     message("  Running prepInputs for: ", paste(layerName, collapse = ", "))
     #browser()
     cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
-    on.exit(try(stopCluster(cl), silent = TRUE))
+    on.exit({try(stopCluster(cl), silent = TRUE)})
 
-    mess <- capture.output(type = "message",
                             obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti,
                                                cl = cl,
                                                single = args1$argsSingle,
-                                               useCache = useCache))
+                                               useCache = useCache)
     tryCatch(stopCluster(cl), error = function(x) invisible())
     if (is(obj, "list")) # note is.list returns TRUE for data.frames ... BAD
       names(obj) <- layerName
