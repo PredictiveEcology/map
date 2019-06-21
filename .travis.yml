@@ -1,81 +1,85 @@
 sudo: required
 language: r
 cache: packages
-cran: https://cran.rstudio.com/
+cran: https://cloud.r-project.org
 env:
   global:
-    - CRAN_REPO=https://cran.rstudio.com
+    - CRAN_REPO=https://cloud.r-project.org
 matrix:
   include:
   - os: linux
-    dist: trusty
+    dist: xenial
     r: 3.3
     addons:
       apt:
         sources:
           - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
         packages:
+          - gdal-bin
           - libgdal-dev
-          - libgdal1-dev
           - libgeos-dev
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
-          - gdal-bin
+    r_binary_packages:
+      - BH
     r_packages:
       - rgdal
       - rgeos
   - os: linux
-    dist: trusty
+    dist: xenial
     r: 3.4
     addons:
       apt:
         sources:
           - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
         packages:
+          - gdal-bin
           - libgdal-dev
-          - libgdal1-dev
           - libgeos-dev
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
-          - gdal-bin
+    r_binary_packages:
+      - BH
     r_packages:
       - rgdal
       - rgeos
   - os: linux
-    dist: trusty
+    dist: xenial
     r: oldrel
     addons:
       apt:
         sources:
           - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
         packages:
+          - gdal-bin
           - libgdal-dev
-          - libgdal1-dev
           - libgeos-dev
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
-          - gdal-bin
+    r_binary_packages:
+      - BH
     r_packages:
       - rgdal
       - rgeos
   - os: linux
-    dist: trusty
+    dist: xenial
     r: release
     addons:
       apt:
         sources:
           - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
         packages:
+          - gdal-bin
           - libgdal-dev
-          - libgdal1-dev
           - libgeos-dev
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
-          - gdal-bin
+    r_binary_packages:
+      - BH
     r_packages:
       - covr
       - devtools
@@ -88,20 +92,21 @@ matrix:
       - rgdal
       - rgeos
   - os: linux
-    dist: trusty
+    dist: xenial
     r: devel
     addons:
       apt:
         sources:
           - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
         packages:
+          - gdal-bin
           - libgdal-dev
-          - libgdal1-dev
           - libgeos-dev
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
-          - gdal-bin
+    r_binary_packages:
+      - BH
     r_packages:
       - devtools
       - rgdal
