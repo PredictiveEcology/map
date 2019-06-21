@@ -63,5 +63,3 @@ setMethod("initialize", "map",
 
             .Object
 })
-
-

@@ -354,14 +354,13 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ####################################################
   # Metadata -- build new entries in data.table -- vectorized
   ####################################################
-  args1 <- identifyVectorArgs(fn = list(buildMetadata, prepInputs), ls(), environment(),
-                              dots = dots)
+  args1 <- identifyVectorArgs(fn = list(buildMetadata, prepInputs), ls(), environment(), dots = dots)
   if (length(dots)) {
     howLong <- unlist(lapply(dots, length))
     args1$argsSingle[names(dots)[howLong <= 1]] <- dots[howLong <= 1]
     args1$argsMulti[names(dots)[howLong > 1]] <- dots[howLong > 1]
   }
-  MoreArgs = append(args1$argsSingle, list(metadata = map@metadata))
+  MoreArgs <- append(args1$argsSingle, list(metadata = map@metadata))
   if (length(args1$argsMulti) == 0) {
     dts <- do.call(buildMetadata, MoreArgs)
   } else {
