@@ -50,16 +50,16 @@ setClass(
 setMethod("initialize", "map",
           function(.Object, ...) {
             .Object <- callNextMethod()
-            .Object@metadata = data.table(layerName = character(), layerType = character(),
-                                          #url = character(),
-                                          columnNameForLabels = character(),
-                                          leaflet = logical(), studyArea = numeric(),
-                                          rasterToMatch = logical())
-            .Object@CRS = sp::CRS()
-            .Object@analyses = data.table::data.table(functionName = character())#, quotedFn = character())
-            .Object@analysesData = list()
-            .Object@paths = list(dataPath = getOption("map.dataPath", "."),
-                                 tilePath = getOption("map.tilePath", "."))
+            .Object@metadata <- data.table(layerName = character(), layerType = character(),
+                                           #url = character(),
+                                           columnNameForLabels = character(),
+                                           leaflet = logical(), studyArea = numeric(),
+                                           rasterToMatch = logical())
+            .Object@CRS <- sp::CRS()
+            .Object@analyses <- data.table::data.table(functionName = character())#, quotedFn = character())
+            .Object@analysesData <- list()
+            .Object@paths <- list(dataPath = getOption("map.dataPath", "."),
+                                  tilePath = getOption("map.tilePath", "."))
 
             .Object
 })
