@@ -23,11 +23,10 @@ if (getRversion() >= "3.1.0") {
 #'  for labels. This is currently only used if the object is a
 #'  \code{SpatialPolygonsDataFram}.
 #' @param leaflet Logical or Character vector of path(s) to write tiles.
-#'  If \code{TRUE} or a character vector, then this layer will be added to a
-#'  leaflet map. For \code{RasterLayer} object, this will trigger a call to
-#'  \code{gdal2tiles}, making tiles. If path is not specified, it will be
-#'  the current path. The tile base file path will be the
-#'  \code{paste0(layerName, "_", rndstr(1,6))}
+#'  If \code{TRUE} or a character vector, then this layer will be added to a leaflet map.
+#'  For \code{RasterLayer} object, this will trigger a call to \code{gdal2tiles}, making tiles.
+#'  If path is not specified, it will be the current path.
+#'  The tile base file path will be \code{paste0(layerName, "_", rndstr(1, 6))}.
 #' @param isStudyArea Logical. If \code{TRUE}, this will be assigned the label,
 #'  "StudyArea", and will be passed into \code{prepInputs} for any future layers
 #'  added.
@@ -219,10 +218,8 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
     on.exit({try(stopCluster(cl), silent = TRUE)})
 
-                            obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti,
-                                               cl = cl,
-                                               single = args1$argsSingle,
-                                               useCache = useCache)
+    obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti, cl = cl,
+                       single = args1$argsSingle, useCache = useCache)
     tryCatch(stopCluster(cl), error = function(x) invisible())
     if (is(obj, "list")) # note is.list returns TRUE for data.frames ... BAD
       names(obj) <- layerName
@@ -388,27 +385,25 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       useParallel <- FALSE
     } else {
       if (missing(useParallel)) {
-        useParallel <- getOption("map.useParallel",
-                                 !identical("windows", .Platform$OS.type))
+        useParallel <- getOption("map.useParallel", !identical("windows", .Platform$OS.type))
       }
     }
     #browser()
     cl <- makeOptimalCluster(useParallel = useParallel,
                              MBper = MBper,
                              maxNumClusters = length(obj))
-    on.exit(try(stopCluster(cl), silent = TRUE))
+    on.exit({try(stopCluster(cl), silent = TRUE)})
     tilePath <- dts$leafletTiles
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
     out <- MapOrDoCall(makeTiles, multiple = args1$argsMulti,
                        single = args1$argsSingle, useCache = FALSE, cl = cl)
-    # If the rasters are identical, then there may be
-    # errors
+    # If the rasters are identical, then there may be errors
     tryCatch(stopCluster(cl), error = function(x) invisible())
   }
 
-  ###################################
+  ######################################
   # set CRS
-  ####################################
+  ######################################
   if (isTRUE(isStudyArea)) {
     if ((!is.null(studyArea(map))) && isStudyArea) {
       message("map already has a studyArea; adding another one as study area ",
@@ -421,12 +416,12 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
   ######################################
   # rbindlist new metadata with existing metadata
-  ########################################
+  ######################################
   map@metadata <- rbindlist(list(map@metadata, dts), use.names = TRUE, fill = TRUE)
 
   ######################################
   # run map analyses
-  ########################################
+  ######################################
   map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
 
   return(map)

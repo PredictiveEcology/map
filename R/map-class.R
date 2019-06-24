@@ -34,24 +34,19 @@ setClass(
     paths = "list",
     analyses = "data.table",
     analysesData = "list"
-  ),
-  validity = function(object) {
-    browser()
-    #if (is.na(object@simtimes$end)) {
-    #  stop("simulation end time must be specified.")
-    #} else {
-    #  if (object@simtimes$start > object@simtimes$end) {
-    #    stop("simulation end time cannot be before start time.")
-    #  }
-    #}
-  }
+  )#,
+  # validity = function(object) {
+  #   ## TODO: add additional checks!
+  #   identical(vapply(object@metadata, class, character(1)),
+  #             c(layerName = "character", layerType = "character", columnNameForLabels = "character",
+  #               leaflet = "character", studyArea = "numeric", rasterToMatch = "logical"))
+  # }
 )
 
 setMethod("initialize", "map",
           function(.Object, ...) {
             .Object <- callNextMethod()
             .Object@metadata <- data.table(layerName = character(), layerType = character(),
-                                           #url = character(),
                                            columnNameForLabels = character(),
                                            leaflet = logical(), studyArea = numeric(),
                                            rasterToMatch = logical())
