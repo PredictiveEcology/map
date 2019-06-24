@@ -48,8 +48,8 @@ setMethod("initialize", "map",
             .Object <- callNextMethod()
             .Object@metadata <- data.table(layerName = character(), layerType = character(),
                                            columnNameForLabels = character(),
-                                           leaflet = logical(), studyArea = numeric(),
-                                           rasterToMatch = logical())
+                                           leaflet = asPath(character()),
+                                           studyArea = numeric(), rasterToMatch = logical())
             .Object@CRS <- sp::CRS()
             .Object@analyses <- data.table::data.table(functionName = character())#, quotedFn = character())
             .Object@analysesData <- list()

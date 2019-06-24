@@ -366,12 +366,25 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE)
   }
 
+  ## TODO: manual workarounds to deal with column typing for LandWeb
+  if (!is(dts$targetFile, "Path"))
+    set(dts, NULL, "targetFile", asPath(dts$targetFile))
+
+  if (!is(dts$destinationPath, "Path"))
+    set(dts, NULL, "destinationPath", asPath(dts$destinationPath))
+
+  if (!is(dts$tsf, "Path"))
+    set(dts, NULL, "tsf", asPath(dts$tsf))
+
+  if (!is(dts$vtm, "Path"))
+    set(dts, NULL, "vtm", asPath(dts$vtm))
+
   ########################################################
   # make tiles, if it is leaflet
   ########################################################
   if (any(!isFALSE(leaflet)) && !is.null(dts$leafletTiles)) {
     if (is.logical(leaflet)) {
-      leaflet <- getwd()
+      leaflet <- asPath(getwd())
     }
     MBadjustment <- 4000 # some approximate, empirically derived number. Likely only good in some cases
     MBper <- if (is(obj, "RasterLayer")) {
