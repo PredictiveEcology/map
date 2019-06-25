@@ -85,6 +85,8 @@ matrix:
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
+    services:
+      - xvfb
     r_binary_packages:
       - BH
       - dplyr
