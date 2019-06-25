@@ -9,55 +9,6 @@ matrix:
   include:
   - os: linux
     dist: xenial
-    r: 3.3
-    addons:
-      apt:
-        sources:
-          - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
-        packages:
-          - gdal-bin
-          - libgdal-dev
-          - libgeos-dev
-          - libgit2-dev
-          - libnlopt-dev
-          - libproj-dev
-          - libudunits2-dev
-    services:
-      - xvfb
-    r_binary_packages:
-      - BH
-    r_packages:
-      - rgdal
-      - rgeos
-  - os: linux
-    dist: xenial
-    r: 3.4
-    addons:
-      apt:
-        sources:
-          - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
-        packages:
-          - gdal-bin
-          - libgdal-dev
-          - libgeos-dev
-          - libgit2-dev
-          - libnlopt-dev
-          - libproj-dev
-          - libudunits2-dev
-    services:
-      - xvfb
-    r_binary_packages:
-      - BH
-      - dplyr
-      - git2r
-      - igraph
-      - raster
-      - RSQlite
-    r_packages:
-      - rgdal
-      - rgeos
-  - os: linux
-    dist: xenial
     r: oldrel
     addons:
       apt:
@@ -76,6 +27,7 @@ matrix:
     r_binary_packages:
       - BH
       - dplyr
+      - ggplot2
       - git2r
       - igraph
       - raster
