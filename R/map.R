@@ -385,7 +385,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ########################################################
   # make tiles, if it is leaflet
   ########################################################
-  if (any(!isFALSE(leaflet)) && !is.null(dts$leafletTiles)) {
+  if (any(!is.na(leaflet)) && !is.null(dts$leafletTiles)) {
     MBadjustment <- 4000 # some approximate, empirically derived number. Likely only good in some cases
     MBper <- if (is(obj, "RasterLayer")) {
       ncell(obj) / MBadjustment
