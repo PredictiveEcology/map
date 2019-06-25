@@ -199,6 +199,9 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   if (is.null(layerName))
     stop("layerName is not optional. Please specify.")
 
+  if (is.logical(leaflet))
+    leaflet <- asPath(ifelse(leaflet, getwd(), NA_character_))
+
   # Some of the arguments will need to be passed into Cache
   ###########################################
   # Get obj, if missing, via prepInputs url, or targetFile
@@ -367,25 +370,22 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   }
 
   ## TODO: manual workarounds to deal with column typing for LandWeb
-  if (!is(dts$targetFile, "Path"))
+  if (!is.null(dts$targetFile) && !is(dts$targetFile, "Path"))
     set(dts, NULL, "targetFile", asPath(dts$targetFile))
 
-  if (!is(dts$destinationPath, "Path"))
+  if (!is.null(dts$destinationPath) && !is(dts$destinationPath, "Path"))
     set(dts, NULL, "destinationPath", asPath(dts$destinationPath))
 
-  if (!is(dts$tsf, "Path"))
+  if (!is.null(dts$tsf) && !is(dts$tsf, "Path"))
     set(dts, NULL, "tsf", asPath(dts$tsf))
 
-  if (!is(dts$vtm, "Path"))
+  if (!is.null(dts$vtm) && !is(dts$vtm, "Path"))
     set(dts, NULL, "vtm", asPath(dts$vtm))
 
   ########################################################
   # make tiles, if it is leaflet
   ########################################################
   if (any(!isFALSE(leaflet)) && !is.null(dts$leafletTiles)) {
-    if (is.logical(leaflet)) {
-      leaflet <- asPath(getwd())
-    }
     MBadjustment <- 4000 # some approximate, empirically derived number. Likely only good in some cases
     MBper <- if (is(obj, "RasterLayer")) {
       ncell(obj) / MBadjustment
@@ -402,9 +402,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       }
     }
     #browser()
-    cl <- makeOptimalCluster(useParallel = useParallel,
-                             MBper = MBper,
-                             maxNumClusters = length(obj))
+    cl <- makeOptimalCluster(useParallel = useParallel, MBper = MBper, maxNumClusters = length(obj))
     on.exit({try(stopCluster(cl), silent = TRUE)})
     tilePath <- dts$leafletTiles
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
@@ -419,8 +417,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ######################################
   if (isTRUE(isStudyArea)) {
     if ((!is.null(studyArea(map))) && isStudyArea) {
-      message("map already has a studyArea; adding another one as study area ",
-              dts$studyArea)
+      message("map already has a studyArea; adding another one as study area ", dts$studyArea)
     } else {
       message("Setting map CRS to this layer because it is the (first) studyArea inserted")
       map@CRS <- raster::crs(obj)
@@ -460,8 +457,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 #'   library(sp)
 #'   longLatCRS <- CRS(paste("+init=epsg:4326 +proj=longlat +datum=WGS84",
 #'                           "+no_defs +ellps=WGS84 +towgs84=0,0,0"))
-#'   p <- randomPolygon(SpatialPoints(cbind(-120, 60), proj4string = longLatCRS),
-#'        area = 1e5)
+#'   p <- randomPolygon(SpatialPoints(cbind(-120, 60), proj4string = longLatCRS), area = 1e5)
 #'   m <- mapAdd(p, layerName = "p")
 #'   mapRm(m, "p")
 #' }
@@ -593,8 +589,7 @@ setMethod("studyArea", "ANY",
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-setMethod("studyArea",
-          "map",
+setMethod("studyArea", "map",
           definition = function(map, layer = NA, sorted = FALSE) {
             if (isTRUE(sorted)) {
               studyAreas <- map@metadata[!is.na(map@metadata$studyArea),]
