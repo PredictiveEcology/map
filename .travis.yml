@@ -1,10 +1,10 @@
 sudo: required
 language: r
 cache: packages
-cran: https://cloud.r-project.org
+cran: https://cran.rstudio.com
 env:
   global:
-    - CRAN_REPO=https://cloud.r-project.org
+    - CRAN_REPO=https://cran.rstudio.com
 matrix:
   include:
   - os: linux
