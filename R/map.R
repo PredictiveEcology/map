@@ -189,12 +189,9 @@ mapAdd <- function(obj, map, layerName,
 #' @rdname mapAdd
 mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            overwrite = getOption("map.overwrite"),
-                           columnNameForLabels = 1,
-                           leaflet = FALSE, isStudyArea = FALSE,
-                           isRasterToMatch = FALSE,
-                           envir = NULL, useCache = TRUE,
-                           useParallel = getOption("map.useParallel"),
-                           ...) {
+                           columnNameForLabels = 1, leaflet = FALSE, isStudyArea = FALSE,
+                           isRasterToMatch = FALSE, envir = NULL, useCache = TRUE,
+                           useParallel = getOption("map.useParallel"), ...) {
   dots <- list(...)
   if (is.null(layerName))
     stop("layerName is not optional. Please specify.")
