@@ -386,7 +386,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     MBadjustment <- 4000 # some approximate, empirically derived number. Likely only good in some cases
     MBper <- if (is(obj, "RasterLayer")) {
       ncell(obj) / MBadjustment
-    } else if ( tryCatch(is(obj[[1]], "RasterLayer"), error = function(x) FALSE)) {
+    } else if (tryCatch(is(obj[[1]], "RasterLayer"), error = function(x) FALSE)) {
       ncell(obj[[1]]) / MBadjustment
     } else {
       1 # i.e., default to detectClusters()

@@ -24,9 +24,7 @@ makeTiles <- function(tilePath, obj) {
 
       tryNum <- tryNum + 1
     }
-
   } else {
     message("  Tiles - skipping creation - already exist")
   }
-
 }

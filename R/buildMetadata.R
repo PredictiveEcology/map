@@ -19,7 +19,6 @@
 #' @rdname buildMetadata
 buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj,
                           columnNameForLabels, objHash, leaflet, envir, ...) {
-
   b <- copy(.singleMetadataNAEntry)
   dots <- list(...)
 
@@ -31,6 +30,7 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
     set(b, NULL, "studyArea", studyAreaNumber)
     set(b, NULL, "area", area)
   }
+
   if (isTRUE(isRasterToMatch)) {
     rasterToMatchNumber <- 1 + NROW(metadata[compareNA(rasterToMatch, TRUE) |
                                            (is.numeric(rasterToMatch) & rasterToMatch > 0)])
