@@ -54,7 +54,7 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
     if (is(obj, "Raster")) {
       dig <- .robustDigest(obj)
       tilePath <- ifelse(is.na(leaflet), asPath(NA_character_),
-                         asPath(file.path(leaflet, paste0("tiles_", layerName, "_", substr(dig, 1, 6)))))
+                         asPath(file.path(leaflet, paste0("tiles_", layerName, "_", substr(dig, 1, 6))))) # nolint
       set(b, NULL, "leafletTiles", tilePath)
     }
   }
