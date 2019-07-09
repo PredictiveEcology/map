@@ -26,6 +26,8 @@ matrix:
       - xvfb
     r_binary_packages:
       - BH
+      - raster
+      - RSQlite
     r_packages:
       - rgdal
       - rgeos
