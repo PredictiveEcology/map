@@ -24,14 +24,6 @@ matrix:
           - libudunits2-dev
     services:
       - xvfb
-    r_binary_packages:
-      - BH
-      - dplyr
-      - ggplot2
-      - git2r
-      - igraph
-      - raster
-      - RSQlite
     r_packages:
       - rgdal
       - rgeos
