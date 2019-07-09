@@ -24,6 +24,8 @@ matrix:
           - libudunits2-dev
     services:
       - xvfb
+    r_binary_packages:
+      - BH
     r_packages:
       - rgdal
       - rgeos
