@@ -33,7 +33,6 @@ matrix:
       - raster
       - RSQlite
     r_packages:
-      - quickPlot
       - rgdal
       - rgeos
   - os: linux
