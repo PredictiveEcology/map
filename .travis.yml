@@ -26,7 +26,6 @@ matrix:
       - xvfb
     r_binary_packages:
       - BH
-      - git2r
       - raster
     r_packages:
       - rgdal
