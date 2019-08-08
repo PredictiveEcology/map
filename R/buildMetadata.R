@@ -8,14 +8,17 @@
 #' @param obj TODO: description needed
 #' @param columnNameForLabels TODO: description needed
 #' @param objHash TODO: description needed
-#' @param leaflet TODO: description needed
+#' @param leaflet Logical or Character vector of path(s) to write tiles.
+#'  If \code{TRUE} or a character vector, then this layer will be added to a leaflet map.
+#'  For \code{RasterLayer} object, this will trigger a call to \code{gdal2tiles}, making tiles.
+#'  If path is not specified, it will be the current path.
+#'  The tile base file path will be \code{paste0(layerName, "_", rndstr(1, 6))}.
 #' @param envir TODO: description needed
 #' @param ... Additional arguments.
 #'
 #' @rdname buildMetadata
 buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj,
                           columnNameForLabels, objHash, leaflet, envir, ...) {
-
   b <- copy(.singleMetadataNAEntry)
   dots <- list(...)
 
@@ -27,6 +30,7 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
     set(b, NULL, "studyArea", studyAreaNumber)
     set(b, NULL, "area", area)
   }
+
   if (isTRUE(isRasterToMatch)) {
     rasterToMatchNumber <- 1 + NROW(metadata[compareNA(rasterToMatch, TRUE) |
                                            (is.numeric(rasterToMatch) & rasterToMatch > 0)])
@@ -35,6 +39,7 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
 
   if (!is.null(dots$url))
     set(b, NULL, "url", dots$url)
+
   set(b, NULL, "layerName", layerName)
   set(b, NULL, "layerType", class(obj))
   if (length(columnNameForLabels) > 0) {
@@ -48,7 +53,8 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
     set(b, NULL, "leaflet", leaflet)
     if (is(obj, "Raster")) {
       dig <- .robustDigest(obj)
-      tilePath <- asPath(file.path(leaflet, paste0("tiles_", layerName, "_", substr(dig, 1,6))))
+      tilePath <- ifelse(is.na(leaflet), asPath(NA_character_),
+                         asPath(file.path(leaflet, paste0("tiles_", layerName, "_", substr(dig, 1, 6))))) # nolint
       set(b, NULL, "leafletTiles", tilePath)
     }
   }
@@ -75,14 +81,12 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
   # Add columns by reference to "b"
   Map(cta = columnsToAdd, nta = names(columnsToAdd),
       function(cta, nta) {
-        # a data.table can't handle all types of objects ... need to wrap in
-        #   a list to stick it there -- try first without a list wrapper, then
-        #   try once with a list
+        ## a data.table can't handle all types of objects. need to wrap in a list to stick it there
+        ## try first without a list wrapper, then try once with a list.
         needToSet <- TRUE
         tries <- 0
         while (isTRUE(needToSet) && tries < 2) {
-          needToSet <- tryCatch(set(b, NULL, nta, cta), silent = TRUE,
-                                error = function(x) TRUE)
+          needToSet <- tryCatch(set(b, NULL, nta, cta), silent = TRUE, error = function(x) TRUE)
           tries <- tries + 1
           cta <- list(cta)
         }

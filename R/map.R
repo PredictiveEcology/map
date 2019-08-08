@@ -23,11 +23,10 @@ if (getRversion() >= "3.1.0") {
 #'  for labels. This is currently only used if the object is a
 #'  \code{SpatialPolygonsDataFram}.
 #' @param leaflet Logical or Character vector of path(s) to write tiles.
-#'  If \code{TRUE} or a character vector, then this layer will be added to a
-#'  leaflet map. For \code{RasterLayer} object, this will trigger a call to
-#'  \code{gdal2tiles}, making tiles. If path is not specified, it will be
-#'  the current path. The tile base file path will be the
-#'  \code{paste0(layerName, "_", rndstr(1,6))}
+#'  If \code{TRUE} or a character vector, then this layer will be added to a leaflet map.
+#'  For \code{RasterLayer} object, this will trigger a call to \code{gdal2tiles}, making tiles.
+#'  If path is not specified, it will be the current path.
+#'  The tile base file path will be \code{paste0(layerName, "_", rndstr(1, 6))}.
 #' @param isStudyArea Logical. If \code{TRUE}, this will be assigned the label,
 #'  "StudyArea", and will be passed into \code{prepInputs} for any future layers
 #'  added.
@@ -190,15 +189,15 @@ mapAdd <- function(obj, map, layerName,
 #' @rdname mapAdd
 mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            overwrite = getOption("map.overwrite"),
-                           columnNameForLabels = 1,
-                           leaflet = FALSE, isStudyArea = FALSE,
-                           isRasterToMatch = FALSE,
-                           envir = NULL, useCache = TRUE,
-                           useParallel = getOption("map.useParallel"),
-                           ...) {
+                           columnNameForLabels = 1, leaflet = FALSE, isStudyArea = FALSE,
+                           isRasterToMatch = FALSE, envir = NULL, useCache = TRUE,
+                           useParallel = getOption("map.useParallel"), ...) {
   dots <- list(...)
   if (is.null(layerName))
     stop("layerName is not optional. Please specify.")
+
+  if (is.logical(leaflet))
+    leaflet <- asPath(ifelse(leaflet, getwd(), NA_character_))
 
   # Some of the arguments will need to be passed into Cache
   ###########################################
@@ -214,15 +213,14 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     } else {
       0
     }
-    message("  Running prepInputs for: ", paste(layerName, collapse = ", "))
+    message("  Running prepInputs for:\n",
+            paste(capture.output(data.table(file = layerName)), collapse = "\n"))
+    #browser()
     cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
-    on.exit(try(stopCluster(cl), silent = TRUE))
+    on.exit({try(stopCluster(cl), silent = TRUE)})
 
-    mess <- capture.output(type = "message",
-                            obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti,
-                                               cl = cl,
-                                               single = args1$argsSingle,
-                                               useCache = useCache))
+    obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti, cl = cl,
+                       single = args1$argsSingle, useCache = useCache)
     tryCatch(stopCluster(cl), error = function(x) invisible())
     if (is(obj, "list")) # note is.list returns TRUE for data.frames ... BAD
       names(obj) <- layerName
@@ -290,6 +288,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       }
 
       message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
+      #browser()
       cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
       on.exit(try(stopCluster(cl), silent = TRUE))
       obj <- MapOrDoCall(postProcess, multiple = args1$argsMulti, cl = cl,
@@ -334,7 +333,6 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     a[layerName] <- objTmp
     list2env(a, envir = envir)
   } else {
-
     if (exists(layerName, envir = envir)) {
       a <- list()
       envir1 <- if (is(envir, "list")) obj else list(envir)
@@ -354,14 +352,13 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ####################################################
   # Metadata -- build new entries in data.table -- vectorized
   ####################################################
-  args1 <- identifyVectorArgs(fn = list(buildMetadata, prepInputs), ls(), environment(),
-                              dots = dots)
+  args1 <- identifyVectorArgs(fn = list(buildMetadata, prepInputs), ls(), environment(), dots = dots)
   if (length(dots)) {
     howLong <- unlist(lapply(dots, length))
     args1$argsSingle[names(dots)[howLong <= 1]] <- dots[howLong <= 1]
     args1$argsMulti[names(dots)[howLong > 1]] <- dots[howLong > 1]
   }
-  MoreArgs = append(args1$argsSingle, list(metadata = map@metadata))
+  MoreArgs <- append(args1$argsSingle, list(metadata = map@metadata))
   if (length(args1$argsMulti) == 0) {
     dts <- do.call(buildMetadata, MoreArgs)
   } else {
@@ -370,17 +367,27 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE)
   }
 
+  ## TODO: manual workarounds to deal with column typing for LandWeb
+  if (!is.null(dts$targetFile) && !is(dts$targetFile, "Path"))
+    set(dts, NULL, "targetFile", asPath(dts$targetFile))
+
+  if (!is.null(dts$destinationPath) && !is(dts$destinationPath, "Path"))
+    set(dts, NULL, "destinationPath", asPath(dts$destinationPath))
+
+  if (!is.null(dts$tsf) && !is(dts$tsf, "Path"))
+    set(dts, NULL, "tsf", asPath(dts$tsf))
+
+  if (!is.null(dts$vtm) && !is(dts$vtm, "Path"))
+    set(dts, NULL, "vtm", asPath(dts$vtm))
+
   ########################################################
   # make tiles, if it is leaflet
   ########################################################
-  if (any(!isFALSE(leaflet)) && !is.null(dts$leafletTiles)) {
-    if (is.logical(leaflet)) {
-      leaflet <- getwd()
-    }
+  if (any(!is.na(leaflet)) && !is.null(dts$leafletTiles)) {
     MBadjustment <- 4000 # some approximate, empirically derived number. Likely only good in some cases
     MBper <- if (is(obj, "RasterLayer")) {
       ncell(obj) / MBadjustment
-    } else if ( tryCatch(is(obj[[1]], "RasterLayer"), error = function(x) FALSE)) {
+    } else if (tryCatch(is(obj[[1]], "RasterLayer"), error = function(x) FALSE)) {
       ncell(obj[[1]]) / MBadjustment
     } else {
       1 # i.e., default to detectClusters()
@@ -389,30 +396,26 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       useParallel <- FALSE
     } else {
       if (missing(useParallel)) {
-        useParallel <- getOption("map.useParallel",
-                                 !identical("windows", .Platform$OS.type))
+        useParallel <- getOption("map.useParallel", !identical("windows", .Platform$OS.type))
       }
     }
-    cl <- makeOptimalCluster(useParallel = useParallel,
-                             MBper = MBper,
-                             maxNumClusters = length(obj))
-    on.exit(try(stopCluster(cl), silent = TRUE))
+    #browser()
+    cl <- makeOptimalCluster(useParallel = useParallel, MBper = MBper, maxNumClusters = length(obj))
+    on.exit({try(stopCluster(cl), silent = TRUE)})
     tilePath <- dts$leafletTiles
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
     out <- MapOrDoCall(makeTiles, multiple = args1$argsMulti,
                        single = args1$argsSingle, useCache = FALSE, cl = cl)
-    # If the rasters are identical, then there may be
-    # errors
+    # If the rasters are identical, then there may be errors
     tryCatch(stopCluster(cl), error = function(x) invisible())
   }
 
-  ###################################
+  ######################################
   # set CRS
-  ####################################
+  ######################################
   if (isTRUE(isStudyArea)) {
     if ((!is.null(studyArea(map))) && isStudyArea) {
-      message("map already has a studyArea; adding another one as study area ",
-              dts$studyArea)
+      message("map already has a studyArea; adding another one as study area ", dts$studyArea)
     } else {
       message("Setting map CRS to this layer because it is the (first) studyArea inserted")
       map@CRS <- raster::crs(obj)
@@ -421,12 +424,12 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
   ######################################
   # rbindlist new metadata with existing metadata
-  ########################################
+  ######################################
   map@metadata <- rbindlist(list(map@metadata, dts), use.names = TRUE, fill = TRUE)
 
   ######################################
   # run map analyses
-  ########################################
+  ######################################
   map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
 
   return(map)
@@ -452,8 +455,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 #'   library(sp)
 #'   longLatCRS <- CRS(paste("+init=epsg:4326 +proj=longlat +datum=WGS84",
 #'                           "+no_defs +ellps=WGS84 +towgs84=0,0,0"))
-#'   p <- randomPolygon(SpatialPoints(cbind(-120, 60), proj4string = longLatCRS),
-#'        area = 1e5)
+#'   p <- randomPolygon(SpatialPoints(cbind(-120, 60), proj4string = longLatCRS), area = 1e5)
 #'   m <- mapAdd(p, layerName = "p")
 #'   mapRm(m, "p")
 #' }
@@ -585,8 +587,7 @@ setMethod("studyArea", "ANY",
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-setMethod("studyArea",
-          "map",
+setMethod("studyArea", "map",
           definition = function(map, layer = NA, sorted = FALSE) {
             if (isTRUE(sorted)) {
               studyAreas <- map@metadata[!is.na(map@metadata$studyArea),]

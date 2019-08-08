@@ -2,7 +2,7 @@
 % Please edit documentation in R/map-analysis.R
 \name{mapAddPostHocAnalysis}
 \alias{mapAddPostHocAnalysis}
-\title{Add a post hoc analysis function to a map obj}
+\title{Add a post hoc analysis function to a \code{map} object}
 \usage{
 mapAddPostHocAnalysis(map, functionName, postHocAnalysisGroups = NULL,
   postHocAnalyses = "all", useParallel = getOption("map.useParallel"),
@@ -30,5 +30,5 @@ cluster via \code{makeOptimalCluster}}
 \item{...}{Optional arguments to pass into \code{functionName}}
 }
 \description{
-Add a post hoc analysis function to a map obj
+Add a post hoc analysis function to a \code{map} object
 }

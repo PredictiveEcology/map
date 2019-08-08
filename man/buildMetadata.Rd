@@ -23,7 +23,11 @@ If \code{TRUE}, then this layer can be accessed by \code{rasterToMatch(map)}}
 
 \item{objHash}{TODO: description needed}
 
-\item{leaflet}{TODO: description needed}
+\item{leaflet}{Logical or Character vector of path(s) to write tiles.
+If \code{TRUE} or a character vector, then this layer will be added to a leaflet map.
+For \code{RasterLayer} object, this will trigger a call to \code{gdal2tiles}, making tiles.
+If path is not specified, it will be the current path.
+The tile base file path will be \code{paste0(layerName, "_", rndstr(1, 6))}.}
 
 \item{envir}{TODO: description needed}
 

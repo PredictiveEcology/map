@@ -89,7 +89,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
                    MoreArgs = list(ags = ags),
                    function(agsByFunName, ags) {
                      expandAnalysisGroups(ags[agsByFunName])
-  })
+                   })
 
   combosToDo <- Map(cc = combosCompleted, ca = combosAll, function(cc, ca) {
     if (!is.null(cc))
@@ -99,7 +99,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
   })
 
   combosToDo <- Map(ctd = combosToDo, fn = functionName,
-      function(ctd, fn) ctd[, functionName := fn])
+                    function(ctd, fn) ctd[, functionName := fn])
   combosToDoDT <- rbindlist(combosToDo)
   # clear out empty ones
   combosToDo <- combosToDo[!unlist(lapply(combosToDo, function(ctd) NROW(ctd) == 0))]
@@ -122,23 +122,24 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
       }
     })
 
+    # browser()
     cl <- makeOptimalCluster(useParallel, maxNumClusters = NROW(combosToDoDT))
     on.exit(try(stopCluster(cl), silent = TRUE))
 
     combosToDoList <- split(combosToDoDT, combosToDoDT$all)
     out3 <- Map2(cl = cl,
-      combo = combosToDoList, function(combo) {
-        funName <- combo$functionName
-        args1 <- getFormalsFromMetadata(metadata = map@metadata,
-                                        combo = combo, AGs = AGs, funName = funName)
-        args <- unlist(unname(args1), recursive = FALSE)
-        message("  Calculating ", funName, " for ", combo$all)
-        fnOut <- do.call(Cache,
-                         args = append(list(get(funName)),
-                                       append(args,
-                                              otherFormalsInFunction[[funName]])))
-        fnOut
-      })
+                 combo = combosToDoList, function(combo) {
+                   funName <- combo$functionName
+                   args1 <- getFormalsFromMetadata(metadata = map@metadata,
+                                                   combo = combo, AGs = AGs, funName = funName)
+                   args <- unlist(unname(args1), recursive = FALSE)
+                   message("  Calculating ", funName, " for ", combo$all)
+                   fnOut <- do.call(Cache,
+                                    args = append(list(get(funName)),
+                                                  append(args,
+                                                         otherFormalsInFunction[[funName]])))
+                   fnOut
+                 })
 
     for (funName in funNames) {
       fromFunName <- combosToDoDT$functionName == funName
@@ -198,7 +199,7 @@ mapAddAnalysis <- function(map, functionName,
 }
 
 
-#' Add a post hoc analysis function to a map obj
+#' Add a post hoc analysis function to a \code{map} object
 #'
 #' @inheritParams mapAdd
 #'
@@ -259,7 +260,6 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
 
   map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
   map
-
 }
 
 ## TODO: needs documentation?
@@ -294,9 +294,9 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
            out2 <- lapply(phas, function(pha) {
              message("    Running ", x$functionName, " on ", pha)
              ma <- do.call(get(x$functionName), append(list(map = map,
-                                                        functionName = pha,
-                                                        analysisGroups = x$postHocAnalysisGroups),
-                                                   unlist(as.list(x[ , forms, with = FALSE]))))
+                                                            functionName = pha,
+                                                            analysisGroups = x$postHocAnalysisGroups),
+                                                       unlist(as.list(x[ , forms, with = FALSE]))))
            })
            out2
          })
@@ -334,10 +334,10 @@ getFormalsFromMetadata <- function(metadata, combo, AGs, funName) {
 
 expandAnalysisGroups <- function(ags) {
   combosAll <- NULL
-   if (any(unlist(lapply(ags, function(x) length(x > 0))))) {
-     combosAll <- do.call(expand.grid, args = append(list(stringsAsFactors = FALSE),
-                                                     lapply(ags, function(x) x)))
-     combosAll$all <- apply(combosAll, 1, paste, collapse = "._.")
-   }
-   combosAll
+  if (any(unlist(lapply(ags, function(x) length(x > 0))))) {
+    combosAll <- do.call(expand.grid, args = append(list(stringsAsFactors = FALSE),
+                                                    lapply(ags, function(x) x)))
+    combosAll$all <- apply(combosAll, 1, paste, collapse = "._.")
+  }
+  combosAll
 }
