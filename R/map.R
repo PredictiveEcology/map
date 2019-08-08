@@ -213,7 +213,8 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     } else {
       0
     }
-    message("  Running prepInputs for: ", paste(layerName, collapse = ", "))
+    message("  Running prepInputs for:\n",
+            paste(capture.output(data.table(file = layerName)), collapse = "\n"))
     #browser()
     cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
     on.exit({try(stopCluster(cl), silent = TRUE)})
