@@ -56,7 +56,6 @@ ByteCompile: yes
 RoxygenNote: 6.1.1
 Collate: 
     'GIS.R'
-    'boxPlots.R'
     'buildMetadata.R'
     'makeTiles.R'
     'map-analysis.R'
