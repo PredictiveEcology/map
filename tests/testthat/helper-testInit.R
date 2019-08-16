@@ -12,9 +12,10 @@ testInit <- function(libraries, ask = FALSE, verbose = FALSE, tmpFileExt = "",
   if (missing(libraries)) libraries <- list()
   unlist(lapply(libraries, require, character.only = TRUE))
   require("testthat")
-  tmpdir <- reproducible::normPath(file.path(tempdir(),
-                                             reproducible:::rndstr(1,6)))
+  tmpdir <- reproducible::normPath(file.path(tempdir(), reproducible:::rndstr(1, 6)))
 
+  ## TODO: reproducible#119 changes use of .httr-oauth (i.e., no longer used)
+  ## instead, uses ~/.R/gargle/gargle-oauth
   if (interactive() && isTRUE(needGoogle)) {
     if (file.exists("~/.httr-oauth")) {
       reproducible::linkOrCopy("~/.httr-oauth", to = file.path(tmpdir, ".httr-oauth"))
