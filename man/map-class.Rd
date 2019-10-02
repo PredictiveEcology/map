@@ -16,8 +16,8 @@ principally for use with \pkg{leaflet} and \pkg{shiny}.
 \code{maps} slot.}
 
 \item{\code{.xData}}{Named environment of map-type objects (e.g., \code{sf}, \code{Raster*},
-\code{Spatial*}. Each entry may also be simply an environment, which
-indicates where to find the object, i.e., via \code{get(layerName, envir = environment)}}
+\code{Spatial*}. Each entry may also be simply an environment, which indicates
+where to find the object, i.e., via \code{get(layerName, envir = environment)}.}
 
 \item{\code{CRS}}{The common crs of all layers}
 

@@ -16,6 +16,8 @@
 #' @param envir TODO: description needed
 #' @param ... Additional arguments.
 #'
+#' @importFrom data.table copy set
+#' @importFrom reproducible asPath
 #' @rdname buildMetadata
 buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj,
                           columnNameForLabels, objHash, leaflet, envir, ...) {
@@ -26,14 +28,14 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
   if (isTRUE(isStudyArea)) {
     area <- rgeos::gArea(obj)
     studyAreaNumber <- 1 + NROW(metadata[compareNA(studyArea, TRUE) |
-                                               (is.numeric(studyArea) & studyArea > 0)])
+                                           (is.numeric(studyArea) & studyArea > 0)])
     set(b, NULL, "studyArea", studyAreaNumber)
     set(b, NULL, "area", area)
   }
 
   if (isTRUE(isRasterToMatch)) {
     rasterToMatchNumber <- 1 + NROW(metadata[compareNA(rasterToMatch, TRUE) |
-                                           (is.numeric(rasterToMatch) & rasterToMatch > 0)])
+                                               (is.numeric(rasterToMatch) & rasterToMatch > 0)])
     set(b, NULL, "rasterToMatch", rasterToMatchNumber)
   }
 
@@ -63,7 +65,7 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
 
   # Add all extra columns to metadata
   if (length(dots)) {
-    dots <- dots[!unlist(lapply(dots, is.null))] # remove NULL because that isn't added to data.table anyway
+    dots <- dots[!unlist(lapply(dots, is.null))] # remove NULL because that isn't added anyway
     if (!is.null(dots$filename2)) {
       if (!isFALSE(dots$filename2)) {
         if (inherits(obj, "RasterLayer")) {

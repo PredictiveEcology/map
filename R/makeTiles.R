@@ -1,3 +1,6 @@
+#' @importFrom raster projectRaster writeRaster
+#' @importFrom sp CRS
+#' @importFrom tiler tile
 makeTiles <- function(tilePath, obj) {
   dirNotExist <- !dir.exists(tilePath)
 

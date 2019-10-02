@@ -9,19 +9,18 @@ test_that("mapAdd doesn't work", {
   }, add = TRUE)
 
  setwd(tempdir())
- coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98,
-                       59.9, 65.73, 63.58, 54.79, 59.9),
+ coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98, 59.9, 65.73, 63.58, 54.79, 59.9),
                      .Dim = c(5L, 2L))
- Sr1 <- Polygon(coords)
- Srs1 <- Polygons(list(Sr1), "s1")
- StudyArea <- SpatialPolygons(list(Srs1), 1L)
- crs(StudyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
- StudyArea <- SpatialPolygonsDataFrame(StudyArea,
-                            data = data.frame(ID = 1, shinyLabel = "zone2"),
-                            match.ID = FALSE)
+ sr1 <- Polygon(coords)
+ srs1 <- Polygons(list(sr1), "s1")
+ studyArea <- SpatialPolygons(list(srs1), 1L)
+ crs(studyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+ studyArea <- SpatialPolygonsDataFrame(studyArea,
+                                       data = data.frame(ID = 1, shinyLabel = "zone2"),
+                                       match.ID = FALSE)
 
- ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area",
-                poly = TRUE, analysisGroup2 = "Small Study Area")
+ ml <- mapAdd(studyArea, isStudyArea = TRUE, layerName = "Small Study Area",
+              poly = TRUE, analysisGroup2 = "Small Study Area")
 
 # if (require("SpaDES.tools")) {
  require("SpaDES.tools")
@@ -35,7 +34,7 @@ test_that("mapAdd doesn't work", {
                 layerName = "Smaller Study Area") # adds a second studyArea within 1st
 
    rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
-   tsf <- randomPolygons(rasTemplate, numTypes = 8)*30
+   tsf <- randomPolygons(rasTemplate, numTypes = 8) * 30
    crs(tsf) <- crs(ml)
    vtm <- randomPolygons(tsf, numTypes = 4)
    levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
@@ -52,12 +51,14 @@ test_that("mapAdd doesn't work", {
    ageClassCutOffs <- c(0, 40, 80, 120)
 
    # add an analysis -- this will trigger analyses because there are already objects in the map
-   #    THis will trigger 2 analyses ... LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
+   #    This will trigger 2 analyses ... LeadingVegTypeByAgeClass on each raster x polygon combo
+   #    (only 1 currently)
    #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
    ml <- mapAddAnalysis(ml, functionName = "LeadingVegTypeByAgeClass",
                         ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
    # add an analysis -- this will trigger analyses because there are already objects in the map
-   #    THis will trigger 2 more analyses ... largePatches on each raster x polygon combo (only 1 currently)
+   #    This will trigger 2 more analyses ... largePatches on each raster x polygon combo
+   #    (only 1 currently)
    #    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
    ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
                      id = "1", labelColumn = "shinyLabel",
@@ -91,7 +92,7 @@ test_that("mapAdd doesn't work", {
 
    # Add a 2nd pair of rasters
    rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
-   tsf2 <- randomPolygons(rasTemplate, numTypes = 8)*30
+   tsf2 <- randomPolygons(rasTemplate, numTypes = 8) * 30
    crs(tsf2) <- crs(ml)
    vtm2 <- randomPolygons(tsf2, numTypes = 4)
    levels(vtm2) <- data.frame(ID = sort(unique(vtm2[])),

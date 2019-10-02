@@ -33,7 +33,7 @@ testInit <- function(libraries, ask = FALSE, verbose = FALSE, tmpFileExt = "",
     opts <- options(opts)
   }
   if (!is.null(tmpFileExt)) {
-    ranfiles <- unlist(lapply(tmpFileExt, function(x) paste0(reproducible:::rndstr(1,7), ".", x)))
+    ranfiles <- unlist(lapply(tmpFileExt, function(x) paste0(reproducible:::rndstr(1, 7), ".", x)))
     tmpfile <- file.path(tmpdir, ranfiles)
     tmpfile <- gsub(pattern = "\\.\\.", tmpfile, replacement = "\\.")
     file.create(tmpfile)
@@ -61,12 +61,10 @@ testOnExit <- function(testInitOut) {
   setwd(testInitOut$origDir)
   unlink(testInitOut$tmpdir, recursive = TRUE)
   lapply(testInitOut$libs, function(lib) {
-    detach(paste0("package:", lib), character.only = TRUE)}
-  )
-
+    detach(paste0("package:", lib), character.only = TRUE)
+  })
 }
 
-urlTif1 <- "https://raw.githubusercontent.com/PredictiveEcology/quickPlot/master/inst/maps/DEM.tif"
-urlShapefiles1Zip <- "https://drive.google.com/file/d/1Bk4SPz8rx8zziIlg2Yp9ELZmdNZytLqb/view?usp=sharing"
-urlShapefilesZip <- "https://drive.google.com/file/d/1z1x0oI5jUDJQosOXacI8xbzbR15HFi0W/view?usp=sharing"
-
+urlTif1 <- "https://raw.githubusercontent.com/PredictiveEcology/quickPlot/master/inst/maps/DEM.tif" # nolint
+urlShapefiles1Zip <- "https://drive.google.com/file/d/1Bk4SPz8rx8zziIlg2Yp9ELZmdNZytLqb/view?usp=sharing" # nolint
+urlShapefilesZip <- "https://drive.google.com/file/d/1z1x0oI5jUDJQosOXacI8xbzbR15HFi0W/view?usp=sharing" # nolint
