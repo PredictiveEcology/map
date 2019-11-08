@@ -364,23 +364,27 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE)
   }
 
+  ## NOTE (2019-11-08): targetCRS needs to be character, not CRS class due to change in data.table
+  if (!is.null(dts[["targetCRS"]]))
+    dts[["targetCRS"]] <- as.character(dts[["targetCRS"]])
+
   ## TODO: manual workarounds to deal with column typing for LandWeb
-  if (!is.null(dts$targetFile) && !is(dts$targetFile, "Path"))
-    set(dts, NULL, "targetFile", asPath(dts$targetFile))
+  if (!is.null(dts[["targetFile"]]) && !is(dts[["targetFile"]], "Path"))
+    set(dts, NULL, "targetFile", asPath(dts[["targetFile"]]))
 
-  if (!is.null(dts$destinationPath) && !is(dts$destinationPath, "Path"))
-    set(dts, NULL, "destinationPath", asPath(dts$destinationPath))
+  if (!is.null(dts[["destinationPath"]]) && !is(dts[["destinationPath"]], "Path"))
+    set(dts, NULL, "destinationPath", asPath(dts[["destinationPath"]]))
 
-  if (!is.null(dts$tsf) && !is(dts$tsf, "Path"))
-    set(dts, NULL, "tsf", asPath(dts$tsf))
+  if (!is.null(dts[["tsf"]]) && !is(dts[["tsf"]], "Path"))
+    set(dts, NULL, "tsf", asPath(dts[["tsf"]]))
 
-  if (!is.null(dts$vtm) && !is(dts$vtm, "Path"))
-    set(dts, NULL, "vtm", asPath(dts$vtm))
+  if (!is.null(dts[["vtm"]]) && !is(dts[["vtm"]], "Path"))
+    set(dts, NULL, "vtm", asPath(dts[["vtm"]]))
 
   ########################################################
   # make tiles, if it is leaflet
   ########################################################
-  if (any(!is.na(leaflet)) && !is.null(dts$leafletTiles)) {
+  if (any(!is.na(leaflet)) && !is.null(dts[["leafletTiles"]])) {
     MBadjustment <- 4000 # some approx, empirically derived number. Likely only good in some cases. # nolint
     MBper <- if (is(obj, "RasterLayer")) { # nolint
       ncell(obj) / MBadjustment
@@ -389,7 +393,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     } else {
       1 # i.e., default to detectClusters()
     }
-    if (isTRUE(all(dir.exists(dts$leafletTiles)))) {
+    if (isTRUE(all(dir.exists(dts[["leafletTiles"]])))) {
       useParallel <- FALSE
     } else {
       if (missing(useParallel)) {
@@ -399,7 +403,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
     cl <- makeOptimalCluster(useParallel = useParallel, MBper = MBper, maxNumClusters = length(obj))
     on.exit(try(stopCluster(cl), silent = TRUE))
-    tilePath <- dts$leafletTiles
+    tilePath <- dts[["leafletTiles"]]
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
     out <- MapOrDoCall(makeTiles, multiple = args1$argsMulti,
                        single = args1$argsSingle, useCache = FALSE, cl = cl)
@@ -412,7 +416,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ######################################
   if (isTRUE(isStudyArea)) {
     if ((!is.null(studyArea(map))) && isStudyArea) {
-      message("map already has a studyArea; adding another one as study area ", dts$studyArea)
+      message("map already has a studyArea; adding another one as study area ", dts[["studyArea"]])
     } else {
       message("Setting map CRS to this layer because it is the (first) studyArea inserted")
       map@CRS <- raster::crs(obj)
