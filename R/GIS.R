@@ -16,7 +16,8 @@ areaAndPolyValue <- function(ras) {
 
 #' Polygonize with GDAL
 #'
-#' Based on \url{https://johnbaumgartner.wordpress.com/2012/07/26/getting-rasters-into-shape-from-r/}.
+#' Based on
+#' \url{https://johnbaumgartner.wordpress.com/2012/07/26/getting-rasters-into-shape-from-r/}.
 #'
 #' @param x TODO: description needed
 #' @param outshape TODO: description needed
@@ -30,7 +31,7 @@ areaAndPolyValue <- function(ras) {
 #' @importFrom reproducible assessDataType
 #' @importFrom sf st_bbox read_sf
 #' @importFrom tools file_path_sans_ext
-gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile",
+gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", # nolint
                              pypath = NULL, readpoly = TRUE, quiet = TRUE) {
   if (isTRUE(readpoly)) requireNamespace("rgdal", quietly = TRUE)
   if (is.null(pypath)) {
@@ -53,10 +54,10 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile",
     outshape <- tempfile(fileext = ".shp")
   } else {
     outshape <- sub("\\.shp$", "", outshape)
-    f.exists <- file.exists(paste(outshape, c("shp", "shx", "dbf"), sep = "."))
-    if (any(f.exists))
+    fExists <- file.exists(paste(outshape, c("shp", "shx", "dbf"), sep = "."))
+    if (any(fExists))
       stop(sprintf("File already exists: %s",
-                   toString(paste(outshape, c("shp", "shx", "dbf"), sep = ".")[f.exists])),
+                   toString(paste(outshape, c("shp", "shx", "dbf"), sep = ".")[fExists])),
            call. = FALSE)
   }
   if (is(x, "Raster")) {
@@ -103,8 +104,9 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile",
 #'
 #' @export
 #' @importFrom fasterize fasterize
-#' @importFrom raster extent
-#' @importFrom reproducible cropInputs projectInputs
+#' @importFrom raster crs extent raster
+#' @importFrom reproducible Cache cropInputs projectInputs
+#' @importFrom sf st_as_sf
 fasterize2 <- function(emptyRaster, polygonToFasterize, field) {
   ras <- raster(emptyRaster)
   if (extent(polygonToFasterize) > extent(ras)) {

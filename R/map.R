@@ -80,7 +80,7 @@ if (getRversion() >= "3.1.0") {
 #'                # to map object
 #'                tsf = "tsf1.tif", # to column in map@metadata
 #'                analysisGroup1 = "tsf1_vtm1",  # this is the label for analysisGroup1
-#'                leaflet = TRUE, # to column in map@metadata, will be used for visualizing in leaflet
+#'                leaflet = TRUE, # to column in map@metadata; used for visualizing in leaflet
 #'                overwrite = TRUE)
 #'   ml <- mapAdd(vtm, ml, filename2 = "vtm1.grd",
 #'                layerName = "vtm1",
@@ -215,9 +215,8 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     }
     message("  Running prepInputs for:\n",
             paste(capture.output(data.table(file = layerName)), collapse = "\n"))
-    #browser()
     cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
-    on.exit({try(stopCluster(cl), silent = TRUE)})
+    on.exit(try(stopCluster(cl), silent = TRUE))
 
     obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti, cl = cl,
                        single = args1$argsSingle, useCache = useCache)
@@ -244,7 +243,6 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     argsFixErrors <- getLocalArgsFor(list(Cache, fixErrors), dots = dots)
     theList <- append(list(FUN = quote(fixErrors), x = quote(obj)), argsFixErrors)
     obj <- do.call(Cache, theList)
-    #obj <- do.call(Cache, append(list(FUN = fixErrors, obj), argsFixErrors))
     if (isFALSE(isStudyArea)) {
       message("There is no studyArea in map; consider adding one with 'isStudyArea = TRUE'")
     }
@@ -288,7 +286,6 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       }
 
       message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
-      #browser()
       cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
       on.exit(try(stopCluster(cl), silent = TRUE))
       obj <- MapOrDoCall(postProcess, multiple = args1$argsMulti, cl = cl,
@@ -352,57 +349,61 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ####################################################
   # Metadata -- build new entries in data.table -- vectorized
   ####################################################
-  args1 <- identifyVectorArgs(fn = list(buildMetadata, prepInputs), ls(), environment(), dots = dots)
+  args1 <- identifyVectorArgs(fn = list(buildMetadata, prepInputs), ls(), environment(), dots = dots) # nolint
   if (length(dots)) {
     howLong <- unlist(lapply(dots, length))
     args1$argsSingle[names(dots)[howLong <= 1]] <- dots[howLong <= 1]
     args1$argsMulti[names(dots)[howLong > 1]] <- dots[howLong > 1]
   }
-  MoreArgs <- append(args1$argsSingle, list(metadata = map@metadata))
+  moreArgs <- append(args1$argsSingle, list(metadata = map@metadata))
   if (length(args1$argsMulti) == 0) {
-    dts <- do.call(buildMetadata, MoreArgs)
+    dts <- do.call(buildMetadata, moreArgs)
   } else {
     dtsList <- do.call(Map, args = append(args1$argsMulti,
-                                          list(f = buildMetadata, MoreArgs = MoreArgs)))
+                                          list(f = buildMetadata, MoreArgs = moreArgs)))
     dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE)
   }
 
+  ## NOTE (2019-11-08): targetCRS needs to be character, not CRS class due to change in data.table
+  if (!is.null(dts[["targetCRS"]]))
+    dts[["targetCRS"]] <- as.character(dts[["targetCRS"]])
+
   ## TODO: manual workarounds to deal with column typing for LandWeb
-  if (!is.null(dts$targetFile) && !is(dts$targetFile, "Path"))
-    set(dts, NULL, "targetFile", asPath(dts$targetFile))
+  if (!is.null(dts[["targetFile"]]) && !is(dts[["targetFile"]], "Path"))
+    set(dts, NULL, "targetFile", asPath(dts[["targetFile"]]))
 
-  if (!is.null(dts$destinationPath) && !is(dts$destinationPath, "Path"))
-    set(dts, NULL, "destinationPath", asPath(dts$destinationPath))
+  if (!is.null(dts[["destinationPath"]]) && !is(dts[["destinationPath"]], "Path"))
+    set(dts, NULL, "destinationPath", asPath(dts[["destinationPath"]]))
 
-  if (!is.null(dts$tsf) && !is(dts$tsf, "Path"))
-    set(dts, NULL, "tsf", asPath(dts$tsf))
+  if (!is.null(dts[["tsf"]]) && !is(dts[["tsf"]], "Path"))
+    set(dts, NULL, "tsf", asPath(dts[["tsf"]]))
 
-  if (!is.null(dts$vtm) && !is(dts$vtm, "Path"))
-    set(dts, NULL, "vtm", asPath(dts$vtm))
+  if (!is.null(dts[["vtm"]]) && !is(dts[["vtm"]], "Path"))
+    set(dts, NULL, "vtm", asPath(dts[["vtm"]]))
 
   ########################################################
   # make tiles, if it is leaflet
   ########################################################
-  if (any(!is.na(leaflet)) && !is.null(dts$leafletTiles)) {
-    MBadjustment <- 4000 # some approximate, empirically derived number. Likely only good in some cases
-    MBper <- if (is(obj, "RasterLayer")) {
+  if (any(!is.na(leaflet)) && !is.null(dts[["leafletTiles"]])) {
+    MBadjustment <- 4000 # some approx, empirically derived number. Likely only good in some cases. # nolint
+    MBper <- if (is(obj, "RasterLayer")) { # nolint
       ncell(obj) / MBadjustment
     } else if (tryCatch(is(obj[[1]], "RasterLayer"), error = function(x) FALSE)) {
       ncell(obj[[1]]) / MBadjustment
     } else {
       1 # i.e., default to detectClusters()
     }
-    if (isTRUE(all(dir.exists(dts$leafletTiles)))) {
+    if (isTRUE(all(dir.exists(dts[["leafletTiles"]])))) {
       useParallel <- FALSE
     } else {
       if (missing(useParallel)) {
         useParallel <- getOption("map.useParallel", !identical("windows", .Platform$OS.type))
       }
     }
-    #browser()
+
     cl <- makeOptimalCluster(useParallel = useParallel, MBper = MBper, maxNumClusters = length(obj))
-    on.exit({try(stopCluster(cl), silent = TRUE)})
-    tilePath <- dts$leafletTiles
+    on.exit(try(stopCluster(cl), silent = TRUE))
+    tilePath <- dts[["leafletTiles"]]
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
     out <- MapOrDoCall(makeTiles, multiple = args1$argsMulti,
                        single = args1$argsSingle, useCache = FALSE, cl = cl)
@@ -415,7 +416,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ######################################
   if (isTRUE(isStudyArea)) {
     if ((!is.null(studyArea(map))) && isStudyArea) {
-      message("map already has a studyArea; adding another one as study area ", dts$studyArea)
+      message("map already has a studyArea; adding another one as study area ", dts[["studyArea"]])
     } else {
       message("Setting map CRS to this layer because it is the (first) studyArea inserted")
       map@CRS <- raster::crs(obj)
@@ -472,19 +473,19 @@ mapRm.default <- function(map = NULL, layer = NULL, ask = TRUE, ...) {
     stop("Must pass a map")
   }
   if (is.character(layer))
-    layer <- map@metadata[, which(layerName %in% layer) ]
+    layer <- map@metadata[, which(layerName %in% layer)]
 
-  layerName <- unique(map@metadata[ layer , layerName])
+  layerName <- unique(map@metadata[layer, layerName])
   if (length(layer) > 1)
-    stop("There are more than obj in map with that layer name, '",
-         layerName,"'. Please indicate layer by row number in map@metadata.")
+    stop("There are more than obj in map with that layer name, '", layerName, "'.",
+         " Please indicate layer by row number in map@metadata.")
 
   rm(list = layerName, envir = map@metadata[layer, envir][[1]])
   map@metadata <- map@metadata[-layer, ]
 
   if (NROW(map@analyses))
     message("Layer ", layerName, " has been removed, but not any analysis that ",
-            "was previously run using this layer")
+            "was previously run using this layer.")
 
   map
 }
@@ -590,9 +591,8 @@ setMethod("studyArea", "ANY",
 setMethod("studyArea", "map",
           definition = function(map, layer = NA, sorted = FALSE) {
             if (isTRUE(sorted)) {
-              studyAreas <- map@metadata[!is.na(map@metadata$studyArea),]
-              mapSorted <- studyAreas[order(area, decreasing = FALSE), ][
-                , studyArea := as.numeric(.I)]
+              studyAreas <- map@metadata[!is.na(map@metadata$studyArea), ]
+              mapSorted <- studyAreas[order(area, decreasing = FALSE), ][, studyArea := as.numeric(.I)] # nolint
               san <- studyAreaName(mapSorted, layer = layer)
             } else {
               san <- studyAreaName(map, layer = layer)

@@ -21,5 +21,6 @@ gdal_polygonizeR(x, outshape = NULL, gdalformat = "ESRI Shapefile",
 \item{quiet}{TODO: description needed}
 }
 \description{
-Based on \url{https://johnbaumgartner.wordpress.com/2012/07/26/getting-rasters-into-shape-from-r/}.
+Based on
+\url{https://johnbaumgartner.wordpress.com/2012/07/26/getting-rasters-into-shape-from-r/}.
 }

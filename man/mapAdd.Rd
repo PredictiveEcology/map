@@ -112,7 +112,7 @@ if (require("SpaDES.tools")) {
                # to map object
                tsf = "tsf1.tif", # to column in map@metadata
                analysisGroup1 = "tsf1_vtm1",  # this is the label for analysisGroup1
-               leaflet = TRUE, # to column in map@metadata, will be used for visualizing in leaflet
+               leaflet = TRUE, # to column in map@metadata; used for visualizing in leaflet
                overwrite = TRUE)
   ml <- mapAdd(vtm, ml, filename2 = "vtm1.grd",
                layerName = "vtm1",

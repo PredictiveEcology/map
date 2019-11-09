@@ -7,8 +7,8 @@
 #'                 \code{maps} slot.
 #'
 #' @slot .xData Named environment of map-type objects (e.g., \code{sf}, \code{Raster*},
-#'            \code{Spatial*}. Each entry may also be simply an environment, which
-#'            indicates where to find the object, i.e., via \code{get(layerName, envir = environment)}
+#'              \code{Spatial*}. Each entry may also be simply an environment, which indicates
+#'              where to find the object, i.e., via \code{get(layerName, envir = environment)}.
 #'
 #' @slot CRS  The common crs of all layers
 #'
@@ -38,8 +38,9 @@ setClass(
   # validity = function(object) {
   #   ## TODO: add additional checks!
   #   identical(vapply(object@metadata, class, character(1)),
-  #             c(layerName = "character", layerType = "character", columnNameForLabels = "character",
-  #               leaflet = "character", studyArea = "numeric", rasterToMatch = "logical"))
+  #             c(layerName = "character", layerType = "character",
+  #               columnNameForLabels = "character", leaflet = "character",
+  #               studyArea = "numeric", rasterToMatch = "logical"))
   # }
 )
 
@@ -51,7 +52,7 @@ setMethod("initialize", "map",
                                            leaflet = asPath(character()),
                                            studyArea = numeric(), rasterToMatch = logical())
             .Object@CRS <- sp::CRS()
-            .Object@analyses <- data.table::data.table(functionName = character())#, quotedFn = character())
+            .Object@analyses <- data.table::data.table(functionName = character())
             .Object@analysesData <- list()
             .Object@paths <- list(dataPath = getOption("map.dataPath", "."),
                                   tilePath = getOption("map.tilePath", "."))

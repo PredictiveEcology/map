@@ -51,13 +51,11 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
          "Please pass in a unique name representing the analysis group, ",
          "i.e., which tsf is associated with which vtm")
   }
-  AGs <- sort(unique(colnames(m)[startsWith(colnames(m), "analysisGroup")]))
+  AGs <- sort(unique(colnames(m)[startsWith(colnames(m), "analysisGroup")])) # nolint
   names(AGs) <- AGs
-  ags <- lapply(AGs, function(AG) sort(na.omit(unique(m[[AG]]))))
+  ags <- lapply(AGs, function(AG) sort(na.omit(unique(m[[AG]])))) # nolint
 
-  combosCompleted <- lapply(functionName, function(fn)
-    map@analysesData[[fn]]$.Completed)
-  #combosCompleted <- map@analysesData[[functionName]]$.Completed
+  combosCompleted <- lapply(functionName, function(fn) map@analysesData[[fn]]$.Completed)
 
   # Purge if purgeAnalyses is non NULL
   if (!is.null(purgeAnalyses)) {
@@ -67,7 +65,6 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
       combosCompleted[purge] <- list(rep(NULL, sum(purge)))
   }
 
-  #if (is.null(combosCompleted)) {
   combosAll <- expandAnalysisGroups(ags)
 
   # Cycle through for each analysisGroup, get each argument
@@ -80,7 +77,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
     args[keepArgs]
   })
 
-  AGsByFunName <- lapply(functionName, function(funName) {
+  AGsByFunName <- lapply(functionName, function(funName) { # nolint
     names(args1[[funName]])
   })
 
@@ -93,7 +90,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
 
   combosToDo <- Map(cc = combosCompleted, ca = combosAll, function(cc, ca) {
     if (!is.null(cc))
-      setDT(ca[!ca$all %in% cc,])
+      setDT(ca[!ca$all %in% cc, ])
     else
       setDT(ca)
   })
@@ -122,7 +119,6 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
       }
     })
 
-    # browser()
     cl <- makeOptimalCluster(useParallel, maxNumClusters = NROW(combosToDoDT))
     on.exit(try(stopCluster(cl), silent = TRUE))
 
@@ -139,12 +135,12 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
                                                   append(args,
                                                          otherFormalsInFunction[[funName]])))
                    fnOut
-                 })
+    })
 
     for (funName in funNames) {
       fromFunName <- combosToDoDT$functionName == funName
       map@analysesData[[funName]][names(out3)[fromFunName]] <- out3[fromFunName]
-      map@analysesData[[funName]]$.Completed <- names(out3[fromFunName])
+      map@analysesData[[funName]]$.Completed <- names(out3[fromFunName]) # nolint
     }
   } else {
     message("  ", paste(functionName, collapse = ", "), " already run on all layers")
@@ -217,9 +213,11 @@ mapAddAnalysis <- function(map, functionName,
 #'
 #'
 #' @aliases mapAddPostHocAnalysis
-#' @importFrom fastdigest fastdigest
-#' @rdname postHoc
 #' @export
+#' @importFrom fastdigest fastdigest
+#' @importFrom data.table data.table rbindlist set
+#' @importFrom reproducible .robustDigest
+#' @rdname postHoc
 mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NULL,
                                   postHocAnalyses = "all",
                                   useParallel = getOption("map.useParallel"),
@@ -262,7 +260,8 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
   map
 }
 
-## TODO: needs documentation?
+## TODO: needs documentation
+#' @importFrom reproducible compareNA
 runMapAnalyses <- function(map, purgeAnalyses = NULL,
                            useParallel = getOption("map.useParallel")) {
   isPostHoc <- if (is.null(map@analyses$postHoc)) {
@@ -293,10 +292,11 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
            names(phas) <- phas
            out2 <- lapply(phas, function(pha) {
              message("    Running ", x$functionName, " on ", pha)
-             ma <- do.call(get(x$functionName), append(list(map = map,
-                                                            functionName = pha,
-                                                            analysisGroups = x$postHocAnalysisGroups),
-                                                       unlist(as.list(x[ , forms, with = FALSE]))))
+             ma <- do.call(get(x$functionName),
+                           append(list(map = map,
+                                       functionName = pha,
+                                       analysisGroups = x$postHocAnalysisGroups),
+                                  unlist(as.list(x[, forms, with = FALSE]))))
            })
            out2
          })
@@ -310,10 +310,10 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
   map
 }
 
-getFormalsFromMetadata <- function(metadata, combo, AGs, funName) {
+getFormalsFromMetadata <- function(metadata, combo, AGs, funName) { # nolint
   formalsInFunction <- formalArgs(funName)[formalArgs(funName) %in% colnames(metadata)]
   names(formalsInFunction) <- formalsInFunction
-  args <- lapply(AGs, function(AG) {
+  args <- lapply(AGs, function(AG) { # nolint
     args <- lapply(formalsInFunction, function(arg) {
       val <- na.omit(metadata[get(AG) == combo[[AG]], ][[arg]])
       if (isTRUE(val)) {
@@ -327,7 +327,6 @@ getFormalsFromMetadata <- function(metadata, combo, AGs, funName) {
     })
     args[!sapply(args, is.null)]
   })
-  #args <- unlist(unname(args), recursive = FALSE)
 
   args
 }
