@@ -288,6 +288,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
       cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
       on.exit(try(stopCluster(cl), silent = TRUE))
+
       obj <- MapOrDoCall(postProcess, multiple = args1$argsMulti, cl = cl,
                          single = args1$argsSingle, useCache = useCache)
       try(stopCluster(cl), silent = TRUE)
