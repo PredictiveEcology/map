@@ -46,34 +46,52 @@ A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
 This will extract all objects in or pointed to within the \code{map}.
 }
 \seealso{
-Other mapMethods: \code{\link{area,map-method}},
-  \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasterToMatch,map-method}},
-  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+Other mapMethods: 
+\code{\link{area,map-method}},
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyAreaName}()},
+\code{\link{studyArea}()}
 
-Other mapMethods: \code{\link{area,map-method}},
-  \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasterToMatch,map-method}},
-  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+Other mapMethods: 
+\code{\link{area,map-method}},
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyAreaName}()},
+\code{\link{studyArea}()}
 
-Other mapMethods: \code{\link{area,map-method}},
-  \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasterToMatch,map-method}},
-  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+Other mapMethods: 
+\code{\link{area,map-method}},
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyAreaName}()},
+\code{\link{studyArea}()}
 
-Other mapMethods: \code{\link{area,map-method}},
-  \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasterToMatch,map-method}},
-  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+Other mapMethods: 
+\code{\link{area,map-method}},
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyAreaName}()},
+\code{\link{studyArea}()}
 
-Other mapMethods: \code{\link{area,map-method}},
-  \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasterToMatch,map-method}},
-  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+Other mapMethods: 
+\code{\link{area,map-method}},
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyAreaName}()},
+\code{\link{studyArea}()}
 
-Other mapMethods: \code{\link{area,map-method}},
-  \code{\link{crs,map-method}}, \code{\link{mapRm}},
-  \code{\link{rasterToMatch,map-method}},
-  \code{\link{studyAreaName}}, \code{\link{studyArea}}
+Other mapMethods: 
+\code{\link{area,map-method}},
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyAreaName}()},
+\code{\link{studyArea}()}
 }
 \concept{mapMethods}

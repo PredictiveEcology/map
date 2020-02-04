@@ -4,8 +4,14 @@
 \alias{gdal_polygonizeR}
 \title{Polygonize with GDAL}
 \usage{
-gdal_polygonizeR(x, outshape = NULL, gdalformat = "ESRI Shapefile",
-  pypath = NULL, readpoly = TRUE, quiet = TRUE)
+gdal_polygonizeR(
+  x,
+  outshape = NULL,
+  gdalformat = "ESRI Shapefile",
+  pypath = NULL,
+  readpoly = TRUE,
+  quiet = TRUE
+)
 }
 \arguments{
 \item{x}{TODO: description needed}

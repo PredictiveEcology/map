@@ -4,8 +4,13 @@
 \alias{mapAnalysis}
 \title{Generic analysis for map objects}
 \usage{
-mapAnalysis(map, functionName = NULL, purgeAnalyses = NULL,
-  useParallel = getOption("map.useParallel"), ...)
+mapAnalysis(
+  map,
+  functionName = NULL,
+  purgeAnalyses = NULL,
+  useParallel = getOption("map.useParallel"),
+  ...
+)
 }
 \arguments{
 \item{map}{Optional map object. If not provided, then one will be

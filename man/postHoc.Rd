@@ -4,9 +4,14 @@
 \alias{mapAddPostHocAnalysis}
 \title{Add a post hoc analysis function to a \code{map} object}
 \usage{
-mapAddPostHocAnalysis(map, functionName, postHocAnalysisGroups = NULL,
-  postHocAnalyses = "all", useParallel = getOption("map.useParallel"),
-  ...)
+mapAddPostHocAnalysis(
+  map,
+  functionName,
+  postHocAnalysisGroups = NULL,
+  postHocAnalyses = "all",
+  useParallel = getOption("map.useParallel"),
+  ...
+)
 }
 \arguments{
 \item{map}{Optional map object. If not provided, then one will be

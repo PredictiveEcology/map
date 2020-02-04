@@ -4,8 +4,12 @@
 \alias{mapAddAnalysis}
 \title{Add an analysis to a \code{map} object}
 \usage{
-mapAddAnalysis(map, functionName,
-  useParallel = getOption("map.useParallel", FALSE), ...)
+mapAddAnalysis(
+  map,
+  functionName,
+  useParallel = getOption("map.useParallel", FALSE),
+  ...
+)
 }
 \arguments{
 \item{map}{A \code{map} object}
