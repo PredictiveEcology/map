@@ -45,6 +45,7 @@ matrix:
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
+          - libxml2-dev
     services:
       - xvfb
     r_binary_packages:
@@ -59,6 +60,7 @@ matrix:
       - devtools
       - rgdal
       - rgeos
+      - XML
     r_github_packages:
       - jimhester/lintr
     after_success:
@@ -79,7 +81,6 @@ matrix:
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
-          - libxml2-dev
     services:
       - xvfb
     r_binary_packages:
@@ -93,7 +94,6 @@ matrix:
       - devtools
       - rgdal
       - rgeos
-      - XML
   - os: osx
     osx_image: xcode9.4
     addons:
