@@ -79,6 +79,7 @@ matrix:
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
+          - libxml2-dev
     services:
       - xvfb
     r_binary_packages:
@@ -92,6 +93,7 @@ matrix:
       - devtools
       - rgdal
       - rgeos
+      - XML
   - os: osx
     osx_image: xcode9.4
     addons:
@@ -100,13 +102,14 @@ matrix:
         - glpk
         - libgit2
         - llvm
+        - libxml2
         - udunits
         update: true
     latex: false
     r_build_args: '--no-build-vignettes'
     r_check_args: '--as-cran --ignore-vignettes --no-examples'
     before_script:
-      - Rscript -e "install.packages(c('rgdal', 'rgeos'), type = 'source')"
+      - Rscript -e "install.packages(c('rgdal', 'rgeos', 'XML'), type = 'source')"
 r_build_args: " "
 r_check_args: "--as-cran"
 warnings_are_errors: true
