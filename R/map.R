@@ -252,14 +252,14 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       } else {
         argsProjectInputs <- getLocalArgsFor(list(Cache, projectInputs), dots = dots)
         obj <- do.call(Cache, append(list(FUN = quote(projectInputs), x = quote(obj)),
-                                     argsProjectInputs), quote = TRUE)
+                                     argsProjectInputs))
       }
     } else {
       dots[["targetCRS"]] <- crs(map)
       args <- dots
       args <- append(args, mget(ls()[ls() %in% formalArgs(projectInputs)], inherits = FALSE))
 
-      obj <- do.call(projectInputs, append(list(obj), args), quote = TRUE)
+      obj <- do.call(projectInputs, append(list(obj), args))
     }
   } else {
     if (is.na(crs(map))) {
@@ -358,11 +358,10 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   }
   moreArgs <- append(args1$argsSingle, list(metadata = map@metadata))
   if (length(args1$argsMulti) == 0) {
-    dts <- do.call(buildMetadata, moreArgs, quote = TRUE)
+    dts <- do.call(buildMetadata, moreArgs)
   } else {
     dtsList <- do.call(Map, args = append(args1$argsMulti,
-                                          list(f = buildMetadata, MoreArgs = moreArgs)),
-                       quote = TRUE)
+                                          list(f = buildMetadata, MoreArgs = moreArgs)))
     dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE)
   }
 
