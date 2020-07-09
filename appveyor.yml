@@ -68,7 +68,8 @@ artifacts:
 notifications:
   - provider: Email
     to:
-    - eliotm.cintire@gmail.com
+    - eliot.mcintire@gmail.com
+    - '{{commitAuthorEmail}}'
     subject: 'map: r-appveyor build {{status}}'
     message: "https://ci.appveyor.com/project/achubaty/map"
     on_build_success: false
