@@ -275,7 +275,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
       list2env(dots, envir = environment()) # put any arguments from the ... into this local env
       x <- obj # put it into memory so identifyVectorArgs finds it
-      args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialObjects"),
+      args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialClasses"),
                                             getS3method("maskInputs", "Raster"),
                                             projectInputs, cropInputs, projectRaster, writeOutputs),
                                   ls(), environment(), dots = dots)
