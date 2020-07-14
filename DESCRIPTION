@@ -29,7 +29,7 @@ Imports:
     methods,
     pemisc,
     quickPlot,
-    reproducible,
+    reproducible (>= 2.0.0.9010),
     raster (>= 2.8.4),
     rgeos,
     sf,
@@ -53,7 +53,7 @@ License: GPL-3
 VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/map/issues
 ByteCompile: yes
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Collate: 
     'GIS.R'
     'buildMetadata.R'

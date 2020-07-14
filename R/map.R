@@ -275,7 +275,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
       list2env(dots, envir = environment()) # put any arguments from the ... into this local env
       x <- obj # put it into memory so identifyVectorArgs finds it
-      args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialObjects"),
+      args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialClasses"),
                                             getS3method("maskInputs", "Raster"),
                                             projectInputs, cropInputs, projectRaster, writeOutputs),
                                   ls(), environment(), dots = dots)
@@ -367,7 +367,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   }
 
   ## NOTE (2019-11-08): targetCRS needs to be character, not CRS class due to change in data.table
-  if (!is.null(dts[["targetCRS"]]))
+  if (!is.null(dts[["targetCRS"]]) && !is(dts[["targetCRS"]], "character"))
     dts[["targetCRS"]] <- as.character(dts[["targetCRS"]])
 
   ## TODO: manual workarounds to deal with column typing for LandWeb
@@ -439,8 +439,6 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 }
 
 #' Remove objects from a \code{map}
-#'
-#' @inheritParams map-class
 #'
 #' @param map TODO: document this
 #'
