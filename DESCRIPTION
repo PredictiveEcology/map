@@ -29,7 +29,7 @@ Imports:
     methods,
     pemisc,
     quickPlot,
-    reproducible (>= 2.0.0.9010),
+    reproducible (>= 1.2.0.9010),
     raster (>= 2.8.4),
     rgeos,
     sf,
