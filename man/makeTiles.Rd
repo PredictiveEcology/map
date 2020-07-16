@@ -2,7 +2,7 @@
 % Please edit documentation in R/makeTiles.R
 \name{makeTiles}
 \alias{makeTiles}
-\title{Make tiles (pyramids) using gdal2tiles}
+\title{Make tiles (pyramids) using \code{gdal2tiles}}
 \usage{
 makeTiles(tilePath, obj, overwrite = FALSE, ...)
 }
@@ -13,7 +13,12 @@ makeTiles(tilePath, obj, overwrite = FALSE, ...)
 
 \item{overwrite}{Logical. If \code{FALSE}, and the director exists,
 then it will not overwrite any files.}
+
+\item{...}{Passed to \code{reproducible::projectInputs} e.g., \code{useGDAL}}
 }
 \description{
-Make tiles (pyramids) using gdal2tiles
+NOTE: by default, \pkg{tiler} is configured to use python 2, which may not be available on
+recent Linux distributions (e.g., Ubuntu 20.04).
+Thus, you should explicitly set tiler options to find the correct python path on your
+system, using e.g., \code{tiler::tiler_options(python = Sys.which("python3"))}.
 }

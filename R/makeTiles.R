@@ -1,14 +1,20 @@
-#' Make tiles (pyramids) using gdal2tiles
+#' Make tiles (pyramids) using \code{gdal2tiles}
 #'
-#' @importFrom raster projectRaster writeRaster
-#' @importFrom sp CRS
-#' @importFrom tiler tile
+#' NOTE: by default, \pkg{tiler} is configured to use python 2, which may not be available on
+#' recent Linux distributions (e.g., Ubuntu 20.04).
+#' Thus, you should explicitly set tiler options to find the correct python path on your
+#' system, using e.g., \code{tiler::tiler_options(python = Sys.which("python3"))}.
+#'
 #' @param tilePath A director to write tiles
 #' @param obj A raster objects with or without file-backing
 #' @param overwrite Logical. If \code{FALSE}, and the director exists,
 #'   then it will not overwrite any files.
-#' @param ... Passed to reproducible::projectInputs e.g., \code{useGDAL}
+#' @param ... Passed to \code{reproducible::projectInputs} e.g., \code{useGDAL}
+#'
 #' @export
+#' @importFrom raster projectRaster writeRaster
+#' @importFrom sp CRS
+#' @importFrom tiler tile
 makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
   dirNotExist <- !dir.exists(tilePath) | isTRUE(overwrite)
 
