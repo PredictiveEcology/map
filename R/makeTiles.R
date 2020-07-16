@@ -51,7 +51,7 @@ makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
     while (toDo) {
       print(tryNum)
       isCorrectCRS <- compareCRS(CRS("+init=epsg:4326"), objLflt)
-      browser()
+      #browser()
       out <- try(tiler::tile(tmpFile, tilePath, zoom = "1-10",
                              crs = CRS("+init=epsg:4326"),
                              format = "tms", viewer = FALSE, resume = TRUE), silent = TRUE)
