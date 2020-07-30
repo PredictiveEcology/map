@@ -12,7 +12,7 @@
 #' @param ... Passed to \code{reproducible::projectInputs} e.g., \code{useGDAL}
 #'
 #' @export
-#' @importFrom raster projectRaster writeRaster
+#' @importFrom raster compareCRS filename projectRaster writeRaster
 #' @importFrom sp CRS
 #' @importFrom tiler tile
 makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
@@ -77,9 +77,9 @@ makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
   }
 }
 
-
+#' @importFrom reproducible .requireNamespace isWindows
 findOSGeo4W <- function() {
-  if (reproducible:::.requireNamespace("gdalUtils")) {
+  if (reproducible::.requireNamespace("gdalUtils")) {
     gdalPath <- NULL
     attemptGDAL <- TRUE
     if (reproducible:::isWindows()) {
