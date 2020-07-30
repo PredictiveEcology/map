@@ -77,7 +77,7 @@ makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
   }
 }
 
-#' @importFrom reproducible .requireNamespace isWindows
+#' @importFrom reproducible .requireNamespace
 findOSGeo4W <- function() {
   if (reproducible::.requireNamespace("gdalUtils")) {
     gdalPath <- NULL
