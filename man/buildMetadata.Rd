@@ -4,8 +4,18 @@
 \alias{buildMetadata}
 \title{Build \code{map} obj metadata table}
 \usage{
-buildMetadata(metadata, isStudyArea, isRasterToMatch, layerName, obj,
-  columnNameForLabels, objHash, leaflet, envir, ...)
+buildMetadata(
+  metadata,
+  isStudyArea,
+  isRasterToMatch,
+  layerName,
+  obj,
+  columnNameForLabels,
+  objHash,
+  leaflet,
+  envir,
+  ...
+)
 }
 \arguments{
 \item{metadata}{TODO: description needed}

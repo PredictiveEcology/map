@@ -5,14 +5,22 @@
 \alias{mapAdd.default}
 \title{Append a spatial object to map}
 \usage{
-mapAdd(obj, map, layerName, overwrite = getOption("map.overwrite",
-  FALSE), ...)
+mapAdd(obj, map, layerName, overwrite = getOption("map.overwrite", FALSE), ...)
 
-\method{mapAdd}{default}(obj = NULL, map = new("map"),
-  layerName = NULL, overwrite = getOption("map.overwrite"),
-  columnNameForLabels = 1, leaflet = FALSE, isStudyArea = FALSE,
-  isRasterToMatch = FALSE, envir = NULL, useCache = TRUE,
-  useParallel = getOption("map.useParallel"), ...)
+\method{mapAdd}{default}(
+  obj = NULL,
+  map = new("map"),
+  layerName = NULL,
+  overwrite = getOption("map.overwrite"),
+  columnNameForLabels = 1,
+  leaflet = FALSE,
+  isStudyArea = FALSE,
+  isRasterToMatch = FALSE,
+  envir = NULL,
+  useCache = TRUE,
+  useParallel = getOption("map.useParallel"),
+  ...
+)
 }
 \arguments{
 \item{obj}{Optional spatial object, currently \code{RasterLayer},

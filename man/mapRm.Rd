@@ -32,16 +32,20 @@ if (require("SpaDES.tools")) {
 }
 }
 \seealso{
-Other mapMethods: \code{\link{area,map-method}},
-  \code{\link{crs,map-method}},
-  \code{\link{rasterToMatch,map-method}},
-  \code{\link{rasters}}, \code{\link{studyAreaName}},
-  \code{\link{studyArea}}
+Other mapMethods: 
+\code{\link{area,map-method}},
+\code{\link{crs,map-method}},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{rasters}()},
+\code{\link{studyAreaName}()},
+\code{\link{studyArea}()}
 
-Other mapMethods: \code{\link{area,map-method}},
-  \code{\link{crs,map-method}},
-  \code{\link{rasterToMatch,map-method}},
-  \code{\link{rasters}}, \code{\link{studyAreaName}},
-  \code{\link{studyArea}}
+Other mapMethods: 
+\code{\link{area,map-method}},
+\code{\link{crs,map-method}},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{rasters}()},
+\code{\link{studyAreaName}()},
+\code{\link{studyArea}()}
 }
 \concept{mapMethods}
