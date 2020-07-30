@@ -30,6 +30,7 @@ areaAndPolyValue <- function(ras) {
 #' @importFrom raster extent writeRaster
 #' @importFrom reproducible assessDataType
 #' @importFrom sf st_bbox read_sf
+#' @importFrom tiler tiler_options
 #' @importFrom tools file_path_sans_ext
 gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", # nolint
                              pypath = NULL, readpoly = TRUE, quiet = TRUE) {
@@ -68,8 +69,9 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
   } else if (is.character(x)) {
     rastpath <- normalizePath(x)
   } else stop("x must be a file path (character string), or a Raster object.")
-  system2("python", args = (sprintf('"%1$s" "%2$s" -f "%3$s" "%4$s"',
-                                    pypath, rastpath, gdalformat, outshape)))
+  system2(tiler::tiler_options()[["python"]],
+          args = (sprintf('"%1$s" "%2$s" -f "%3$s" "%4$s"',
+                          pypath, rastpath, gdalformat, outshape)))
   if (isTRUE(readpoly)) {
     shp <- sf::read_sf(dsn = dirname(outshape), layer = basename(file_path_sans_ext(outshape)))
     sf::st_bbox(shp, extent(x))

@@ -19,6 +19,6 @@ then it will not overwrite any files.}
 \description{
 NOTE: by default, \pkg{tiler} is configured to use python 2, which may not be available on
 recent Linux distributions (e.g., Ubuntu 20.04).
-Thus, you should explicitly set tiler options to find the correct python path on your
+Thus, the user should explicitly set tiler options to find the correct python path on their
 system, using e.g., \code{tiler::tiler_options(python = Sys.which("python3"))}.
 }
