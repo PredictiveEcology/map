@@ -7,8 +7,8 @@ Description: The map class is a collection of map objects ('sp', 'raster', 'sf')
 URL: 
     http://map.predictiveecology.org,
     https://github.com/PredictiveEcology/map
-Date: 2020-02-03
-Version: 0.0.1
+Date: 2020-08-28
+Version: 0.0.2
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
     role = c("aut", "cre"), comment=c(ORCID = "0000-0002-6914-8316")),
@@ -18,7 +18,7 @@ Authors@R: c(
     role = "cph")
     )
 Depends:
-    R (>= 3.5)
+    R (>= 3.6)
 Imports:
     backports,
     data.table (>= 1.10.4),

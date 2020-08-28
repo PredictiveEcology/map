@@ -293,7 +293,7 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
            out2 <- lapply(phas, function(pha) {
              message("    Running ", x$functionName, " on ", pha)
              ma <- do.call(get(x$functionName),
-                           append(list(map = map,
+                           append(alist(map = map,
                                        functionName = pha,
                                        analysisGroups = x$postHocAnalysisGroups),
                                   unlist(as.list(x[, forms, with = FALSE]))))

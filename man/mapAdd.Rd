@@ -43,8 +43,7 @@ the \code{map}, then it will replace the existing object. Default is
 \code{\link[reproducible]{prepInputs}}.}
 
 \item{columnNameForLabels}{A character string indicating which column to use
-for labels. This is currently only used if the object is a
-\code{SpatialPolygonsDataFram}.}
+for labels. This is currently only used if the object is a \code{SpatialPolygonsDataFrame}.}
 
 \item{leaflet}{Logical or Character vector of path(s) to write tiles.
 If \code{TRUE} or a character vector, then this layer will be added to a leaflet map.

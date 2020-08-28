@@ -20,8 +20,7 @@ if (getRversion() >= "3.1.0") {
 #'  the \code{map}, then it will replace the existing object. Default is
 #'  \code{getOption("map.overwrite")}
 #' @param columnNameForLabels A character string indicating which column to use
-#'  for labels. This is currently only used if the object is a
-#'  \code{SpatialPolygonsDataFram}.
+#'  for labels. This is currently only used if the object is a \code{SpatialPolygonsDataFrame}.
 #' @param leaflet Logical or Character vector of path(s) to write tiles.
 #'  If \code{TRUE} or a character vector, then this layer will be added to a leaflet map.
 #'  For \code{RasterLayer} object, this will trigger a call to \code{gdal2tiles}, making tiles.
@@ -356,7 +355,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     args1$argsSingle[names(dots)[howLong <= 1]] <- dots[howLong <= 1]
     args1$argsMulti[names(dots)[howLong > 1]] <- dots[howLong > 1]
   }
-  moreArgs <- append(args1$argsSingle, list(metadata = map@metadata))
+  moreArgs <- append(args1$argsSingle, alist(metadata = map@metadata))
   if (length(args1$argsMulti) == 0) {
     dts <- do.call(buildMetadata, moreArgs)
   } else {
