@@ -1,9 +1,8 @@
 ^\.httr-oauth$
 ^\.lintr
-^\.travis\.yml$
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^appveyor\.yml$
-^appveyor_cache\.txt$
 ^_pkgdown\.yml$
 ^LICENSE$
+^\.github$
+^codecov\.yml$
