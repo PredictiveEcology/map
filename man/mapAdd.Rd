@@ -18,7 +18,7 @@ mapAdd(obj, map, layerName, overwrite = getOption("map.overwrite", FALSE), ...)
   isRasterToMatch = FALSE,
   envir = NULL,
   useCache = TRUE,
-  useParallel = getOption("map.useParallel"),
+  useParallel = getOption("map.useParallel", FALSE),
   ...
 )
 }
