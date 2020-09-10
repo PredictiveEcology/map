@@ -1,6 +1,4 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c("envir"))
-}
+utils::globalVariables(c("envir"))
 
 #' Generic analysis for map objects
 #'
@@ -37,7 +35,7 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom parallel stopCluster
 #' @importFrom pemisc makeOptimalCluster Map2
 mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
-                        useParallel = getOption("map.useParallel"), ...) {
+                        useParallel = getOption("map.useParallel", FALSE), ...) {
   m <- map@metadata
   dots <- list(...)
 
@@ -57,7 +55,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
 
   combosCompleted <- lapply(functionName, function(fn) map@analysesData[[fn]]$.Completed)
 
-  # Purge if purgeAnalyses is non NULL
+  # Purge if purgeAnalyses is non-NULL
   if (!is.null(purgeAnalyses)) {
     message("Purging previous analyses with ", purgeAnalyses)
     purge <- names(combosCompleted) %in% purgeAnalyses
@@ -119,7 +117,8 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
       }
     })
 
-    cl <- makeOptimalCluster(useParallel, maxNumClusters = NROW(combosToDoDT))
+    cl <- makeOptimalCluster(useParallel,
+                             maxNumClusters = min(NROW(combosToDoDT), getOption("map.maxNumCores")))
     on.exit(try(stopCluster(cl), silent = TRUE))
 
     combosToDoList <- split(combosToDoDT, combosToDoDT$all)
@@ -220,7 +219,7 @@ mapAddAnalysis <- function(map, functionName,
 #' @rdname postHoc
 mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NULL,
                                   postHocAnalyses = "all",
-                                  useParallel = getOption("map.useParallel"),
+                                  useParallel = getOption("map.useParallel", FALSE),
                                   ...) {
   dots <- list(...)
 
@@ -263,7 +262,7 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
 ## TODO: needs documentation
 #' @importFrom reproducible compareNA
 runMapAnalyses <- function(map, purgeAnalyses = NULL,
-                           useParallel = getOption("map.useParallel")) {
+                           useParallel = getOption("map.useParallel", FALSE)) {
   isPostHoc <- if (is.null(map@analyses$postHoc)) {
     rep(FALSE, NROW(map@analyses))
   } else {
@@ -273,7 +272,7 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
   # First run all primary analyses
   if (NROW(map@analyses[!isPostHoc])) {
     funName <- map@analyses$functionName[!isPostHoc]
-    map <- mapAnalysis(map, funName, purgeAnalyses = purgeAnalyses)
+    map <- mapAnalysis(map, funName, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
   }
 
   # run postHoc analyses
@@ -304,7 +303,7 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
     if (!is.null(out)) {
       map@analysesData[names(out)] <- lapply(out, function(x) x)
     } else {
-      warning("One of the analyses failed")
+      warning("One or more of the analyses failed.")
     }
   }
   map

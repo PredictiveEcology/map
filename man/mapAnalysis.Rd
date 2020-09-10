@@ -8,7 +8,7 @@ mapAnalysis(
   map,
   functionName = NULL,
   purgeAnalyses = NULL,
-  useParallel = getOption("map.useParallel"),
+  useParallel = getOption("map.useParallel", FALSE),
   ...
 )
 }

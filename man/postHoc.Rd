@@ -9,7 +9,7 @@ mapAddPostHocAnalysis(
   functionName,
   postHocAnalysisGroups = NULL,
   postHocAnalyses = "all",
-  useParallel = getOption("map.useParallel"),
+  useParallel = getOption("map.useParallel", FALSE),
   ...
 )
 }

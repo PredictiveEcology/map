@@ -1,6 +1,4 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(".", ":=", ".I", ".N", ".SD", "envir", "layerName", "objectHash"))
-}
+utils::globalVariables(c(".", ":=", ".I", ".N", ".SD", "envir", "layerName", "objectHash"))
 
 #' Append a spatial object to map
 #'
@@ -190,7 +188,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            overwrite = getOption("map.overwrite"),
                            columnNameForLabels = 1, leaflet = FALSE, isStudyArea = FALSE,
                            isRasterToMatch = FALSE, envir = NULL, useCache = TRUE,
-                           useParallel = getOption("map.useParallel"), ...) {
+                           useParallel = getOption("map.useParallel", FALSE), ...) {
   dots <- list(...)
   if (is.null(layerName))
     stop("layerName is not optional. Please specify.")
@@ -212,6 +210,8 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     } else {
       0
     }
+    maxNumClus <- min(maxNumClus, getOption("map.maxNumCores"))
+
     message("  Running prepInputs for:\n",
             paste(capture.output(data.table(file = layerName)), collapse = "\n"))
     cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
@@ -283,6 +283,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       } else {
         0
       }
+      maxNumClus <- min(maxNumClus, getOption("map.maxNumCores"))
 
       message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
       cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
@@ -401,7 +402,8 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       }
     }
 
-    cl <- makeOptimalCluster(useParallel = useParallel, MBper = MBper, maxNumClusters = length(obj))
+    cl <- makeOptimalCluster(useParallel = useParallel, MBper = MBper,
+                             maxNumClusters = min(length(obj)), getOption("map.maxNumCores"))
     on.exit(try(stopCluster(cl), silent = TRUE))
     tilePath <- dts[["leafletTiles"]]
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
