@@ -149,7 +149,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
 
 #' Add an analysis to a \code{map} object
 #'
-#' TODO: description neeeded
+#' TODO: description needed
 #'
 #' @param map A \code{map} object
 #' @param functionName The name of the analysis function to add
@@ -293,8 +293,8 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
              message("    Running ", x$functionName, " on ", pha)
              ma <- do.call(get(x$functionName),
                            append(alist(map = map,
-                                       functionName = pha,
-                                       analysisGroups = x$postHocAnalysisGroups),
+                                        functionName = pha,
+                                        analysisGroups = x$postHocAnalysisGroups),
                                   unlist(as.list(x[, forms, with = FALSE]))))
            })
            out2
