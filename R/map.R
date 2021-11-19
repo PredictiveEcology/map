@@ -314,11 +314,13 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ###################################################
   # Add "shinyLabel" column if it is a SpatialPolygonsDataFrame
   ###################################################
-  args1 <- identifyVectorArgs(fn = addColumnNameForLabels,
-                              c(x = "obj", columnNameForLabels = "columnNameForLabels"),
-                              environment(), dots = dots)
-  obj <- MapOrDoCall(addColumnNameForLabels, multiple = args1$argsMulti,
-                     single = args1$argsSingle, useCache = useCache)
+  if (any(vapply(obj, is, logical(1), "SpatialPolygonsDataFrame"))) {
+    args1 <- identifyVectorArgs(fn = addColumnNameForLabels,
+                                c(x = "obj", columnNameForLabels = "columnNameForLabels"),
+                                environment(), dots = dots)
+    obj <- MapOrDoCall(addColumnNameForLabels, multiple = args1$argsMulti,
+                       single = args1$argsSingle, useCache = useCache)
+  }
 
   ####################################################
   # Assign obj to map@.xData
