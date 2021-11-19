@@ -20,9 +20,9 @@ makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
 
   if (dirNotExist) { # assume that tilePath is unique for that obj, via .robustDigest
     if (reproducible:::isWindows()) {
-      out <- reproducible:::findGDAL()
-      if (isFALSE(out))
-        stop("Need to have gdal installed; see ?tiler")
+      # out <- reproducible:::findGDAL()
+      # if (isFALSE(out))
+      #   stop("Need to have gdal installed; see ?tiler")
       pydir <- file.path(getOption("gdalUtils_gdalPath")[[1]]$path)
       possPyBin <- file.path(pydir, "python.exe")
       possPyBin3 <- file.path(pydir, "python3.exe")
