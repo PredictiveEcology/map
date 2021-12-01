@@ -848,7 +848,7 @@ addColumnNameForLabels <- function(x, columnNameForLabels) {
     lapply(x, addColumnNameForLabels, columnNameForLabels = columnNameForLabels)
   } else if (is(x, "SpatialPolygonsDataFrame")) {
     x[["shinyLabel"]] <- x[[columnNameForLabels]]
-  } else {
-    x
   }
+
+  return(x)
 }
