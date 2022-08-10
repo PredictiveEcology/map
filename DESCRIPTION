@@ -44,7 +44,7 @@ Suggests:
     SpaDES.tools,
     testthat
 Remotes:
-    gearslaboratory/gdalUtils
+    gearslaboratory/gdalUtils,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
