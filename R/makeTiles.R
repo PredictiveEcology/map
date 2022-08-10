@@ -1,3 +1,6 @@
+#' @keywords internal
+.isWindows <- getFromNamespace("isWindows", "reproducible")
+
 #' Make tiles (pyramids) using \code{gdal2tiles}
 #'
 #' NOTE: by default, \pkg{tiler} is configured to use python 2, which may not be available on
@@ -19,7 +22,7 @@ makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
   dirNotExist <- !dir.exists(tilePath) | isTRUE(overwrite)
 
   if (dirNotExist) { # assume that tilePath is unique for that obj, via .robustDigest
-    if (reproducible:::isWindows()) {
+    if (.isWindows()) {
       # out <- reproducible:::findGDAL()
       # if (isFALSE(out))
       #   stop("Need to have gdal installed; see ?tiler")
@@ -82,13 +85,12 @@ findOSGeo4W <- function() {
   if (reproducible::.requireNamespace("gdalUtils")) {
     gdalPath <- NULL
     attemptGDAL <- TRUE
-    if (reproducible:::isWindows()) {
+    if (.isWindows()) {
       # Handle all QGIS possibilities
       a <- dir("C:/", pattern = "Progra", full.names = TRUE)
       a <- grep("Program Files", a, value = TRUE)
       a <- unlist(lapply(a, dir, pattern = "QGIS", full.name = TRUE))
       # a <- unlist(lapply(a, dir, pattern = "bin", full.name = TRUE))
-
 
       possibleWindowsPaths <- c(a, "C:/OSGeo4W64/",
                                 "C:/GuidosToolbox/QGIS/",
@@ -105,6 +107,5 @@ findOSGeo4W <- function() {
     tiler::tiler_options(osgeo4w = OSGeo4WPath)
 
     OSGeo4WPath
-
   }
 }

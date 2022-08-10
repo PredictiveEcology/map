@@ -26,7 +26,6 @@ areaAndPolyValue <- function(ras) {
 #' @param readpoly TODO: description needed
 #' @param quiet TODO: description needed
 #'
-#' @importFrom gdalUtils gdal_setInstallation
 #' @importFrom raster extent writeRaster
 #' @importFrom reproducible assessDataType
 #' @importFrom sf st_bbox read_sf
@@ -38,8 +37,9 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
   if (is.null(pypath)) {
     pypath <- Sys.which("gdal_polygonize.py")
     if (!nzchar(pypath)) {
-      browser()
-      gdalUtils::gdal_setInstallation()
+      if (reproducible::.requireNamespace("gdalUtils")) {
+        gdalUtils::gdal_setInstallation()
+      }
       o <- options()
       pypath <- file.path(o$gdalUtils_gdalPath[[2]]$path, "gdal_polygonize.py")
       if (!nzchar(pypath)) {
@@ -65,10 +65,11 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
     f <- tempfile(fileext = ".tif")
     rastpath <- normalizePath(f, mustWork = FALSE)
     writeRaster(x, rastpath, datatype = assessDataType(x))
-
   } else if (is.character(x)) {
     rastpath <- normalizePath(x)
-  } else stop("x must be a file path (character string), or a Raster object.")
+  } else {
+    stop("x must be a file path (character string), or a Raster object.")
+  }
   system2(tiler::tiler_options()[["python"]],
           args = (sprintf('"%1$s" "%2$s" -f "%3$s" "%4$s"',
                           pypath, rastpath, gdalformat, outshape)))
