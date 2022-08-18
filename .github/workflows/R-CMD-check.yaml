@@ -54,8 +54,6 @@ jobs:
             any::rcmdcheck
             fastshp=?ignore
             PredictiveEcology/reproducible@development
-            PredictiveEcology/Require@development
-            PredictiveEcology/SpaDES.core@development
             PredictiveEcology/SpaDES.tools@development
 
       - name: Install additional package dependencies

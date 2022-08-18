@@ -35,8 +35,6 @@ jobs:
             local::.
             fastshp=?ignore
             PredictiveEcology/reproducible@development
-            PredictiveEcology/Require@development
-            PredictiveEcology/SpaDES.core@development
             PredictiveEcology/SpaDES.tools@development
           needs: website
 
