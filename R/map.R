@@ -219,9 +219,13 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
     obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti, cl = cl,
                        single = args1$argsSingle, useCache = useCache)
+
     tryCatch(stopCluster(cl), error = function(x) invisible())
-    if (is(obj, "list")) # note is.list returns TRUE for data.frames ... BAD
+    if (is(obj, "list")) { ## NOTE: is.list returns TRUE for data.frames ... BAD
       names(obj) <- layerName
+    } else if (is(obj, "sf")) { ## NOTE: Aug 2022 workaround #7 by forcing use of sp objects
+      obj <- as_Spatial(obj)
+    }
   }
 
   layerNameExistsInMetadata <- if (isTRUE(layerName %in% ls(map@.xData))) {
