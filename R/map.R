@@ -181,6 +181,7 @@ mapAdd <- function(obj, map, layerName,
 #' @importFrom raster crs ncell projectRaster writeRaster
 #' @importFrom reproducible .robustDigest asPath Cache compareNA cropInputs fixErrors
 #' @importFrom reproducible prepInputs preProcess projectInputs postProcess writeOutputs
+#' @importFrom sf as_Spatial
 #' @importFrom sp CRS
 #' @importFrom utils capture.output getS3method
 #' @rdname mapAdd
@@ -201,7 +202,6 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   # Get obj, if missing, via prepInputs url, or targetFile
   ###########################################
   if (is.null(obj)) {    # with no obj, we get it first, then pass to mapAdd
-    dots <- list(...)
     # Don't run postProcess because that will happen in next mapAdd when obj is
     #   in hand
     args1 <- identifyVectorArgs(fn = list(Cache, preProcess), ls(), environment(), dots)
