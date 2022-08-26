@@ -850,6 +850,8 @@ metadata.map <- function(x) {
 addColumnNameForLabels <- function(x, columnNameForLabels) {
   if (is(x, "list")) {
     lapply(x, addColumnNameForLabels, columnNameForLabels = columnNameForLabels)
+  } else if (is(x, "sf")) {
+    x[["shinyLabel"]] <- x[[columnNameForLabels]]
   } else if (is(x, "SpatialPolygonsDataFrame")) {
     x[["shinyLabel"]] <- x[[columnNameForLabels]]
   }
