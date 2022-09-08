@@ -181,7 +181,7 @@ mapAdd <- function(obj, map, layerName,
 #' @importFrom raster crs ncell projectRaster writeRaster
 #' @importFrom reproducible .robustDigest asPath Cache compareNA cropInputs fixErrors
 #' @importFrom reproducible prepInputs preProcess projectInputs postProcess writeOutputs
-#' @importFrom sf as_Spatial
+#' @importFrom sf as_Spatial st_zm
 #' @importFrom sp CRS
 #' @importFrom utils capture.output getS3method
 #' @rdname mapAdd
