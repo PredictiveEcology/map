@@ -224,7 +224,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     if (is(obj, "list")) { ## NOTE: is.list returns TRUE for data.frames ... BAD
       names(obj) <- layerName
     } else if (is(obj, "sf")) { ## NOTE: Aug 2022 workaround #7 by forcing use of sp objects
-      obj <- as_Spatial(obj)
+      obj <- as_Spatial(st_zm(obj))
     }
   }
 
