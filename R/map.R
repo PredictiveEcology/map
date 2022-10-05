@@ -754,8 +754,8 @@ spatialPoints <- function(map) {
 #' A vector of paths indicating the relative paths. Any layers
 #' that don't have leaflet tiles will return NA.
 leafletTiles <- function(map) {
-  x <- map@metadata$layerName
-  tiles <- map@metadata$leafletTiles
+  x <- map@metadata[["layerName"]]
+  tiles <- map@metadata[["leafletTiles"]]
   names(tiles) <- x
   tiles
 }

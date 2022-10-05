@@ -41,8 +41,8 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
     set(b, NULL, "rasterToMatch", rasterToMatchNumber)
   }
 
-  if (!is.null(dots$url))
-    set(b, NULL, "url", dots$url)
+  if (!is.null(dots[["url"]]))
+    set(b, NULL, "url", dots[["url"]])
 
   set(b, NULL, "layerName", layerName)
   set(b, NULL, "layerType", class(obj)[1])
@@ -54,7 +54,6 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
   set(b, NULL, "objectHash", objHash)
 
   if (isFALSE(leaflet)) {
-    #set(b, NULL, "leaflet", asPath(NA_character_)) ## already a Path coming in from mapAdd.default
     set(b, NULL, "leafletTiles", asPath(NA_character_))
   } else {
     set(b, NULL, "leaflet", leaflet)
@@ -113,6 +112,9 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
 
   if (!is.null(b[["leaflet"]]) && !is(b[["leaflet"]], "Path"))
     set(b, NULL, "leaflet", asPath(b[["leaflet"]]))
+
+  if (!is.null(b[["leafletTiles"]]) && !is(b[["leafletTiles"]], "Path"))
+    set(b, NULL, "leafletTiles", asPath(b[["leafletTiles"]]))
 
   if (!is.null(b[["targetFile"]]) && !is(b[["targetFile"]], "Path"))
     set(b, NULL, "targetFile", asPath(b[["targetFile"]]))
