@@ -1,4 +1,4 @@
-utils::globalVariables(c(".", ":=", ".I", ".N", ".SD", "envir", "layerName", "objectHash"))
+utils::globalVariables(c(".", ":=", "..pathCols1", "..pathCols2", ".I", ".N", ".SD", "envir", "layerName", "objectHash"))
 
 #' Append a spatial object to map
 #'
@@ -374,23 +374,6 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE)
   }
 
-  ## NOTE (2019-11-08): targetCRS needs to be character, not CRS class due to change in data.table
-  if (!is.null(dts[["targetCRS"]]) && !is(dts[["targetCRS"]], "character"))
-    dts[["targetCRS"]] <- as.character(dts[["targetCRS"]])
-
-  ## TODO: manual workarounds to deal with column typing for LandWeb
-  if (!is.null(dts[["targetFile"]]) && !is(dts[["targetFile"]], "Path"))
-    set(dts, NULL, "targetFile", asPath(dts[["targetFile"]]))
-
-  if (!is.null(dts[["destinationPath"]]) && !is(dts[["destinationPath"]], "Path"))
-    set(dts, NULL, "destinationPath", asPath(dts[["destinationPath"]]))
-
-  if (!is.null(dts[["tsf"]]) && !is(dts[["tsf"]], "Path"))
-    set(dts, NULL, "tsf", asPath(dts[["tsf"]]))
-
-  if (!is.null(dts[["vtm"]]) && !is(dts[["vtm"]], "Path"))
-    set(dts, NULL, "vtm", asPath(dts[["vtm"]]))
-
   ########################################################
   # make tiles, if it is leaflet
   ########################################################
@@ -437,6 +420,43 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ######################################
   # rbindlist new metadata with existing metadata
   ######################################
+
+  ## 2022-10-04: workaround path columns having same class() but sorted slightly differently, e.g.,
+  ## Browse[4]> class(map@metadata$leaflet) == class(dts$leaflet)
+  ## [1]  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE FALSE
+  ## Browse[4]> sort(class(map@metadata$leaflet)) == sort(class(dts$leaflet))
+  ## [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+
+  pathCols1 <- names(which(sapply(dts, is, class2 = "Path")))
+  pathCols2 <- names(which(sapply(map@metadata, is, class2 = "Path")))
+
+  classes1 <- lapply(dts[, ..pathCols1], class)
+  allClasses1Identical <- all(vapply(seq_along(classes1[-1]), function(i) {
+    identical(classes1[[i]], classes1[[i + 1]])
+  }, logical(1)))
+  if (isFALSE(allClasses1Identical)) {
+    warning("Some columns in dts corresponding to Paths do not have identical class.")
+  }
+  class1 <- classes1[[1]]
+
+  classes2 <- lapply(map@metadata[, ..pathCols2], class)
+  allClasses2Identical <- all(vapply(seq_along(classes2[-1]), function(i) {
+    identical(classes2[[i]], classes2[[i + 1]])
+  }, logical(1)))
+  if (isFALSE(allClasses2Identical)) {
+    warning("Some columns in map@metadata corresponding to Paths do not have identical class.")
+  }
+  class2 <- classes2[[1]]
+
+  if (!identical(class1, class2)) {
+    if (!is.null(dts[["destinationPath"]])) class(dts[["destinationPath"]]) <- class2
+    if (!is.null(dts[["filename2"]])) class(dts[["filename2"]]) <- class2
+    if (!is.null(dts[["leaflet"]])) class(dts[["leaflet"]]) <- class2
+    if (!is.null(dts[["targetFile"]])) class(dts[["targetFile"]]) <- class2
+    if (!is.null(dts[["tsf"]])) class(dts[["tsf"]]) <- class2
+    if (!is.null(dts[["vtm"]])) class(dts[["vtm"]]) <- class2
+  }
+
   map@metadata <- rbindlist(list(map@metadata, dts), use.names = TRUE, fill = TRUE)
 
   ######################################

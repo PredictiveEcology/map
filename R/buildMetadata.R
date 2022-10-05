@@ -57,9 +57,11 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
     set(b, NULL, "leaflet", leaflet)
     if (is(obj, "Raster")) {
       dig <- .robustDigest(obj)
-      tilePath <- ifelse(is.na(leaflet), asPath(NA_character_),
-                         asPath(file.path(leaflet, paste0("tiles_", layerName, "_", substr(dig, 1, 6))))) # nolint
-      set(b, NULL, "leafletTiles", tilePath)
+      defaultTilePath <- file.path(leaflet, paste0("tiles_", layerName, "_", substr(dig, 1, 6)))
+      tilePath <- ifelse(is.na(leaflet), NA_character_, defaultTilePath)
+      set(b, NULL, "leafletTiles", asPath(tilePath))
+    } else {
+      set(b, NULL, "leafletTiles", asPath(NA_character_))
     }
   }
 
@@ -94,7 +96,29 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
           tries <- tries + 1
           cta <- list(cta)
         }
-      })
+      }
+  )
+
+  ## NOTE (2019-11-08): targetCRS needs to be character, not CRS class due to change in data.table
+  if (!is.null(b[["targetCRS"]]) && !is(b[["targetCRS"]], "character"))
+    b[["targetCRS"]] <- as.character(b[["targetCRS"]])
+
+  ## TODO: manual workarounds to deal with column typing for LandWeb
+  ## -- even this is not enough, as Path class not consistently defined; see reproducible#263
+  if (!is.null(b[["destinationPath"]]) && !is(b[["destinationPath"]], "Path"))
+    set(b, NULL, "destinationPath", asPath(b[["destinationPath"]]))
+
+  if (!is.null(b[["leaflet"]]) && !is(b[["leaflet"]], "Path"))
+    set(b, NULL, "leaflet", asPath(b[["leaflet"]]))
+
+  if (!is.null(b[["targetFile"]]) && !is(b[["targetFile"]], "Path"))
+    set(b, NULL, "targetFile", asPath(b[["targetFile"]]))
+
+  if (!is.null(b[["tsf"]]) && !is(b[["tsf"]], "Path"))
+    set(b, NULL, "tsf", asPath(b[["tsf"]]))
+
+  if (!is.null(b[["vtm"]]) && !is(b[["vtm"]], "Path"))
+    set(b, NULL, "vtm", asPath(b[["vtm"]]))
 
   return(b)
 }

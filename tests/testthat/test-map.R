@@ -1,14 +1,16 @@
 test_that("mapAdd doesn't work", {
   testthat::skip_on_cran()
-  testthat::skip_on_travis()
-  testthat::skip_on_appveyor()
+  testthat::skip_on_ci()
 
-  testInitOut <- testInit(c("raster", "sp", "reproducible", "SpaDES.tools"))
+  ## TODO: `LargePatches` and `LeadingVegTypeByAgeClass` were moved to `LandWebUtils`,
+  ##  which is a reverse dependency of this package, so it can't be used here.
+
+  testInitOut <- testInit(c("raster", "sp", "reproducible", "SpaDES.tools")) ## , "LandWebUtils"
   on.exit({
     testOnExit(testInitOut)
   }, add = TRUE)
 
-  setwd(tempdir())
+  setwd(tmpdir)
   coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98, 59.9, 65.73, 63.58, 54.79, 59.9),
                       .Dim = c(5L, 2L))
   sr1 <- Polygon(coords)
@@ -37,8 +39,9 @@ test_that("mapAdd doesn't work", {
   tsf <- randomPolygons(rasTemplate, numTypes = 8) * 30
   crs(tsf) <- crs(ml)
   vtm <- randomPolygons(tsf, numTypes = 4)
+  vtm[] <- as.factor(vtm[])
   levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
-                            Factor = c("black spruce", "white spruce", "aspen", "fir"))
+                            VALUE = c("black spruce", "white spruce", "aspen", "fir"))
   crs(vtm) <- crs(ml)
   ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
                tsf = "tsf1.tif",
@@ -110,6 +113,4 @@ test_that("mapAdd doesn't work", {
   ml <- mapAddPostHocAnalysis(map = ml, functionName = "rbindlistAG",
                               postHocAnalysisGroups = "analysisGroup2",
                               postHocAnalyses = "all")
-
-
 })
