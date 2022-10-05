@@ -2,30 +2,35 @@ utils::globalVariables(c(".", ":=", ".I", ".N", ".SD", "envir", "layerName", "ob
 
 #' Append a spatial object to map
 #'
-#' If \code{isStudyArea = TRUE}, then several things will be triggered:
-#' \enumerate{ \item This layer will be added to metadata with \code{studyArea}
-#' set to \code{max(studyArea(map)) + 1}. \item update CRS slot to be the CRS of
-#' the study area. }
+#' If `isStudyArea = TRUE`, then several things will be triggered:
+#' 1. This layer will be added to metadata with `studyArea`
+#'   set to `max(studyArea(map)) + 1`.
+#' 2. update CRS slot to be the CRS of the study area.
 #'
-#' @param obj    Optional spatial object, currently \code{RasterLayer},
-#'  \code{SpatialPolygons}
+#' @param obj    Optional spatial object, currently `RasterLayer`, `SpatialPolygons`.
+#'
 #' @param map       Optional map object. If not provided, then one will be
-#'  created. If provided, then the present \code{object} or options passed to
-#'  prepInputs e.g., \code{url}, will be appended to this \code{map}
+#'  created. If provided, then the present `object` or options passed to
+#'  `prepInputs` e.g., `url`, will be appended to this `map`.
+#'
 #' @param layerName Required. A label for this map layer. This can be the same as
 #'  the object name.
-#' @param overwrite Logical. If \code{TRUE} and this \code{layerName} exists in
-#'  the \code{map}, then it will replace the existing object. Default is
-#'  \code{getOption("map.overwrite")}
+#'
+#' @param overwrite Logical. If `TRUE` and this `layerName` exists in
+#'  the `map`, then it will replace the existing object. Default is
+#'  `getOption("map.overwrite")`
+#'
 #' @param columnNameForLabels A character string indicating which column to use
-#'  for labels. This is currently only used if the object is a \code{SpatialPolygonsDataFrame}.
+#'  for labels. This is currently only used if the object is a `SpatialPolygonsDataFrame`.
+#'
 #' @param leaflet Logical or Character vector of path(s) to write tiles.
-#'  If \code{TRUE} or a character vector, then this layer will be added to a leaflet map.
-#'  For \code{RasterLayer} object, this will trigger a call to \code{gdal2tiles}, making tiles.
+#'  If `TRUE` or a character vector, then this layer will be added to a leaflet map.
+#'  For `RasterLayer` object, this will trigger a call to `gdal2tiles`, making tiles.
 #'  If path is not specified, it will be the current path.
-#'  The tile base file path will be \code{paste0(layerName, "_", rndstr(1, 6))}.
-#' @param isStudyArea Logical. If \code{TRUE}, this will be assigned the label,
-#'  "StudyArea", and will be passed into \code{prepInputs} for any future layers
+#'  The tile base file path will be `paste0(layerName, "_", rndstr(1, 6))`.
+#'
+#' @param isStudyArea Logical. If `TRUE`, this will be assigned the label,
+#'  "StudyArea", and will be passed into `prepInputs` for any future layers
 #'  added.
 #'
 #' @export
@@ -159,19 +164,19 @@ mapAdd <- function(obj, map, layerName,
   UseMethod("mapAdd")
 }
 
-#' @param ... Additonal arguments passed to \code{\link[reproducible]{postProcess}},
-#'            \code{\link[reproducible]{projectInputs}},
-#'            \code{\link[reproducible]{fixErrors}}, and
-#'            \code{\link[reproducible]{prepInputs}}.
+#' @param ... Additonal arguments passed to [reproducible::postProcess()],
+#'            [reproducible::projectInputs()],
+#'            [reproducible::fixErrors()], and
+#'            [reproducible::prepInputs()].
 #' @param isRasterToMatch  Logical indicating ... TODO: need description
 #' @param envir An optional environment. If supplied, then the obj
 #'        will not be placed "into" the maps slot, rather the environment label will
 #'        be placed into the maps slot. Upon re
-#' @param useCache Logical. If \code{TRUE}, then internal calls to \code{Cache} will
-#'        be used. Default is \code{TRUE}
-#' @param useParallel Logical. If \code{TRUE}, then if there is more than one
+#' @param useCache Logical. If `TRUE`, then internal calls to `Cache` will
+#'        be used. Default is `TRUE`
+#' @param useParallel Logical. If `TRUE`, then if there is more than one
 #'        calculation to do at any stage, it will create and use a parallel
-#'        cluster via \code{makeOptimalCluster}
+#'        cluster via `makeOptimalCluster`
 #'
 #' @export
 #' @importFrom data.table copy rbindlist set
@@ -442,7 +447,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   return(map)
 }
 
-#' Remove objects from a \code{map}
+#' Remove objects from a `map`
 #'
 #' @param map TODO: document this
 #'
@@ -500,7 +505,7 @@ if (!isGeneric("crs")) {
   })
 }
 
-#' Extract the crs of a \code{map}
+#' Extract the crs of a `map`
 #'
 #' @inheritParams raster::crs
 #'
@@ -520,7 +525,7 @@ setMethod("crs",
 
 #' Map class methods
 #'
-#' Tools for getting objects and metadata in and out of a \code{map} class.
+#' Tools for getting objects and metadata in and out of a `map` class.
 #'
 #' @param x TODO: document this
 #'
@@ -561,16 +566,16 @@ studyAreaName.data.table <- function(x, layer = 1) {
   }
 }
 
-#' Extract the studyArea(s) from a \code{map}
+#' Extract the studyArea(s) from a `map`
 #'
-#' If \code{layer} is not provided and there is more than one \code{studyArea},
+#' If `layer` is not provided and there is more than one `studyArea`,
 #' then this will extract the last one added.
 #'
 #' @param map TODO: document this
 #'
-#' @param sorted Logical. Should the numeric \code{layer} be referring to
-#'               geographic area of the \code{area} or the order that
-#'               the \code{studyArea} were placed into map object
+#' @param sorted Logical. Should the numeric `layer` be referring to
+#'               geographic area of the `area` or the order that
+#'               the `studyArea` were placed into map object
 #'
 #' @param layer TODO: document this
 #'
@@ -634,9 +639,9 @@ if (!isGeneric("rasterToMatch")) {
   })
 }
 
-#' Extract the rasterToMatch(s) from a \code{x}
+#' Extract the rasterToMatch(s) from a `x`
 #'
-#' If \code{layer} is not provided and there is more than one \code{studyArea},
+#' If `layer` is not provided and there is more than one `studyArea`,
 #' then this will extract the last one added.
 #'
 #' @param x TODO: describe this
@@ -662,7 +667,7 @@ setMethod("rasterToMatch", signature = "map",
             }
 })
 
-#' Extract rasters in the \code{map} object
+#' Extract rasters in the `map` object
 #'
 #' @export
 #' @family mapMethods
@@ -678,7 +683,7 @@ rasters.map <- function(map) {
   maps(map, "RasterLayer")
 }
 
-#' Extract \code{sp} class objects from the \code{map} obj
+#' Extract `sp` class objects from the `map` obj
 #' @export
 #' @family mapMethods
 #' @rdname maps
@@ -693,7 +698,7 @@ sp.map <- function(map) {
   maps(map, "Spatial")
 }
 
-#' Extract \code{sf} class objects from the \code{map} obj
+#' Extract `sf` class objects from the `map` obj
 #' @export
 #' @family mapMethods
 #' @rdname maps
@@ -720,9 +725,9 @@ spatialPoints <- function(map) {
   maps(map, "SpatialPoints")
 }
 
-#' Extract leaflet tile paths from a \code{map} obj
+#' Extract leaflet tile paths from a `map` obj
 #'
-#' @param map A \code{map} class obj
+#' @param map A `map` class obj
 #'
 #' @export
 #' @return
@@ -735,16 +740,16 @@ leafletTiles <- function(map) {
   tiles
 }
 
-#' Extract maps from a \code{map} object
+#' Extract maps from a `map` object
 #'
-#' This will extract all objects in or pointed to within the \code{map}.
+#' This will extract all objects in or pointed to within the `map`.
 #'
-#' @param map A \code{map} class obj
+#' @param map A `map` class obj
 #' @param class If supplied, this will be the class of objects returned. Default
-#'              is \code{NULL} which is "all", meaning all objects in the \code{map}
+#'              is `NULL` which is "all", meaning all objects in the `map`
 #'              object.
 #' @param layerName TODO: description needed
-#' @return A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
+#' @return A list of maps (i.e., sp, raster, or sf objects) of class `class`
 #'
 #' @export
 maps <- function(map, class = NULL, layerName = NULL) {
@@ -782,7 +787,7 @@ if (!isGeneric("area")) {
   })
 }
 
-#' Calculate area of (named) objects the \code{map} obj
+#' Calculate area of (named) objects the `map` obj
 #'
 #' @inheritParams raster::area
 #'

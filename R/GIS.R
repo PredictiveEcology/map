@@ -1,10 +1,10 @@
-#' \code{areaAndPolyValue}
+#' `areaAndPolyValue`
 #'
 #' Determine the area of each zone in a raster. TODO: improve description
 #'
-#' @param ras A \code{Raster*} object
+#' @param ras A `Raster*` object
 #'
-#' @return list containing: \code{sizeInHa}, the area; and \code{polyID}, the polygon ID.
+#' @return list containing: `sizeInHa`, the area; and `polyID`, the polygon ID.
 #'
 #' @export
 #' @importFrom sf st_area
@@ -17,7 +17,7 @@ areaAndPolyValue <- function(ras) {
 #' Polygonize with GDAL
 #'
 #' Based on
-#' \url{https://johnbaumgartner.wordpress.com/2012/07/26/getting-rasters-into-shape-from-r/}.
+#' <https://johnbaumgartner.wordpress.com/2012/07/26/getting-rasters-into-shape-from-r/>.
 #'
 #' @param x TODO: description needed
 #' @param outshape TODO: description needed
@@ -82,10 +82,10 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
   }
 }
 
-#' \code{.rasterToMemory}
+#' `.rasterToMemory`
 #'
-#' @param x A \code{Raster*} object
-#' @param ... Additional arguments passed to \code{raster}
+#' @param x A `Raster*` object
+#' @param ... Additional arguments passed to `raster`
 #'
 #' @export
 #' @importFrom raster getValues raster setValues
@@ -99,11 +99,11 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
 #' Fasterize with crop & spTransform first
 #'
 #' @param emptyRaster An empty raster with res, crs, extent all
-#'        correct for to pass to \code{fasterize}
-#' @param polygonToFasterize passed to \code{fasterize}, but it
+#'        correct for to pass to `fasterize`
+#' @param polygonToFasterize passed to `fasterize`, but it
 #'        will be cropped first if
-#'        \code{extent(emptyRaster) < extent(polygonToFasterize)}
-#' @param field passed to \code{fasterize}
+#'        `extent(emptyRaster) < extent(polygonToFasterize)`
+#' @param field passed to `fasterize`
 #'
 #' @export
 #' @importFrom fasterize fasterize

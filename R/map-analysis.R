@@ -3,7 +3,7 @@ utils::globalVariables(c("envir"))
 #' Generic analysis for map objects
 #'
 #' This is the workhorse function that runs any analyses described in
-#' \code{map@@analyses}. It uses hashing, and will not rerun any analysis that
+#' `map@@analyses`. It uses hashing, and will not rerun any analysis that
 #' already ran on identical inputs.
 #'
 #' @inheritParams mapAdd
@@ -12,23 +12,23 @@ utils::globalVariables(c("envir"))
 #'   inputs in the map object. See details.
 #' @param purgeAnalyses A character string indicating which analysis group
 #'   combination or part thereof (e.g., the name entered into the row under
-#'   \code{analysisGroup2} column of the \code{map@@metadata} or a \code{functionName}.
+#'   `analysisGroup2` column of the `map@@metadata` or a `functionName`.
 #'
 #' @details
 #' This function will do a sequence of things. First, it will run
-#' \code{expand.grid} on any columns whose names start with
-#' \code{analysisGroup}, creating a factorial set of analyses as described by
+#' `expand.grid` on any columns whose names start with
+#' `analysisGroup`, creating a factorial set of analyses as described by
 #' these columns. It will assess the combinations against the arguments used by
-#' the \code{functionName}. For any \code{analysisGroup} that does not provide
-#' the correct arguments for the \code{functionName}, these
-#' \code{analysisGroups} will be omitted for that particular function. For
+#' the `functionName`. For any `analysisGroup` that does not provide
+#' the correct arguments for the `functionName`, these
+#' `analysisGroups` will be omitted for that particular function. For
 #' efficiency, the function will then assess if any of these has already been
 #' run. For those that have not been run, it will then run the
-#' \code{functionName} on arguments that it finds in the \code{metadata} slot of
-#' the map obj, as well as any arguments passed in here in the \code{...}. In
+#' `functionName` on arguments that it finds in the `metadata` slot of
+#' the map obj, as well as any arguments passed in here in the `...`. In
 #' general, the arguments being passed in here should be fixed across all
 #' analyses, while any that vary by analysis should be entered into the metadata
-#' table at the time of adding the layer to the map, via \code{mapAdd}.
+#' table at the time of adding the layer to the map, via `mapAdd`.
 #'
 #' @importFrom data.table setDT
 #' @importFrom stats na.omit
@@ -147,14 +147,14 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
   map
 }
 
-#' Add an analysis to a \code{map} object
+#' Add an analysis to a `map` object
 #'
 #' TODO: description needed
 #'
-#' @param map A \code{map} object
+#' @param map A `map` object
 #' @param functionName The name of the analysis function to add
 #' @param useParallel Logical indicating whether to use multiple threads.
-#'                    Defaults to \code{getOption("map.useParallel", FALSE)}.
+#'                    Defaults to `getOption("map.useParallel", FALSE)`.
 #' @param ... Additional arguments TODO: description needed
 #'
 #' @export
@@ -194,21 +194,21 @@ mapAddAnalysis <- function(map, functionName,
 }
 
 
-#' Add a post hoc analysis function to a \code{map} object
+#' Add a post hoc analysis function to a `map` object
 #'
 #' @inheritParams mapAdd
 #'
 #' @param functionName A function that is designed for post hoc analysis of
-#'   map class objects, e.g., \code{rbindlistAG}
+#'   map class objects, e.g., `rbindlistAG`
 #'
 #' @param postHocAnalysisGroups Character string with one
-#'   \code{analysisGroups} i.e., \code{"analysisGroup1"} or \code{"analysisGroup2"}
+#'   `analysisGroups` i.e., `"analysisGroup1"` or `"analysisGroup2"`
 #'
-#' @param postHocAnalyses Character vector with \code{"all"},
+#' @param postHocAnalyses Character vector with `"all"`,
 #'   (which will do all analysisGroups) the default,
-#'   or 1 or more of the the \code{functionName}s that are in the analyses slot.
+#'   or 1 or more of the the `functionName`s that are in the analyses slot.
 #'
-#' @param ... Optional arguments to pass into \code{functionName}
+#' @param ... Optional arguments to pass into `functionName`
 #'
 #'
 #' @aliases mapAddPostHocAnalysis

@@ -15,7 +15,7 @@ mapAnalysis(
 \arguments{
 \item{map}{Optional map object. If not provided, then one will be
 created. If provided, then the present \code{object} or options passed to
-prepInputs e.g., \code{url}, will be appended to this \code{map}}
+\code{prepInputs} e.g., \code{url}, will be appended to this \code{map}.}
 
 \item{functionName}{A function name that will be run on combinations of
 inputs in the map object. See details.}
@@ -28,10 +28,10 @@ combination or part thereof (e.g., the name entered into the row under
 calculation to do at any stage, it will create and use a parallel
 cluster via \code{makeOptimalCluster}}
 
-\item{...}{Additonal arguments passed to \code{\link[reproducible]{postProcess}},
-\code{\link[reproducible]{projectInputs}},
-\code{\link[reproducible]{fixErrors}}, and
-\code{\link[reproducible]{prepInputs}}.}
+\item{...}{Additonal arguments passed to \code{\link[reproducible:postProcess]{reproducible::postProcess()}},
+\code{\link[reproducible:projectInputs]{reproducible::projectInputs()}},
+\code{\link[reproducible:fixErrors]{reproducible::fixErrors()}}, and
+\code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 }
 \description{
 This is the workhorse function that runs any analyses described in

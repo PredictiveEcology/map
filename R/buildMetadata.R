@@ -1,18 +1,18 @@
-#' Build \code{map} obj metadata table
+#' Build `map` obj metadata table
 #'
 #' @param metadata TODO: description needed
 #' @param isStudyArea TODO: description needed
-#' @param isRasterToMatch Logical. Is this(these) layer(s) the \code{rasterToMatch} layers.
-#'        If \code{TRUE}, then this layer can be accessed by \code{rasterToMatch(map)}
+#' @param isRasterToMatch Logical. Is this(these) layer(s) the `rasterToMatch` layers.
+#'        If `TRUE`, then this layer can be accessed by `rasterToMatch(map)`
 #' @param layerName TODO: description needed
 #' @param obj TODO: description needed
 #' @param columnNameForLabels TODO: description needed
 #' @param objHash TODO: description needed
 #' @param leaflet Logical or Character vector of path(s) to write tiles.
-#'  If \code{TRUE} or a character vector, then this layer will be added to a leaflet map.
-#'  For \code{RasterLayer} object, this will trigger a call to \code{gdal2tiles}, making tiles.
+#'  If `TRUE` or a character vector, then this layer will be added to a leaflet map.
+#'  For `RasterLayer` object, this will trigger a call to `gdal2tiles`, making tiles.
 #'  If path is not specified, it will be the current path.
-#'  The tile base file path will be \code{paste0(layerName, "_", rndstr(1, 6))}.
+#'  The tile base file path will be `paste0(layerName, "_", rndstr(1, 6))`.
 #' @param envir TODO: description needed
 #' @param ... Additional arguments.
 #'

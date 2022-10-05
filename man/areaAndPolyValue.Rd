@@ -7,7 +7,7 @@
 areaAndPolyValue(ras)
 }
 \arguments{
-\item{ras}{A \code{Raster*} object}
+\item{ras}{A \verb{Raster*} object}
 }
 \value{
 list containing: \code{sizeInHa}, the area; and \code{polyID}, the polygon ID.

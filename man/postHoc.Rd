@@ -16,7 +16,7 @@ mapAddPostHocAnalysis(
 \arguments{
 \item{map}{Optional map object. If not provided, then one will be
 created. If provided, then the present \code{object} or options passed to
-prepInputs e.g., \code{url}, will be appended to this \code{map}}
+\code{prepInputs} e.g., \code{url}, will be appended to this \code{map}.}
 
 \item{functionName}{A function that is designed for post hoc analysis of
 map class objects, e.g., \code{rbindlistAG}}

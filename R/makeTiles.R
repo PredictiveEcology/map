@@ -1,18 +1,18 @@
 #' @keywords internal
 .isWindows <- getFromNamespace("isWindows", "reproducible")
 
-#' Make tiles (pyramids) using \code{gdal2tiles}
+#' Make tiles (pyramids) using `gdal2tiles`
 #'
 #' NOTE: by default, \pkg{tiler} is configured to use python 2, which may not be available on
 #' recent Linux distributions (e.g., Ubuntu 20.04).
 #' Thus, the user should explicitly set tiler options to find the correct python path on their
-#' system, using e.g., \code{tiler::tiler_options(python = Sys.which("python3"))}.
+#' system, using e.g., `tiler::tiler_options(python = Sys.which("python3"))`.
 #'
 #' @param tilePath A director to write tiles
 #' @param obj A raster objects with or without file-backing
-#' @param overwrite Logical. If \code{FALSE}, and the director exists,
+#' @param overwrite Logical. If `FALSE`, and the director exists,
 #'   then it will not overwrite any files.
-#' @param ... Passed to \code{reproducible::projectInputs} e.g., \code{useGDAL}
+#' @param ... Passed to `reproducible::projectInputs` e.g., `useGDAL`
 #'
 #' @export
 #' @importFrom raster compareCRS filename projectRaster writeRaster
