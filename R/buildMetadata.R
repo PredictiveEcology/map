@@ -54,7 +54,7 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
   set(b, NULL, "objectHash", objHash)
 
   if (isFALSE(leaflet)) {
-    set(b, NULL, "leaflet", asPath(NA_character_))
+    #set(b, NULL, "leaflet", asPath(NA_character_)) ## already a Path coming in from mapAdd.default
     set(b, NULL, "leafletTiles", asPath(NA_character_))
   } else {
     set(b, NULL, "leaflet", leaflet)
