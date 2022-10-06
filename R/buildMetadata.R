@@ -101,29 +101,43 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
       }
   )
 
+  b <- .enforceColumnTypes(b)
+
+  return(b)
+}
+
+#' Ensure columns in metadata table are a particular type (class)
+#'
+#' @param metadata
+#'
+#' @return metadata `data.table` with corrected column types
+#'
+#' @keywords internal
+#'
+.enforceColumnTypes <- function(metadata) {
   ## NOTE (2019-11-08): targetCRS needs to be character, not CRS class due to change in data.table
-  if (!is.null(b[["targetCRS"]]) && !is(b[["targetCRS"]], "character"))
-    b[["targetCRS"]] <- as.character(b[["targetCRS"]])
+  if (!is.null(metadata[["targetCRS"]]) && !is(metadata[["targetCRS"]], "character"))
+    metadata[["targetCRS"]] <- as.character(metadata[["targetCRS"]])
 
   ## TODO: manual workarounds to deal with column typing for LandWeb
   ## -- even this is not enough, as Path class not consistently defined; see reproducible#263
-  if (!is.null(b[["destinationPath"]]) && !is(b[["destinationPath"]], "Path"))
-    set(b, NULL, "destinationPath", asPath(b[["destinationPath"]]))
+  if (!is.null(metadata[["destinationPath"]]) && !is(metadata[["destinationPath"]], "Path"))
+    set(metadata, NULL, "destinationPath", asPath(metadata[["destinationPath"]]))
 
-  if (!is.null(b[["leaflet"]]) && !is(b[["leaflet"]], "Path"))
-    set(b, NULL, "leaflet", asPath(b[["leaflet"]]))
+  if (!is.null(metadata[["leaflet"]]) && !is(metadata[["leaflet"]], "Path"))
+    set(metadata, NULL, "leaflet", asPath(metadata[["leaflet"]]))
 
-  if (!is.null(b[["leafletTiles"]]) && !is(b[["leafletTiles"]], "Path"))
-    set(b, NULL, "leafletTiles", asPath(b[["leafletTiles"]]))
+  if (!is.null(metadata[["leafletTiles"]]) && !is(metadata[["leafletTiles"]], "Path"))
+    set(metadata, NULL, "leafletTiles", asPath(metadata[["leafletTiles"]]))
 
-  if (!is.null(b[["targetFile"]]) && !is(b[["targetFile"]], "Path"))
-    set(b, NULL, "targetFile", asPath(b[["targetFile"]]))
+  if (!is.null(metadata[["targetFile"]]) && !is(metadata[["targetFile"]], "Path"))
+    set(metadata, NULL, "targetFile", asPath(metadata[["targetFile"]]))
 
-  if (!is.null(b[["tsf"]]) && !is(b[["tsf"]], "Path"))
-    set(b, NULL, "tsf", asPath(b[["tsf"]]))
+  if (!is.null(metadata[["tsf"]]) && !is(metadata[["tsf"]], "Path"))
+    set(metadata, NULL, "tsf", asPath(metadata[["tsf"]]))
 
-  if (!is.null(b[["vtm"]]) && !is(b[["vtm"]], "Path"))
-    set(b, NULL, "vtm", asPath(b[["vtm"]]))
+  if (!is.null(metadata[["vtm"]]) && !is(metadata[["vtm"]], "Path"))
+    set(metadata, NULL, "vtm", asPath(metadata[["vtm"]]))
 
-  return(b)
+  return(metadata)
 }

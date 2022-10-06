@@ -196,6 +196,9 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            isRasterToMatch = FALSE, envir = NULL, useCache = TRUE,
                            useParallel = getOption("map.useParallel", FALSE), ...) {
   dots <- list(...)
+
+  map <- .enforceColumnTypes(map) ## update previously-created map objects
+
   if (is.null(layerName))
     stop("layerName is not optional. Please specify.")
 
