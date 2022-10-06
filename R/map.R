@@ -200,7 +200,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   map@metadata <- .enforceColumnTypes(map@metadata) ## update previously-created map objects
 
   if (is.null(layerName))
-    stop("layerName is not optional. Please specify.")
+    stop("layerName is required and cannot be NULL")
 
   if (is.logical(leaflet))
     leaflet <- asPath(ifelse(leaflet, getwd(), NA_character_))
