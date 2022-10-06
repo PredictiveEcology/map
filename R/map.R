@@ -330,7 +330,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                               c(x = "obj", columnNameForLabels = "columnNameForLabels"),
                               environment(), dots = dots)
   obj <- MapOrDoCall(addColumnNameForLabels, multiple = args1$argsMulti,
-                     single = args1$argsSingle, useCache = useCache)
+                     single = args1$argsSingle, useCache = FALSE, cl = NULL)
 
   ####################################################
   # Assign obj to map@.xData
