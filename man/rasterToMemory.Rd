@@ -7,7 +7,7 @@
 .rasterToMemory(x, ...)
 }
 \arguments{
-\item{x}{A \code{Raster*} object}
+\item{x}{A \verb{Raster*} object}
 
 \item{...}{Additional arguments passed to \code{raster}}
 }

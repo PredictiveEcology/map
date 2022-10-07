@@ -17,8 +17,5 @@ then it will not overwrite any files.}
 \item{...}{Passed to \code{reproducible::projectInputs} e.g., \code{useGDAL}}
 }
 \description{
-NOTE: by default, \pkg{tiler} is configured to use python 2, which may not be available on
-recent Linux distributions (e.g., Ubuntu 20.04).
-Thus, the user should explicitly set tiler options to find the correct python path on their
-system, using e.g., \code{tiler::tiler_options(python = Sys.which("python3"))}.
+Make tiles (pyramids) using \code{gdal2tiles}
 }

@@ -22,5 +22,5 @@ Defaults to \code{getOption("map.useParallel", FALSE)}.}
 \item{...}{Additional arguments TODO: description needed}
 }
 \description{
-TODO: description neeeded
+TODO: description needed
 }

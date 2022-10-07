@@ -1,31 +1,36 @@
-utils::globalVariables(c(".", ":=", ".I", ".N", ".SD", "envir", "layerName", "objectHash"))
+utils::globalVariables(c(".", ":=", "..pathCols1", "..pathCols2", ".I", ".N", ".SD", "envir", "layerName", "objectHash"))
 
 #' Append a spatial object to map
 #'
-#' If \code{isStudyArea = TRUE}, then several things will be triggered:
-#' \enumerate{ \item This layer will be added to metadata with \code{studyArea}
-#' set to \code{max(studyArea(map)) + 1}. \item update CRS slot to be the CRS of
-#' the study area. }
+#' If `isStudyArea = TRUE`, then several things will be triggered:
+#' 1. This layer will be added to metadata with `studyArea`
+#'   set to `max(studyArea(map)) + 1`.
+#' 2. update CRS slot to be the CRS of the study area.
 #'
-#' @param obj    Optional spatial object, currently \code{RasterLayer},
-#'  \code{SpatialPolygons}
+#' @param obj    Optional spatial object, currently `RasterLayer`, `SpatialPolygons`.
+#'
 #' @param map       Optional map object. If not provided, then one will be
-#'  created. If provided, then the present \code{object} or options passed to
-#'  prepInputs e.g., \code{url}, will be appended to this \code{map}
+#'  created. If provided, then the present `object` or options passed to
+#'  `prepInputs` e.g., `url`, will be appended to this `map`.
+#'
 #' @param layerName Required. A label for this map layer. This can be the same as
 #'  the object name.
-#' @param overwrite Logical. If \code{TRUE} and this \code{layerName} exists in
-#'  the \code{map}, then it will replace the existing object. Default is
-#'  \code{getOption("map.overwrite")}
+#'
+#' @param overwrite Logical. If `TRUE` and this `layerName` exists in
+#'  the `map`, then it will replace the existing object. Default is
+#'  `getOption("map.overwrite")`
+#'
 #' @param columnNameForLabels A character string indicating which column to use
-#'  for labels. This is currently only used if the object is a \code{SpatialPolygonsDataFrame}.
+#'  for labels. This is currently only used if the object is a `SpatialPolygonsDataFrame`.
+#'
 #' @param leaflet Logical or Character vector of path(s) to write tiles.
-#'  If \code{TRUE} or a character vector, then this layer will be added to a leaflet map.
-#'  For \code{RasterLayer} object, this will trigger a call to \code{gdal2tiles}, making tiles.
+#'  If `TRUE` or a character vector, then this layer will be added to a leaflet map.
+#'  For `RasterLayer` object, this will trigger a call to `gdal2tiles`, making tiles.
 #'  If path is not specified, it will be the current path.
-#'  The tile base file path will be \code{paste0(layerName, "_", rndstr(1, 6))}.
-#' @param isStudyArea Logical. If \code{TRUE}, this will be assigned the label,
-#'  "StudyArea", and will be passed into \code{prepInputs} for any future layers
+#'  The tile base file path will be `paste0(layerName, "_", rndstr(1, 6))`.
+#'
+#' @param isStudyArea Logical. If `TRUE`, this will be assigned the label,
+#'  "StudyArea", and will be passed into `prepInputs` for any future layers
 #'  added.
 #'
 #' @export
@@ -159,19 +164,19 @@ mapAdd <- function(obj, map, layerName,
   UseMethod("mapAdd")
 }
 
-#' @param ... Additonal arguments passed to \code{\link[reproducible]{postProcess}},
-#'            \code{\link[reproducible]{projectInputs}},
-#'            \code{\link[reproducible]{fixErrors}}, and
-#'            \code{\link[reproducible]{prepInputs}}.
+#' @param ... Additonal arguments passed to [reproducible::postProcess()],
+#'            [reproducible::projectInputs()],
+#'            [reproducible::fixErrors()], and
+#'            [reproducible::prepInputs()].
 #' @param isRasterToMatch  Logical indicating ... TODO: need description
 #' @param envir An optional environment. If supplied, then the obj
 #'        will not be placed "into" the maps slot, rather the environment label will
 #'        be placed into the maps slot. Upon re
-#' @param useCache Logical. If \code{TRUE}, then internal calls to \code{Cache} will
-#'        be used. Default is \code{TRUE}
-#' @param useParallel Logical. If \code{TRUE}, then if there is more than one
+#' @param useCache Logical. If `TRUE`, then internal calls to `Cache` will
+#'        be used. Default is `TRUE`
+#' @param useParallel Logical. If `TRUE`, then if there is more than one
 #'        calculation to do at any stage, it will create and use a parallel
-#'        cluster via \code{makeOptimalCluster}
+#'        cluster via `makeOptimalCluster`
 #'
 #' @export
 #' @importFrom data.table copy rbindlist set
@@ -181,6 +186,7 @@ mapAdd <- function(obj, map, layerName,
 #' @importFrom raster crs ncell projectRaster writeRaster
 #' @importFrom reproducible .robustDigest asPath Cache compareNA cropInputs fixErrors
 #' @importFrom reproducible prepInputs preProcess projectInputs postProcess writeOutputs
+#' @importFrom sf as_Spatial st_zm
 #' @importFrom sp CRS
 #' @importFrom utils capture.output getS3method
 #' @rdname mapAdd
@@ -190,8 +196,11 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            isRasterToMatch = FALSE, envir = NULL, useCache = TRUE,
                            useParallel = getOption("map.useParallel", FALSE), ...) {
   dots <- list(...)
+
+  map@metadata <- .enforceColumnTypes(map@metadata) ## update previously-created map objects
+
   if (is.null(layerName))
-    stop("layerName is not optional. Please specify.")
+    stop("layerName is required and cannot be NULL")
 
   if (is.logical(leaflet))
     leaflet <- asPath(ifelse(leaflet, getwd(), NA_character_))
@@ -201,7 +210,6 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   # Get obj, if missing, via prepInputs url, or targetFile
   ###########################################
   if (is.null(obj)) {    # with no obj, we get it first, then pass to mapAdd
-    dots <- list(...)
     # Don't run postProcess because that will happen in next mapAdd when obj is
     #   in hand
     args1 <- identifyVectorArgs(fn = list(Cache, preProcess), ls(), environment(), dots)
@@ -214,14 +222,18 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
     message("  Running prepInputs for:\n",
             paste(capture.output(data.table(file = layerName)), collapse = "\n"))
-    cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
+    cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel, outfile = dots$outfile)
     on.exit(try(stopCluster(cl), silent = TRUE))
 
     obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti, cl = cl,
                        single = args1$argsSingle, useCache = useCache)
-    tryCatch(stopCluster(cl), error = function(x) invisible())
-    if (is(obj, "list")) # note is.list returns TRUE for data.frames ... BAD
+
+    tryCatch({ stopCluster(cl); rm(cl) }, error = function(x) invisible())
+    if (is(obj, "list")) { ## NOTE: is.list returns TRUE for data.frames ... BAD
       names(obj) <- layerName
+    } else if (is(obj, "sf")) { ## NOTE: Aug 2022 workaround #7 by forcing use of sp objects
+      obj <- as_Spatial(st_zm(obj))
+    }
   }
 
   layerNameExistsInMetadata <- if (isTRUE(layerName %in% ls(map@.xData))) {
@@ -286,12 +298,12 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       maxNumClus <- min(maxNumClus, getOption("map.maxNumCores"))
 
       message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
-      cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
+      cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel, outfile = dots$outfile)
       on.exit(try(stopCluster(cl), silent = TRUE))
 
       obj <- MapOrDoCall(postProcess, multiple = args1$argsMulti, cl = cl,
                          single = args1$argsSingle, useCache = useCache)
-      try(stopCluster(cl), silent = TRUE)
+      tryCatch({ stopCluster(cl); rm(cl) }, error = function(x) invisible())
     }
   }
 
@@ -318,7 +330,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                               c(x = "obj", columnNameForLabels = "columnNameForLabels"),
                               environment(), dots = dots)
   obj <- MapOrDoCall(addColumnNameForLabels, multiple = args1$argsMulti,
-                     single = args1$argsSingle, useCache = useCache)
+                     single = args1$argsSingle, useCache = FALSE, cl = NULL)
 
   ####################################################
   # Assign obj to map@.xData
@@ -365,34 +377,17 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE)
   }
 
-  ## NOTE (2019-11-08): targetCRS needs to be character, not CRS class due to change in data.table
-  if (!is.null(dts[["targetCRS"]]) && !is(dts[["targetCRS"]], "character"))
-    dts[["targetCRS"]] <- as.character(dts[["targetCRS"]])
-
-  ## TODO: manual workarounds to deal with column typing for LandWeb
-  if (!is.null(dts[["targetFile"]]) && !is(dts[["targetFile"]], "Path"))
-    set(dts, NULL, "targetFile", asPath(dts[["targetFile"]]))
-
-  if (!is.null(dts[["destinationPath"]]) && !is(dts[["destinationPath"]], "Path"))
-    set(dts, NULL, "destinationPath", asPath(dts[["destinationPath"]]))
-
-  if (!is.null(dts[["tsf"]]) && !is(dts[["tsf"]], "Path"))
-    set(dts, NULL, "tsf", asPath(dts[["tsf"]]))
-
-  if (!is.null(dts[["vtm"]]) && !is(dts[["vtm"]], "Path"))
-    set(dts, NULL, "vtm", asPath(dts[["vtm"]]))
-
   ########################################################
   # make tiles, if it is leaflet
   ########################################################
   if (any(!is.na(leaflet)) && !is.null(dts[["leafletTiles"]])) {
-    MBadjustment <- 4000 # some approx, empirically derived number. Likely only good in some cases. # nolint
+    MBadjustment <- 4000 ## some approx, empirically derived number. Likely only good in some cases.
     MBper <- if (is(obj, "RasterLayer")) { # nolint
       ncell(obj) / MBadjustment
     } else if (tryCatch(is(obj[[1]], "RasterLayer"), error = function(x) FALSE)) {
       ncell(obj[[1]]) / MBadjustment
     } else {
-      1 # i.e., default to detectClusters()
+      4600 ## seems to be approx mem use for a prov
     }
     if (isTRUE(all(dir.exists(dts[["leafletTiles"]])))) {
       useParallel <- FALSE
@@ -403,14 +398,15 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     }
 
     cl <- makeOptimalCluster(useParallel = useParallel, MBper = MBper,
-                             maxNumClusters = min(length(obj)), getOption("map.maxNumCores"))
+                             maxNumClusters = min(length(obj), getOption("map.maxNumCores")),
+                             outfile = dots$outfile)
     on.exit(try(stopCluster(cl), silent = TRUE))
     tilePath <- dts[["leafletTiles"]]
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
     out <- MapOrDoCall(makeTiles, multiple = args1$argsMulti,
                        single = args1$argsSingle, useCache = FALSE, cl = cl)
     # If the rasters are identical, then there may be errors
-    tryCatch(stopCluster(cl), error = function(x) invisible())
+    tryCatch({ stopCluster(cl); rm(cl) }, error = function(x) invisible())
   }
 
   ######################################
@@ -428,6 +424,43 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ######################################
   # rbindlist new metadata with existing metadata
   ######################################
+
+  ## 2022-10-04: workaround path columns having same class() but sorted slightly differently, e.g.,
+  ## Browse[4]> class(map@metadata$leaflet) == class(dts$leaflet)
+  ## [1]  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE FALSE
+  ## Browse[4]> sort(class(map@metadata$leaflet)) == sort(class(dts$leaflet))
+  ## [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+
+  pathCols1 <- names(which(sapply(dts, is, class2 = "Path")))
+  pathCols2 <- names(which(sapply(map@metadata, is, class2 = "Path")))
+
+  classes1 <- lapply(dts[, ..pathCols1], class)
+  allClasses1Identical <- all(vapply(seq_along(classes1[-1]), function(i) {
+    identical(classes1[[i]], classes1[[i + 1]])
+  }, logical(1)))
+  if (isFALSE(allClasses1Identical)) {
+    warning("Some columns in dts corresponding to Paths do not have identical class.")
+  }
+  class1 <- classes1[[1]]
+
+  classes2 <- lapply(map@metadata[, ..pathCols2], class)
+  allClasses2Identical <- all(vapply(seq_along(classes2[-1]), function(i) {
+    identical(classes2[[i]], classes2[[i + 1]])
+  }, logical(1)))
+  if (isFALSE(allClasses2Identical)) {
+    warning("Some columns in map@metadata corresponding to Paths do not have identical class.")
+  }
+  class2 <- classes2[[1]]
+
+  if (!identical(class1, class2)) {
+    if (!is.null(dts[["destinationPath"]])) class(dts[["destinationPath"]]) <- class2
+    if (!is.null(dts[["filename2"]])) class(dts[["filename2"]]) <- class2
+    if (!is.null(dts[["leaflet"]])) class(dts[["leaflet"]]) <- class2
+    if (!is.null(dts[["targetFile"]])) class(dts[["targetFile"]]) <- class2
+    if (!is.null(dts[["tsf"]])) class(dts[["tsf"]]) <- class2
+    if (!is.null(dts[["vtm"]])) class(dts[["vtm"]]) <- class2
+  }
+
   map@metadata <- rbindlist(list(map@metadata, dts), use.names = TRUE, fill = TRUE)
 
   ######################################
@@ -438,7 +471,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   return(map)
 }
 
-#' Remove objects from a \code{map}
+#' Remove objects from a `map`
 #'
 #' @param map TODO: document this
 #'
@@ -496,7 +529,7 @@ if (!isGeneric("crs")) {
   })
 }
 
-#' Extract the crs of a \code{map}
+#' Extract the crs of a `map`
 #'
 #' @inheritParams raster::crs
 #'
@@ -516,7 +549,7 @@ setMethod("crs",
 
 #' Map class methods
 #'
-#' Tools for getting objects and metadata in and out of a \code{map} class.
+#' Tools for getting objects and metadata in and out of a `map` class.
 #'
 #' @param x TODO: document this
 #'
@@ -557,16 +590,16 @@ studyAreaName.data.table <- function(x, layer = 1) {
   }
 }
 
-#' Extract the studyArea(s) from a \code{map}
+#' Extract the studyArea(s) from a `map`
 #'
-#' If \code{layer} is not provided and there is more than one \code{studyArea},
+#' If `layer` is not provided and there is more than one `studyArea`,
 #' then this will extract the last one added.
 #'
 #' @param map TODO: document this
 #'
-#' @param sorted Logical. Should the numeric \code{layer} be referring to
-#'               geographic area of the \code{area} or the order that
-#'               the \code{studyArea} were placed into map object
+#' @param sorted Logical. Should the numeric `layer` be referring to
+#'               geographic area of the `area` or the order that
+#'               the `studyArea` were placed into map object
 #'
 #' @param layer TODO: document this
 #'
@@ -630,9 +663,9 @@ if (!isGeneric("rasterToMatch")) {
   })
 }
 
-#' Extract the rasterToMatch(s) from a \code{x}
+#' Extract the rasterToMatch(s) from a `x`
 #'
-#' If \code{layer} is not provided and there is more than one \code{studyArea},
+#' If `layer` is not provided and there is more than one `studyArea`,
 #' then this will extract the last one added.
 #'
 #' @param x TODO: describe this
@@ -658,7 +691,7 @@ setMethod("rasterToMatch", signature = "map",
             }
 })
 
-#' Extract rasters in the \code{map} object
+#' Extract rasters in the `map` object
 #'
 #' @export
 #' @family mapMethods
@@ -674,7 +707,7 @@ rasters.map <- function(map) {
   maps(map, "RasterLayer")
 }
 
-#' Extract \code{sp} class objects from the \code{map} obj
+#' Extract `sp` class objects from the `map` obj
 #' @export
 #' @family mapMethods
 #' @rdname maps
@@ -689,7 +722,7 @@ sp.map <- function(map) {
   maps(map, "Spatial")
 }
 
-#' Extract \code{sf} class objects from the \code{map} obj
+#' Extract `sf` class objects from the `map` obj
 #' @export
 #' @family mapMethods
 #' @rdname maps
@@ -716,31 +749,31 @@ spatialPoints <- function(map) {
   maps(map, "SpatialPoints")
 }
 
-#' Extract leaflet tile paths from a \code{map} obj
+#' Extract leaflet tile paths from a `map` obj
 #'
-#' @param map A \code{map} class obj
+#' @param map A `map` class obj
 #'
 #' @export
 #' @return
 #' A vector of paths indicating the relative paths. Any layers
 #' that don't have leaflet tiles will return NA.
 leafletTiles <- function(map) {
-  x <- map@metadata$layerName
-  tiles <- map@metadata$leafletTiles
+  x <- map@metadata[["layerName"]]
+  tiles <- map@metadata[["leafletTiles"]]
   names(tiles) <- x
   tiles
 }
 
-#' Extract maps from a \code{map} object
+#' Extract maps from a `map` object
 #'
-#' This will extract all objects in or pointed to within the \code{map}.
+#' This will extract all objects in or pointed to within the `map`.
 #'
-#' @param map A \code{map} class obj
+#' @param map A `map` class obj
 #' @param class If supplied, this will be the class of objects returned. Default
-#'              is \code{NULL} which is "all", meaning all objects in the \code{map}
+#'              is `NULL` which is "all", meaning all objects in the `map`
 #'              object.
 #' @param layerName TODO: description needed
-#' @return A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
+#' @return A list of maps (i.e., sp, raster, or sf objects) of class `class`
 #'
 #' @export
 maps <- function(map, class = NULL, layerName = NULL) {
@@ -778,7 +811,7 @@ if (!isGeneric("area")) {
   })
 }
 
-#' Calculate area of (named) objects the \code{map} obj
+#' Calculate area of (named) objects the `map` obj
 #'
 #' @inheritParams raster::area
 #'
@@ -844,8 +877,13 @@ metadata.map <- function(x) {
 }
 
 addColumnNameForLabels <- function(x, columnNameForLabels) {
-  if (is(x, "SpatialPolygonsDataFrame")) {
-    x$shinyLabel <- x[[columnNameForLabels]]
+  if (is(x, "list")) {
+    lapply(x, addColumnNameForLabels, columnNameForLabels = columnNameForLabels)
+  } else if (is(x, "sf")) {
+    x[["shinyLabel"]] <- x[[columnNameForLabels]]
+  } else if (is(x, "SpatialPolygonsDataFrame")) {
+    x[["shinyLabel"]] <- x[[columnNameForLabels]]
   }
-  x
+
+  return(x)
 }

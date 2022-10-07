@@ -23,12 +23,11 @@ mapAdd(obj, map, layerName, overwrite = getOption("map.overwrite", FALSE), ...)
 )
 }
 \arguments{
-\item{obj}{Optional spatial object, currently \code{RasterLayer},
-\code{SpatialPolygons}}
+\item{obj}{Optional spatial object, currently \code{RasterLayer}, \code{SpatialPolygons}.}
 
 \item{map}{Optional map object. If not provided, then one will be
 created. If provided, then the present \code{object} or options passed to
-prepInputs e.g., \code{url}, will be appended to this \code{map}}
+\code{prepInputs} e.g., \code{url}, will be appended to this \code{map}.}
 
 \item{layerName}{Required. A label for this map layer. This can be the same as
 the object name.}
@@ -37,10 +36,10 @@ the object name.}
 the \code{map}, then it will replace the existing object. Default is
 \code{getOption("map.overwrite")}}
 
-\item{...}{Additonal arguments passed to \code{\link[reproducible]{postProcess}},
-\code{\link[reproducible]{projectInputs}},
-\code{\link[reproducible]{fixErrors}}, and
-\code{\link[reproducible]{prepInputs}}.}
+\item{...}{Additonal arguments passed to \code{\link[reproducible:postProcess]{reproducible::postProcess()}},
+\code{\link[reproducible:projectInputs]{reproducible::projectInputs()}},
+\code{\link[reproducible:fixErrors]{reproducible::fixErrors()}}, and
+\code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
 \item{columnNameForLabels}{A character string indicating which column to use
 for labels. This is currently only used if the object is a \code{SpatialPolygonsDataFrame}.}
@@ -70,9 +69,11 @@ cluster via \code{makeOptimalCluster}}
 }
 \description{
 If \code{isStudyArea = TRUE}, then several things will be triggered:
-\enumerate{ \item This layer will be added to metadata with \code{studyArea}
-set to \code{max(studyArea(map)) + 1}. \item update CRS slot to be the CRS of
-the study area. }
+\enumerate{
+\item This layer will be added to metadata with \code{studyArea}
+set to \code{max(studyArea(map)) + 1}.
+\item update CRS slot to be the CRS of the study area.
+}
 }
 \examples{
 \dontrun{

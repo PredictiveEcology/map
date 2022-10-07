@@ -7,29 +7,27 @@ Description: The map class is a collection of map objects ('sp', 'raster', 'sf')
 URL: 
     http://map.predictiveecology.org,
     https://github.com/PredictiveEcology/map
-Date: 2020-09-10
-Version: 0.0.3
+Date: 2022-10-07
+Version: 0.0.4
 Authors@R: c(
-    person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
-    role = c("aut", "cre"), comment=c(ORCID = "0000-0002-6914-8316")),
-    person("Alex M", "Chubaty", email = "alex.chubaty@gmail.com",
-    role = c("aut"), comment = c(ORCID = "0000-0001-7146-8135")),
+    person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
+           role = c("aut", "cre"), comment=c(ORCID = "0000-0002-6914-8316")),
+    person("Alex M", "Chubaty", email = "achubaty@for-cast.ca",
+           role = c("aut"), comment = c(ORCID = "0000-0001-7146-8135")),
     person("Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources Canada",
-    role = "cph")
+           role = "cph")
     )
 Depends:
-    R (>= 3.6)
+    R (>= 4.0)
 Imports:
     backports,
     data.table (>= 1.10.4),
     fastdigest,
     fasterize,
-    gdalUtils,
-    magrittr,
     methods,
-    pemisc,
+    pemisc (>= 0.0.4.9001),
     quickPlot,
-    reproducible (>= 1.2.0.9010),
+    reproducible (>= 1.2.1),
     raster (>= 2.8.4),
     rgeos,
     sf,
@@ -39,12 +37,14 @@ Imports:
     utils
 Suggests:
     covr,
+    gdalUtils,
     knitr,
     rgdal,
     rmarkdown,
     SpaDES.tools,
     testthat
 Remotes:
+    gearslaboratory/gdalUtils,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
@@ -53,7 +53,6 @@ License: GPL-3
 VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/map/issues
 ByteCompile: yes
-RoxygenNote: 7.1.1
 Collate: 
     'GIS.R'
     'buildMetadata.R'
@@ -64,3 +63,5 @@ Collate:
     'map.R'
     'rbindlistAG.R'
     'zzz.R'
+RoxygenNote: 7.2.1
+Roxygen: list(markdown = TRUE)

@@ -15,7 +15,7 @@ mapAnalysis(
 \arguments{
 \item{map}{Optional map object. If not provided, then one will be
 created. If provided, then the present \code{object} or options passed to
-prepInputs e.g., \code{url}, will be appended to this \code{map}}
+\code{prepInputs} e.g., \code{url}, will be appended to this \code{map}.}
 
 \item{functionName}{A function name that will be run on combinations of
 inputs in the map object. See details.}
@@ -28,10 +28,10 @@ combination or part thereof (e.g., the name entered into the row under
 calculation to do at any stage, it will create and use a parallel
 cluster via \code{makeOptimalCluster}}
 
-\item{...}{Additonal arguments passed to \code{\link[reproducible]{postProcess}},
-\code{\link[reproducible]{projectInputs}},
-\code{\link[reproducible]{fixErrors}}, and
-\code{\link[reproducible]{prepInputs}}.}
+\item{...}{Additonal arguments passed to \code{\link[reproducible:postProcess]{reproducible::postProcess()}},
+\code{\link[reproducible:projectInputs]{reproducible::projectInputs()}},
+\code{\link[reproducible:fixErrors]{reproducible::fixErrors()}}, and
+\code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 }
 \description{
 This is the workhorse function that runs any analyses described in
@@ -39,18 +39,17 @@ This is the workhorse function that runs any analyses described in
 already ran on identical inputs.
 }
 \details{
-This function will do a sequence of things. First, it will run
-\code{expand.grid} on any columns whose names start with
-\code{analysisGroup}, creating a factorial set of analyses as described by
-these columns. It will assess the combinations against the arguments used by
-the \code{functionName}. For any \code{analysisGroup} that does not provide
-the correct arguments for the \code{functionName}, these
-\code{analysisGroups} will be omitted for that particular function. For
-efficiency, the function will then assess if any of these has already been
-run. For those that have not been run, it will then run the
+This function will do a sequence of things.
+First, it will run \code{expand.grid} on any columns whose names start with \code{analysisGroup},
+creating a factorial set of analyses as described by these columns.
+It will assess the combinations against the arguments used by the \code{functionName}.
+For any \code{analysisGroup} that does not provide the correct arguments for the \code{functionName},
+these \code{analysisGroups} will be omitted for that particular function.
+For efficiency, the function will then assess if any of these has already been run.
+For those that have not been run, it will then run the
 \code{functionName} on arguments that it finds in the \code{metadata} slot of
-the map obj, as well as any arguments passed in here in the \code{...}. In
-general, the arguments being passed in here should be fixed across all
+the map obj, as well as any arguments passed in here in the \code{...}.
+In general, the arguments being passed in here should be fixed across all
 analyses, while any that vary by analysis should be entered into the metadata
 table at the time of adding the layer to the map, via \code{mapAdd}.
 }

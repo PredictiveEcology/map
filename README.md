@@ -13,7 +13,7 @@ Defines a meta class of geographical objects, the `map` class, which is a collec
 ### Current release
 
 [![R build status](https://github.com/PredictiveEcology/map/workflows/R-CMD-check/badge.svg?branch=master)](https://github.com/PredictiveEcology/map/actions)
-[![Codecov test coverage](https://codecov.io/gh/PredictiveEcology/map/branch/master/graph/badge.svg)](https://codecov.io/gh/PredictiveEcology/map?branch=master)
+[![Codecov test coverage](https://codecov.io/gh/PredictiveEcology/map/branch/master/graph/badge.svg)](https://app.codecov.io/gh/PredictiveEcology/map?branch=master)
 
 **Install from CRAN:**
 
@@ -32,7 +32,7 @@ install_github("PredictiveEcology/map", dependencies = TRUE)
 ### Development version
 
 [![R build status](https://github.com/PredictiveEcology/map/workflows/R-CMD-check/badge.svg?branch=development)](https://github.com/PredictiveEcology/map/actions)
-[![Codecov test coverage](https://codecov.io/gh/PredictiveEcology/map/branch/development/graph/badge.svg)](https://codecov.io/gh/PredictiveEcology/map?branch=development)
+[![Codecov test coverage](https://codecov.io/gh/PredictiveEcology/map/branch/development/graph/badge.svg)](https://app.codecov.io/gh/PredictiveEcology/map?branch=development)
 
 **Install from GitHub:**
 

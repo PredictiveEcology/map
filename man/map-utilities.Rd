@@ -10,7 +10,7 @@ rbindlistAG(map, functionName, analysisGroups)
 \arguments{
 \item{map}{Optional map object. If not provided, then one will be
 created. If provided, then the present \code{object} or options passed to
-prepInputs e.g., \code{url}, will be appended to this \code{map}}
+\code{prepInputs} e.g., \code{url}, will be appended to this \code{map}.}
 
 \item{functionName}{TODO: description needed}
 
