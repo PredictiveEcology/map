@@ -381,13 +381,13 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   # make tiles, if it is leaflet
   ########################################################
   if (any(!is.na(leaflet)) && !is.null(dts[["leafletTiles"]])) {
-    MBadjustment <- 4000 # some approx, empirically derived number. Likely only good in some cases. # nolint
+    MBadjustment <- 4000 ## some approx, empirically derived number. Likely only good in some cases.
     MBper <- if (is(obj, "RasterLayer")) { # nolint
       ncell(obj) / MBadjustment
     } else if (tryCatch(is(obj[[1]], "RasterLayer"), error = function(x) FALSE)) {
       ncell(obj[[1]]) / MBadjustment
     } else {
-      1 # i.e., default to detectClusters()
+      4600 ## seems to be approx mem use for a prov
     }
     if (isTRUE(all(dir.exists(dts[["leafletTiles"]])))) {
       useParallel <- FALSE
