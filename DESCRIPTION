@@ -33,7 +33,7 @@ Imports:
     sf,
     sp,
     stats,
-    tiler,
+    tiler (>= 0.2.6),
     utils
 Suggests:
     covr,
@@ -44,6 +44,7 @@ Suggests:
     SpaDES.tools,
     testthat
 Remotes:
+    achubaty@tiler,
     gearslaboratory/gdalUtils,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/SpaDES.tools@development
