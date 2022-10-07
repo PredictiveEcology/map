@@ -398,7 +398,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     }
 
     cl <- makeOptimalCluster(useParallel = useParallel, MBper = MBper,
-                             maxNumClusters = min(length(obj)), getOption("map.maxNumCores"),
+                             maxNumClusters = min(length(obj), getOption("map.maxNumCores")),
                              outfile = dots$outfile)
     on.exit(try(stopCluster(cl), silent = TRUE))
     tilePath <- dts[["leafletTiles"]]
