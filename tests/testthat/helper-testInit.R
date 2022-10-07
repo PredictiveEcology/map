@@ -9,13 +9,6 @@ testInit <- function(libraries, ask = FALSE, verbose = FALSE, tmpFileExt = "",
   else
     list()
 
-  os <- strsplit(utils::osVersion, " ")[[1]][1]
-  osVersion <- numeric_version(strsplit(utils::osVersion, " ")[[1]][2])
-  if (isTRUE(os == "Ubuntu") && isTRUE(osVersion >= "20.04")) {
-    tiler::tiler_options(python = Sys.which("python3"))
-    message("Additonally setting tiler option `python = python3`.")
-  }
-
   if (missing(libraries)) libraries <- list()
   unlist(lapply(libraries, require, character.only = TRUE))
   require("testthat")
