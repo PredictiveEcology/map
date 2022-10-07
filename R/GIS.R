@@ -38,7 +38,7 @@
   }
 
   tiler::tiler_options(python = pythonPth)
-  message("Setting tiler option `python = `", pythonPth, ".")
+  message("Setting tiler option `python = '", pythonPth, "'`.")
 }
 
 #' `areaAndPolyValue`
