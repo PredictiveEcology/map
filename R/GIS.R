@@ -1,3 +1,42 @@
+#' Set python path for `tiler`
+#'
+#' By default, \pkg{tiler} is configured to use python 2, which may not be available on
+#' recent Linux distributions (e.g., Ubuntu 20.04+).
+#' Thus, explicitly set tiler options to find the correct python path on their system.
+#'
+#' @keywords internal
+.setTilerPythonPath <- function() {
+  if (identical(Sys.info()[["sysname"]], "Linux")) {
+    os <- strsplit(utils::osVersion, " ")[[1]][1]
+    osVersion <- numeric_version(strsplit(utils::osVersion, " ")[[1]][2])
+    if (isTRUE(os == "Ubuntu") && isTRUE(osVersion >= "20.04")) {
+      tiler::tiler_options(python = Sys.which("python3"))
+      message("Setting tiler option `python = python3`.")
+    }
+  } else if (.isWindows()) {
+    # out <- reproducible:::findGDAL()
+    # if (isFALSE(out))
+    #   stop("Need to have gdal installed; see ?tiler")
+    pydir <- file.path(getOption("gdalUtils_gdalPath")[[1]]$path)
+    possPyBin <- file.path(pydir, "python.exe")
+    possPyBin3 <- file.path(pydir, "python3.exe")
+
+    pythonPth <- if (file.exists(possPyBin)) {
+      possPyBin
+    } else if (file.exists(possPyBin3)) {
+      possPyBin3
+    } else {
+      stop("Can't find python.exe or python3.exe")
+    }
+    tiler::tiler_options(python = pythonPth)
+    message("Setting tiler option `python = `", pythonPth, ".")
+
+    out <- findOSGeo4W() # set path in tiler::tiler_options
+    if (length(out) == 0)
+      stop("Need to have OSGeo4W installed; see ?tiler")
+  }
+}
+
 #' `areaAndPolyValue`
 #'
 #' Determine the area of each zone in a raster. TODO: improve description
