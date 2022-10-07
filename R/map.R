@@ -406,7 +406,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     out <- MapOrDoCall(makeTiles, multiple = args1$argsMulti,
                        single = args1$argsSingle, useCache = FALSE, cl = cl)
     # If the rasters are identical, then there may be errors
-    tryCatch(stopCluster(cl), error = function(x) invisible())
+    tryCatch({ stopCluster(cl); rm(cl) }, error = function(x) invisible())
   }
 
   ######################################
