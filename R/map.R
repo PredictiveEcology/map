@@ -222,7 +222,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
     message("  Running prepInputs for:\n",
             paste(capture.output(data.table(file = layerName)), collapse = "\n"))
-    cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
+    cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel, outfile = dots$outfile)
     on.exit(try(stopCluster(cl), silent = TRUE))
 
     obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti, cl = cl,
@@ -298,7 +298,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       maxNumClus <- min(maxNumClus, getOption("map.maxNumCores"))
 
       message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
-      cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel)
+      cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel, outfile = dots$outfile)
       on.exit(try(stopCluster(cl), silent = TRUE))
 
       obj <- MapOrDoCall(postProcess, multiple = args1$argsMulti, cl = cl,
@@ -398,7 +398,8 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     }
 
     cl <- makeOptimalCluster(useParallel = useParallel, MBper = MBper,
-                             maxNumClusters = min(length(obj)), getOption("map.maxNumCores"))
+                             maxNumClusters = min(length(obj)), getOption("map.maxNumCores"),
+                             outfile = dots$outfile)
     on.exit(try(stopCluster(cl), silent = TRUE))
     tilePath <- dts[["leafletTiles"]]
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)

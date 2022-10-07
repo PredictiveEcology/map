@@ -117,7 +117,8 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
     })
 
     cl <- makeOptimalCluster(useParallel,
-                             maxNumClusters = min(NROW(combosToDoDT), getOption("map.maxNumCores")))
+                             maxNumClusters = min(NROW(combosToDoDT), getOption("map.maxNumCores")),
+                             outfile = dots$outfile)
     on.exit(try(stopCluster(cl), silent = TRUE))
 
     combosToDoList <- split(combosToDoDT, combosToDoDT$all)
