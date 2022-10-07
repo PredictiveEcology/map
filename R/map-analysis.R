@@ -15,18 +15,17 @@ utils::globalVariables(c("envir"))
 #'   `analysisGroup2` column of the `map@@metadata` or a `functionName`.
 #'
 #' @details
-#' This function will do a sequence of things. First, it will run
-#' `expand.grid` on any columns whose names start with
-#' `analysisGroup`, creating a factorial set of analyses as described by
-#' these columns. It will assess the combinations against the arguments used by
-#' the `functionName`. For any `analysisGroup` that does not provide
-#' the correct arguments for the `functionName`, these
-#' `analysisGroups` will be omitted for that particular function. For
-#' efficiency, the function will then assess if any of these has already been
-#' run. For those that have not been run, it will then run the
+#' This function will do a sequence of things.
+#' First, it will run `expand.grid` on any columns whose names start with `analysisGroup`,
+#' creating a factorial set of analyses as described by these columns.
+#' It will assess the combinations against the arguments used by the `functionName`.
+#' For any `analysisGroup` that does not provide the correct arguments for the `functionName`,
+#' these `analysisGroups` will be omitted for that particular function.
+#' For efficiency, the function will then assess if any of these has already been run.
+#' For those that have not been run, it will then run the
 #' `functionName` on arguments that it finds in the `metadata` slot of
-#' the map obj, as well as any arguments passed in here in the `...`. In
-#' general, the arguments being passed in here should be fixed across all
+#' the map obj, as well as any arguments passed in here in the `...`.
+#' In general, the arguments being passed in here should be fixed across all
 #' analyses, while any that vary by analysis should be entered into the metadata
 #' table at the time of adding the layer to the map, via `mapAdd`.
 #'
