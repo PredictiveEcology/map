@@ -25,7 +25,7 @@ Imports:
     fastdigest,
     fasterize,
     methods,
-    pemisc (>= 0.0.4.9001),
+    pemisc (>= 0.0.4.9003),
     quickPlot,
     reproducible (>= 1.2.1),
     raster (>= 2.8.4),
