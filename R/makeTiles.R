@@ -58,11 +58,12 @@ makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
 
 #' @importFrom reproducible .requireNamespace
 findOSGeo4W <- function() {
-  if (reproducible::.requireNamespace("gdalUtils")) {
-    gdalPath <- NULL
-    attemptGDAL <- TRUE
-    if (.isWindows()) {
-      # Handle all QGIS possibilities
+  if (.isWindows()) {
+    if (reproducible::.requireNamespace("gdalUtils")) {
+      gdalPath <- NULL
+      attemptGDAL <- TRUE
+
+      ## Handle all QGIS possibilities
       a <- dir("C:/", pattern = "Progra", full.names = TRUE)
       a <- grep("Program Files", a, value = TRUE)
       a <- unlist(lapply(a, dir, pattern = "QGIS", full.name = TRUE))
@@ -79,9 +80,10 @@ findOSGeo4W <- function() {
       OSGeo4WExists <- file.exists(paths)
       if (any(OSGeo4WExists))
         OSGeo4WPath <- paths[OSGeo4WExists]
-    }
-    tiler::tiler_options(osgeo4w = OSGeo4WPath)
 
-    OSGeo4WPath
+      tiler::tiler_options(osgeo4w = OSGeo4WPath)
+
+      OSGeo4WPath
+    }
   }
 }
