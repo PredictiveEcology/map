@@ -44,7 +44,7 @@ Suggests:
     SpaDES.tools,
     testthat
 Remotes:
-    achubaty/tiler,
+    ropensci/tiler,
     gearslaboratory/gdalUtils,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/SpaDES.tools@development
