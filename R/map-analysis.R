@@ -37,6 +37,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
                         useParallel = getOption("map.useParallel", FALSE), ...) {
   m <- map@metadata
   dots <- list(...)
+  .outfile <- dots$outfile
 
   if (is.null(functionName)) {
     stop("Each analysis must have a functionName")
@@ -118,7 +119,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
 
     cl <- makeOptimalCluster(useParallel,
                              maxNumClusters = min(NROW(combosToDoDT), getOption("map.maxNumCores")),
-                             outfile = dots$outfile)
+                             outfile = .outfile)
     on.exit(try(stopCluster(cl), silent = TRUE))
 
     combosToDoList <- split(combosToDoDT, combosToDoDT$all)
@@ -264,6 +265,8 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
 #' @importFrom reproducible compareNA
 runMapAnalyses <- function(map, purgeAnalyses = NULL,
                            useParallel = getOption("map.useParallel", FALSE), ...) {
+  dots <- list(...)
+
   isPostHoc <- if (is.null(map@analyses$postHoc)) {
     rep(FALSE, NROW(map@analyses))
   } else {
