@@ -74,7 +74,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
     args[keepArgs]
   })
 
-  AGsByFunName <- lapply(functionName, function(funName) { # nolint
+  AGsByFunName <- lapply(functionName, function(funName) {
     names(args1[[funName]])
   })
 
@@ -188,7 +188,8 @@ mapAddAnalysis <- function(map, functionName,
   if (doRbindlist)
     map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
 
-  map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
+  map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel,
+                        outfile = dots$outfile)
 
   map
 }
@@ -262,7 +263,7 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
 ## TODO: needs documentation
 #' @importFrom reproducible compareNA
 runMapAnalyses <- function(map, purgeAnalyses = NULL,
-                           useParallel = getOption("map.useParallel", FALSE)) {
+                           useParallel = getOption("map.useParallel", FALSE), ...) {
   isPostHoc <- if (is.null(map@analyses$postHoc)) {
     rep(FALSE, NROW(map@analyses))
   } else {
@@ -272,7 +273,8 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
   # First run all primary analyses
   if (NROW(map@analyses[!isPostHoc])) {
     funName <- map@analyses$functionName[!isPostHoc]
-    map <- mapAnalysis(map, funName, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
+    map <- mapAnalysis(map, funName, purgeAnalyses = purgeAnalyses, useParallel = useParallel,
+                       outfile = dots$outfile)
   }
 
   # run postHoc analyses
