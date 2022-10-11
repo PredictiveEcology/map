@@ -155,7 +155,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
 #' @param functionName The name of the analysis function to add
 #' @param useParallel Logical indicating whether to use multiple threads.
 #'                    Defaults to `getOption("map.useParallel", FALSE)`.
-#' @param ... Additional arguments TODO: description needed
+#' @param ... Additional arguments passed to `functionName`.
 #'
 #' @export
 #' @importFrom data.table data.table
@@ -199,14 +199,14 @@ mapAddAnalysis <- function(map, functionName,
 #' @inheritParams mapAdd
 #'
 #' @param functionName A function that is designed for post hoc analysis of
-#'   map class objects, e.g., `rbindlistAG`
+#'                     map class objects, e.g., `rbindlistAG`.
 #'
-#' @param postHocAnalysisGroups Character string with one
-#'   `analysisGroups` i.e., `"analysisGroup1"` or `"analysisGroup2"`
+#' @param postHocAnalysisGroups Character string with one `analysisGroups`,
+#'                              i.e., `"analysisGroup1"` or `"analysisGroup2"`.
 #'
 #' @param postHocAnalyses Character vector with `"all"`,
-#'   (which will do all analysisGroups) the default,
-#'   or 1 or more of the the `functionName`s that are in the analyses slot.
+#'                        (which will do all `analysisGroups`; default),
+#'                        or 1 or more of the the `functionName`s that are in the analyses slot.
 #'
 #' @param ... Optional arguments to pass into `functionName`
 #'
