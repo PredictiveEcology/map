@@ -104,8 +104,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
     names(funNames) <- funNames
     # Get the fixed arguments
     otherFormalsInFunction <- lapply(funNames, function(funName) {
-      otherFormalsInFunction <- formalArgs(funName)[formalArgs(funName) %in%
-                                                      colnames(map@analyses)]
+      otherFormalsInFunction <- formalArgs(funName)[formalArgs(funName) %in% colnames(map@analyses)]
       if (length(otherFormalsInFunction)) {
         names(otherFormalsInFunction) <- otherFormalsInFunction
 
