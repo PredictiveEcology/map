@@ -145,7 +145,10 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
   } else {
     message("  ", paste(functionName, collapse = ", "), " already run on all layers")
   }
-  map
+
+  tryCatch({ stopCluster(cl); rm(cl) }, error = function(x) invisible())
+
+  return(map)
 }
 
 #' Add an analysis to a `map` object
