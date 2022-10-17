@@ -120,7 +120,10 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
     cl <- makeOptimalCluster(useParallel,
                              maxNumClusters = min(NROW(combosToDoDT), getOption("map.maxNumCores")),
                              outfile = .outfile)
-    if (!is.null(cl) && !is.null(.clInit)) parallel::clusterEvalQ(cl, .clInit())
+    if (!is.null(cl) && !is.null(.clInit)) {
+      parallel::clusterExport(cl, c(".clInit"), envir = environment())
+      parallel::clusterEvalQ(cl, .clInit())
+    }
     on.exit(try(stopCluster(cl), silent = TRUE))
 
     combosToDoList <- split(combosToDoDT, combosToDoDT$all)
