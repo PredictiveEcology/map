@@ -26,7 +26,9 @@ combination or part thereof (e.g., the name entered into the row under
 
 \item{useParallel}{Logical. If \code{TRUE}, then if there is more than one
 calculation to do at any stage, it will create and use a parallel
-cluster via \code{makeOptimalCluster}}
+cluster via \code{makeOptimalCluster}.
+If running analyses in parallel, it may be useful to pass a function (via \code{clInit})
+to be run on each of the nodes immediately upon cluster creation (e.g., to set options).}
 
 \item{...}{Additonal arguments passed to \code{\link[reproducible:postProcess]{reproducible::postProcess()}},
 \code{\link[reproducible:projectInputs]{reproducible::projectInputs()}},

@@ -54,8 +54,8 @@ setMethod("initialize", "map",
             .Object@CRS <- sp::CRS()
             .Object@analyses <- data.table::data.table(functionName = character())
             .Object@analysesData <- list()
-            .Object@paths <- list(dataPath = getOption("map.dataPath", "."),
-                                  tilePath = getOption("map.tilePath", "."))
+            .Object@paths <- list(dataPath = getOption("map.dataPath", getwd()),
+                                  tilePath = getOption("map.tilePath", getwd()))
 
             .Object
 })

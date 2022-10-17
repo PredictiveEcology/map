@@ -30,7 +30,9 @@ or 1 or more of the the \code{functionName}s that are in the analyses slot.}
 
 \item{useParallel}{Logical. If \code{TRUE}, then if there is more than one
 calculation to do at any stage, it will create and use a parallel
-cluster via \code{makeOptimalCluster}}
+cluster via \code{makeOptimalCluster}.
+If running analyses in parallel, it may be useful to pass a function (via \code{clInit})
+to be run on each of the nodes immediately upon cluster creation (e.g., to set options).}
 
 \item{...}{Optional arguments to pass into \code{functionName}}
 }

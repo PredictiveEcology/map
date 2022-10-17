@@ -38,6 +38,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
   m <- map@metadata
   dots <- list(...)
   .outfile <- dots$outfile
+  .clInit <- dots$clInit
 
   if (is.null(functionName)) {
     stop("Each analysis must have a functionName")
@@ -119,6 +120,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
     cl <- makeOptimalCluster(useParallel,
                              maxNumClusters = min(NROW(combosToDoDT), getOption("map.maxNumCores")),
                              outfile = .outfile)
+    if (!is.null(cl) && !is.null(.clInit)) parallel::clusterEvalQ(cl, .clInit())
     on.exit(try(stopCluster(cl), silent = TRUE))
 
     combosToDoList <- split(combosToDoDT, combosToDoDT$all)

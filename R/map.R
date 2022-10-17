@@ -176,7 +176,9 @@ mapAdd <- function(obj, map, layerName,
 #'        be used. Default is `TRUE`
 #' @param useParallel Logical. If `TRUE`, then if there is more than one
 #'        calculation to do at any stage, it will create and use a parallel
-#'        cluster via `makeOptimalCluster`
+#'        cluster via `makeOptimalCluster`.
+#'        If running analyses in parallel, it may be useful to pass a function (via `clInit`)
+#'        to be run on each of the nodes immediately upon cluster creation (e.g., to set options).
 #'
 #' @export
 #' @importFrom data.table copy rbindlist set
@@ -196,6 +198,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            isRasterToMatch = FALSE, envir = NULL, useCache = TRUE,
                            useParallel = getOption("map.useParallel", FALSE), ...) {
   dots <- list(...)
+  .clInit <- dots$clInit
 
   map@metadata <- .enforceColumnTypes(map@metadata) ## update previously-created map objects
 
@@ -223,6 +226,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     message("  Running prepInputs for:\n",
             paste(capture.output(data.table(file = layerName)), collapse = "\n"))
     cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel, outfile = dots$outfile)
+    if (!is.null(cl) && !is.null(.clInit)) parallel::clusterEvalQ(cl, .clInit())
     on.exit(try(stopCluster(cl), silent = TRUE))
 
     obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti, cl = cl,
@@ -299,6 +303,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
       message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
       cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel, outfile = dots$outfile)
+      if (!is.null(cl) && !is.null(.clInit)) parallel::clusterEvalQ(cl, .clInit())
       on.exit(try(stopCluster(cl), silent = TRUE))
 
       obj <- MapOrDoCall(postProcess, multiple = args1$argsMulti, cl = cl,
@@ -400,6 +405,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     cl <- makeOptimalCluster(useParallel = useParallel, MBper = MBper,
                              maxNumClusters = min(length(obj), getOption("map.maxNumCores")),
                              outfile = dots$outfile)
+    if (!is.null(cl) && !is.null(.clInit)) parallel::clusterEvalQ(cl, .clInit())
     on.exit(try(stopCluster(cl), silent = TRUE))
     tilePath <- dts[["leafletTiles"]]
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
