@@ -177,7 +177,7 @@ mapAdd <- function(obj, map, layerName,
 #' @param useParallel Logical. If `TRUE`, then if there is more than one
 #'        calculation to do at any stage, it will create and use a parallel
 #'        cluster via `makeOptimalCluster`.
-#'        If running analyses in parallel, it may be useful to pass a function (via `clInit`)
+#'        If running analyses in parallel, it may be useful to pass a function (via `.clInit`)
 #'        to be run on each of the nodes immediately upon cluster creation (e.g., to set options).
 #'
 #' @export
@@ -198,7 +198,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            isRasterToMatch = FALSE, envir = NULL, useCache = TRUE,
                            useParallel = getOption("map.useParallel", FALSE), ...) {
   dots <- list(...)
-  .clInit <- dots$clInit
+  .clInit <- dots$.clInit
 
   map@metadata <- .enforceColumnTypes(map@metadata) ## update previously-created map objects
 
@@ -380,12 +380,13 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     args1$argsMulti[names(dots)[howLong > 1]] <- dots[howLong > 1]
   }
   moreArgs <- append(args1$argsSingle, alist(metadata = map@metadata))
+  moreArgs$.clInit <- NULL ## data.table, esp. rbindlist chokes on functions
   if (length(args1$argsMulti) == 0) {
     dts <- do.call(buildMetadata, moreArgs)
   } else {
     dtsList <- do.call(Map, args = append(args1$argsMulti,
                                           list(f = buildMetadata, MoreArgs = moreArgs)))
-    dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE)
+    dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE) ## TODO: falis here provMB postprocess
   }
 
   ########################################################

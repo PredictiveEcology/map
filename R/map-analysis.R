@@ -38,7 +38,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
   m <- map@metadata
   dots <- list(...)
   .outfile <- dots$outfile
-  .clInit <- dots$clInit
+  .clInit <- dots$.clInit
 
   if (is.null(functionName)) {
     stop("Each analysis must have a functionName")

@@ -66,7 +66,7 @@ be used. Default is \code{TRUE}}
 \item{useParallel}{Logical. If \code{TRUE}, then if there is more than one
 calculation to do at any stage, it will create and use a parallel
 cluster via \code{makeOptimalCluster}.
-If running analyses in parallel, it may be useful to pass a function (via \code{clInit})
+If running analyses in parallel, it may be useful to pass a function (via \code{.clInit})
 to be run on each of the nodes immediately upon cluster creation (e.g., to set options).}
 }
 \description{
