@@ -472,6 +472,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     if (!is.null(dts[["destinationPath"]])) class(dts[["destinationPath"]]) <- class2
     if (!is.null(dts[["filename2"]])) class(dts[["filename2"]]) <- class2
     if (!is.null(dts[["leaflet"]])) class(dts[["leaflet"]]) <- class2
+    if (!is.null(dts[["leafletTiles"]])) class(dts[["leafletTiles"]]) <- class2
     if (!is.null(dts[["targetFile"]])) class(dts[["targetFile"]]) <- class2
     if (!is.null(dts[["tsf"]])) class(dts[["tsf"]]) <- class2
     if (!is.null(dts[["vtm"]])) class(dts[["vtm"]]) <- class2
