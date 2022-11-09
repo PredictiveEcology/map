@@ -39,6 +39,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
   dots <- list(...)
   .outfile <- dots$outfile
   .clInit <- dots$.clInit
+  dots$.clInit <- NULL
 
   if (is.null(functionName)) {
     stop("Each analysis must have a functionName")
@@ -171,6 +172,9 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
 mapAddAnalysis <- function(map, functionName,
                            useParallel = getOption("map.useParallel", FALSE), ...) {
   dots <- list(...)
+  .clInit <- dots$.clInit
+  dots$.clInit <- NULL
+
   b <- data.table(functionName = functionName, t(dots))
   prevEntry <- map@analyses$functionName == functionName
   purgeAnalyses <- NULL # Set default as NULL
@@ -197,7 +201,7 @@ mapAddAnalysis <- function(map, functionName,
     map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
 
   map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel,
-                        outfile = dots$outfile)
+                        outfile = dots$outfile, .clInit = .clInit)
 
   map
 }
@@ -273,6 +277,8 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
 runMapAnalyses <- function(map, purgeAnalyses = NULL,
                            useParallel = getOption("map.useParallel", FALSE), ...) {
   dots <- list(...)
+  .clInit <- dots$.clInit
+  dots$.clInit <- NULL
 
   isPostHoc <- if (is.null(map@analyses$postHoc)) {
     rep(FALSE, NROW(map@analyses))
@@ -284,7 +290,7 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
   if (NROW(map@analyses[!isPostHoc])) {
     funName <- map@analyses$functionName[!isPostHoc]
     map <- mapAnalysis(map, funName, purgeAnalyses = purgeAnalyses, useParallel = useParallel,
-                       outfile = dots$outfile)
+                       outfile = dots$outfile, .clInit = .clInit)
   }
 
   # run postHoc analyses

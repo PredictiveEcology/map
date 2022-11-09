@@ -199,6 +199,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            useParallel = getOption("map.useParallel", FALSE), ...) {
   dots <- list(...)
   .clInit <- dots$.clInit
+  dots$.clInit <- NULL
 
   map@metadata <- .enforceColumnTypes(map@metadata) ## update previously-created map objects
 
@@ -380,7 +381,6 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     args1$argsMulti[names(dots)[howLong > 1]] <- dots[howLong > 1]
   }
   moreArgs <- append(args1$argsSingle, alist(metadata = map@metadata))
-  moreArgs$.clInit <- NULL ## data.table, esp. rbindlist chokes on functions
   if (length(args1$argsMulti) == 0) {
     dts <- do.call(buildMetadata, moreArgs)
   } else {
