@@ -93,9 +93,9 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
     }
   }
   if (!file.exists(pypath)) stop("Can't find gdal_polygonize.py on your system.")
-  owd <- getwd()
-  on.exit(setwd(owd))
-  setwd(dirname(pypath))
+  #owd <- getwd()
+  #on.exit(setwd(owd))
+  #setwd(dirname(pypath))
   if (is.null(outshape)) {
     outshape <- tempfile(fileext = ".shp")
   } else {
