@@ -286,6 +286,10 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       message("There is no CRS already in map; using the studyArea CRS and adding that to map")
     } else {
       dots <- list(...)
+      .outfile <- dots$outfile
+      .clInit <- dots$.clInit
+      dots$.clInit <- NULL
+
       if (!is.null(studyArea(map))) {
         studyArea <- studyArea(map)
       }
