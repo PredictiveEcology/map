@@ -198,6 +198,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            isRasterToMatch = FALSE, envir = NULL, useCache = TRUE,
                            useParallel = getOption("map.useParallel", FALSE), ...) {
   dots <- list(...)
+  .outfile <- dots$outfile
   .clInit <- dots$.clInit
   dots$.clInit <- NULL
 
@@ -226,7 +227,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
     message("  Running prepInputs for:\n",
             paste(capture.output(data.table(file = layerName)), collapse = "\n"))
-    cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel, outfile = dots$outfile)
+    cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel, outfile = .outfile)
     if (!is.null(cl) && !is.null(.clInit)) {
       parallel::clusterExport(cl, c(".clInit"), envir = environment())
       parallel::clusterEvalQ(cl, .clInit())
@@ -306,7 +307,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       maxNumClus <- min(maxNumClus, getOption("map.maxNumCores"))
 
       message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
-      cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel, outfile = dots$outfile)
+      cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel, outfile = .outfile)
       if (!is.null(cl) && !is.null(.clInit)) {
         parallel::clusterExport(cl, c(".clInit"), envir = environment())
         parallel::clusterEvalQ(cl, .clInit())
@@ -411,7 +412,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
     cl <- makeOptimalCluster(useParallel = useParallel, MBper = MBper,
                              maxNumClusters = min(length(obj), getOption("map.maxNumCores")),
-                             outfile = dots$outfile)
+                             outfile = .outfile)
     if (!is.null(cl) && !is.null(.clInit)) {
       parallel::clusterExport(cl, c(".clInit"), envir = environment())
       parallel::clusterEvalQ(cl, .clInit())
