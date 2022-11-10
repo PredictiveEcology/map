@@ -277,6 +277,7 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
 runMapAnalyses <- function(map, purgeAnalyses = NULL,
                            useParallel = getOption("map.useParallel", FALSE), ...) {
   dots <- list(...)
+  .outfile <- dots$outfile
   .clInit <- dots$.clInit
   dots$.clInit <- NULL
 
@@ -290,7 +291,7 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
   if (NROW(map@analyses[!isPostHoc])) {
     funName <- map@analyses$functionName[!isPostHoc]
     map <- mapAnalysis(map, funName, purgeAnalyses = purgeAnalyses, useParallel = useParallel,
-                       outfile = dots$outfile, .clInit = .clInit)
+                       outfile = .outfile, .clInit = .clInit)
   }
 
   # run postHoc analyses
