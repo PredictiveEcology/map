@@ -131,7 +131,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
     out3 <- Map2(cl = cl,
                  combo = combosToDoList, function(combo) {
                    funName <- combo$functionName
-                   args1 <- getFormalsFromMetadata(metadata = map@metadata,
+                   args1 <- getFormalsFromMetadata(metadata = m,
                                                    combo = combo, AGs = AGs, funName = funName)
                    args <- unlist(unname(args1), recursive = FALSE)
                    message("  Calculating ", funName, " for ", combo$all)
