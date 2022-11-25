@@ -7,8 +7,8 @@ Description: The map class is a collection of map objects ('sp', 'raster', 'sf')
 URL: 
     http://map.predictiveecology.org,
     https://github.com/PredictiveEcology/map
-Date: 2022-11-10
-Version: 0.0.4.9008
+Date: 2022-11-25
+Version: 0.0.4.9009
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment=c(ORCID = "0000-0002-6914-8316")),
@@ -25,7 +25,7 @@ Imports:
     fastdigest,
     fasterize,
     methods,
-    pemisc (>= 0.0.4.9003),
+    pemisc (>= 0.0.4.9004),
     quickPlot,
     reproducible (>= 1.2.1),
     raster (>= 2.8.4),
@@ -64,5 +64,5 @@ Collate:
     'map.R'
     'rbindlistAG.R'
     'zzz.R'
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.2
 Roxygen: list(markdown = TRUE)
