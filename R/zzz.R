@@ -1,4 +1,4 @@
-.NCONNECTIONS <- utils::getFromNamespace(".NCONNECTIONS", "pemisc")
+.NCONNECTIONS <- 120L
 
 #' @importFrom parallel detectCores
 .onLoad <- function(libname, pkgname) {
