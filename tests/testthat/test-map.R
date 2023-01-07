@@ -24,8 +24,6 @@ test_that("mapAdd doesn't work", {
   ml <- mapAdd(studyArea, isStudyArea = TRUE, layerName = "Small Study Area",
                poly = TRUE, analysisGroup2 = "Small Study Area")
 
-  # if (require("SpaDES.tools")) {
-  #require()
   smallStudyArea <- randomPolygon(studyArea(ml), 1e5)
   smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,
                                              data = data.frame(ID = 1, shinyLabel = "zone1"),

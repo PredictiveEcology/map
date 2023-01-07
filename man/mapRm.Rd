@@ -22,7 +22,7 @@ mapRm(map, layer, ask = TRUE, ...)
 Remove objects from a \code{map}
 }
 \examples{
-if (require("SpaDES.tools")) {
+if (require("SpaDES.tools", quietly = TRUE)) {
   library(sp)
   longLatCRS <- CRS(paste("+init=epsg:4326 +proj=longlat +datum=WGS84",
                           "+no_defs +ellps=WGS84 +towgs84=0,0,0"))

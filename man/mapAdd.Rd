@@ -99,7 +99,7 @@ StudyArea <- SpatialPolygonsDataFrame(StudyArea,
 ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area",
              poly = TRUE, analysisGroup2 = "Small Study Area")
 
-if (require("SpaDES.tools")) {
+if (require("SpaDES.tools", quietly = TRUE)) {
   options(map.useParallel = FALSE)
   smallStudyArea <- randomPolygon(studyArea(ml), 1e5)
   smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,

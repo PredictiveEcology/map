@@ -59,7 +59,7 @@ utils::globalVariables(c(".", ":=", "..pathCols1", "..pathCols2", ".I", ".N", ".
 #' ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area",
 #'              poly = TRUE, analysisGroup2 = "Small Study Area")
 #'
-#' if (require("SpaDES.tools")) {
+#' if (require("SpaDES.tools", quietly = TRUE)) {
 #'   options(map.useParallel = FALSE)
 #'   smallStudyArea <- randomPolygon(studyArea(ml), 1e5)
 #'   smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,
@@ -507,7 +507,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 #' @family mapMethods
 #' @rdname mapRm
 #' @examples
-#' if (require("SpaDES.tools")) {
+#' if (require("SpaDES.tools", quietly = TRUE)) {
 #'   library(sp)
 #'   longLatCRS <- CRS(paste("+init=epsg:4326 +proj=longlat +datum=WGS84",
 #'                           "+no_defs +ellps=WGS84 +towgs84=0,0,0"))
