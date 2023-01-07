@@ -513,7 +513,10 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 #'                           "+no_defs +ellps=WGS84 +towgs84=0,0,0"))
 #'   p <- randomPolygon(SpatialPoints(cbind(-120, 60), proj4string = longLatCRS), area = 1e5)
 #'   m <- mapAdd(p, layerName = "p")
-#'   mapRm(m, "p")
+#'   m
+#'
+#'   m <- mapRm(m, "p")
+#'   m
 #' }
 mapRm <- function(map, layer, ask = TRUE, ...) {
   UseMethod("mapRm")
@@ -902,9 +905,13 @@ addColumnNameForLabels <- function(x, columnNameForLabels) {
   if (is(x, "list")) {
     lapply(x, addColumnNameForLabels, columnNameForLabels = columnNameForLabels)
   } else if (is(x, "sf")) {
-    x[["shinyLabel"]] <- x[[columnNameForLabels]]
+    if (ncol(x) > 0) {
+      x[["shinyLabel"]] <- x[[columnNameForLabels]]
+    }
   } else if (is(x, "SpatialPolygonsDataFrame")) {
-    x[["shinyLabel"]] <- x[[columnNameForLabels]]
+    if (ncol(x) > 0) {
+      x[["shinyLabel"]] <- x[[columnNameForLabels]]
+    }
   }
 
   return(x)

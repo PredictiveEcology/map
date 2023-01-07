@@ -28,7 +28,10 @@ if (require("SpaDES.tools", quietly = TRUE)) {
                           "+no_defs +ellps=WGS84 +towgs84=0,0,0"))
   p <- randomPolygon(SpatialPoints(cbind(-120, 60), proj4string = longLatCRS), area = 1e5)
   m <- mapAdd(p, layerName = "p")
-  mapRm(m, "p")
+  m
+
+  m <- mapRm(m, "p")
+  m
 }
 }
 \seealso{

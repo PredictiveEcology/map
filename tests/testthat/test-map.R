@@ -51,6 +51,10 @@ test_that("mapAdd doesn't work", {
   ageClasses <- c("Young", "Immature", "Mature", "Old")
   ageClassCutOffs <- c(0, 40, 80, 120)
 
+  skip("need LandWebUtils")
+  ## TODO: `LargePatches` and `LeadingVegTypeByAgeClass` were moved to `LandWebUtils`,
+  ##  which is a reverse dependency of this package, so it can't be used here.
+
   # add an analysis -- this will trigger analyses because there are already objects in the map
   #    This will trigger 2 analyses ... LeadingVegTypeByAgeClass on each raster x polygon combo
   #    (only 1 currently)
