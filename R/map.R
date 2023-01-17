@@ -237,6 +237,11 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti, cl = cl,
                        single = args1$argsSingle, useCache = useCache)
 
+    ## TODO: remove this workaround:
+    if (is(obj, "Raster") && grepl("[.]grd$", filename(obj))) {
+      obj[] <- obj[] ## pull into memory to avoid terra reading from file (rspatial/terra#976)
+    }
+
     tryCatch({ stopCluster(cl); rm(cl) }, error = function(x) invisible())
     if (is(obj, "list")) { ## NOTE: is.list returns TRUE for data.frames ... BAD
       names(obj) <- layerName
@@ -298,11 +303,12 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       }
 
       list2env(dots, envir = environment()) # put any arguments from the ... into this local env
-      x <- obj # put it into memory so identifyVectorArgs finds it
+      x <- obj ## put it into memory so identifyVectorArgs finds it
       args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialClasses"),
                                             getS3method("maskInputs", "Raster"),
                                             projectInputs, cropInputs, projectRaster, writeOutputs),
                                   ls(), environment(), dots = dots)
+
       maxNumClus <- if (length(args1$argsMulti)) {
         max(unlist(lapply(args1$argsMulti, NROW)), na.rm = TRUE)
       } else {
