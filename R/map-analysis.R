@@ -135,10 +135,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
                                                    combo = combo, AGs = AGs, funName = funName)
                    args <- unlist(unname(args1), recursive = FALSE)
                    message("  Calculating ", funName, " for ", combo$all)
-                   fnOut <- do.call(Cache,
-                                    args = append(list(get(funName)),
-                                                  append(args,
-                                                         otherFormalsInFunction[[funName]])))
+                   fnOut <- Cache(do.call, get(funName), append(args, otherFormalsInFunction[[funName]]))
                    fnOut
     })
 
