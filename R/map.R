@@ -186,7 +186,7 @@ mapAdd <- function(obj, map, layerName,
 #' @importFrom pemisc getLocalArgsFor identifyVectorArgs makeOptimalCluster MapOrDoCall
 #' @importFrom quickPlot whereInStack
 #' @importFrom raster crs ncell projectRaster writeRaster
-#' @importFrom reproducible .robustDigest asPath Cache compareNA cropInputs fixErrors
+#' @importFrom reproducible .robustDigest asPath Cache compareNA cropInputs Filenames fixErrors
 #' @importFrom reproducible prepInputs preProcess projectInputs postProcess writeOutputs
 #' @importFrom sf as_Spatial st_zm
 #' @importFrom sp CRS
