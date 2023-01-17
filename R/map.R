@@ -238,8 +238,17 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                        single = args1$argsSingle, useCache = useCache)
 
     ## TODO: remove this workaround:
-    if (is(obj, "Raster") && grepl("[.]grd$", filename(obj))) {
-      obj[] <- obj[] ## pull into memory to avoid terra reading from file (rspatial/terra#976)
+    ## pull into memory to avoid terra reading from file (rspatial/terra#976)
+    if (is(obj, "Raster") && any(grepl("[.]grd$", Filenames(obj)))) {
+      obj[] <- obj[]
+    } else if (is(obj, "list")) {
+      obj <- lapply(obj, function(x) {
+        if (is(x, "Raster") && any(grepl("[.]grd$", Filenames(x)))) {
+          x[] <- x[]
+
+          x
+        }
+      })
     }
 
     tryCatch({ stopCluster(cl); rm(cl) }, error = function(x) invisible())
@@ -266,8 +275,8 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ####################################################
   if (is.null(studyArea(map)) && is.null(rasterToMatch(map))) {
     argsFixErrors <- getLocalArgsFor(list(Cache, fixErrors), dots = dots)
-    theList <- append(list(FUN = quote(fixErrors), x = quote(obj)), argsFixErrors)
-    obj <- do.call(Cache, theList)
+    theList <- append(list(x = quote(obj)), argsFixErrors)
+    obj <- Cache(do.call, fixErrors, theList)
     if (isFALSE(isStudyArea)) {
       message("There is no studyArea in map; consider adding one with 'isStudyArea = TRUE'")
     }
