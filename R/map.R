@@ -237,20 +237,6 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti, cl = cl,
                        single = args1$argsSingle, useCache = useCache)
 
-    ## TODO: remove this workaround:
-    ## pull into memory to avoid terra reading from file (rspatial/terra#976)
-    if (is(obj, "Raster") && any(grepl("[.]grd$", Filenames(obj)))) {
-      obj[] <- obj[]
-    } else if (is(obj, "list")) {
-      obj <- lapply(obj, function(x) {
-        if (is(x, "Raster") && any(grepl("[.]grd$", Filenames(x)))) {
-          x[] <- x[]
-
-          x
-        }
-      })
-    }
-
     tryCatch({ stopCluster(cl); rm(cl) }, error = function(x) invisible())
     if (is(obj, "list")) { ## NOTE: is.list returns TRUE for data.frames ... BAD
       names(obj) <- layerName
