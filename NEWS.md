@@ -1,11 +1,11 @@
-Known issues: https://github.com/PredictiveEcology/map/issues
+# map (development version)
 
-version 0.0.3
-=============
+* drop support for R 4.0 due to changes in dependency packages
+
+# map v0.0.3
 
 * maximum number of threads for parallel operations limited by package option `map.maxNumCores`, which defaults to `min(getOption("Ncpus"), parallel::detectCores())`.
 
-version 0.0.1
-=============
+# map v0.0.1
 
 * initial development version

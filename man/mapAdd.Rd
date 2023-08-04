@@ -37,8 +37,8 @@ the \code{map}, then it will replace the existing object. Default is
 \code{getOption("map.overwrite")}}
 
 \item{...}{Additonal arguments passed to \code{\link[reproducible:postProcess]{reproducible::postProcess()}},
-\code{\link[reproducible:projectInputs]{reproducible::projectInputs()}},
-\code{\link[reproducible:fixErrors]{reproducible::fixErrors()}}, and
+\code{\link[reproducible:deprecated]{reproducible::projectInputs()}},
+\code{\link[reproducible:deprecated]{reproducible::fixErrors()}}, and
 \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
 \item{columnNameForLabels}{A character string indicating which column to use
