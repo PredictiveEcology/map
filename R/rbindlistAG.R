@@ -1,4 +1,3 @@
-
 #' Utility functions for grouping analyses in a `map` object
 #'
 #' @inheritParams mapAdd
@@ -13,7 +12,6 @@
 #' @aliases rbindlist-analysisGroups
 #' @aliases rbindlistAG
 #' @export
-#' @importFrom data.table rbindlist
 #' @rdname map-utilities
 rbindlistAG <- function(map, functionName, analysisGroups) {
   lpNames <- names(map@analysesData[[functionName]])

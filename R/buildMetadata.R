@@ -16,10 +16,6 @@
 #' @param envir TODO: description needed
 #' @param ... Additional arguments.
 #'
-#' @importFrom data.table copy set
-#' @importFrom rgeos gArea
-#' @importFrom reproducible asPath
-#' @importFrom sf st_area
 #' @rdname buildMetadata
 buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj,
                           columnNameForLabels, objHash, leaflet, envir, ...) {

@@ -8,7 +8,7 @@ URL:
     http://map.predictiveecology.org,
     https://github.com/PredictiveEcology/map
 Date: 2023-08-03
-Version: 0.0.5.9001
+Version: 0.0.5.9002
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment=c(ORCID = "0000-0002-6914-8316")),
@@ -44,7 +44,8 @@ Suggests:
     rgdal,
     rmarkdown,
     SpaDES.tools,
-    testthat
+    testthat,
+    usethis
 Remotes:
     ropensci/tiler,
     gearslaboratory/gdalUtils,

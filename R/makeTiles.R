@@ -10,9 +10,6 @@
 #' @param ... Passed to `reproducible::projectInputs` e.g., `useGDAL`
 #'
 #' @export
-#' @importFrom raster compareCRS filename projectRaster writeRaster
-#' @importFrom sp CRS
-#' @importFrom tiler tile
 makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
   dirNotExist <- !dir.exists(tilePath) | isTRUE(overwrite)
 
@@ -56,7 +53,6 @@ makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
   }
 }
 
-#' @importFrom reproducible .requireNamespace
 findOSGeo4W <- function() {
   if (.isWindows()) {
     if (reproducible::.requireNamespace("gdalUtils")) {

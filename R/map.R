@@ -183,16 +183,6 @@ mapAdd <- function(obj, map, layerName,
 #'        to be run on each of the nodes immediately upon cluster creation (e.g., to set options).
 #'
 #' @export
-#' @importFrom data.table copy rbindlist set
-#' @importFrom parallel stopCluster
-#' @importFrom pemisc getLocalArgsFor identifyVectorArgs makeOptimalCluster MapOrDoCall
-#' @importFrom quickPlot whereInStack
-#' @importFrom raster crs ncell projectRaster writeRaster
-#' @importFrom reproducible .robustDigest asPath Cache compareNA cropInputs Filenames fixErrors
-#' @importFrom reproducible prepInputs preProcess projectInputs postProcess writeOutputs
-#' @importFrom sf as_Spatial st_zm
-#' @importFrom sp CRS
-#' @importFrom utils capture.output getS3method
 #' @rdname mapAdd
 mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            overwrite = getOption("map.overwrite"),
@@ -563,7 +553,6 @@ if (!isGeneric("crs")) {
 #' @exportMethod crs
 #' @family mapMethods
 #' @importMethodsFrom raster crs
-#' @importFrom raster crs
 #' @rdname crs
 setMethod("crs",
           signature = "map",
@@ -844,8 +833,6 @@ if (!isGeneric("area")) {
 #'
 #' @export
 #' @family mapMethods
-#' @importMethodsFrom raster area
-#' @importFrom raster area
 #' @rdname area
 setMethod("area",
           signature = "map",
@@ -890,7 +877,6 @@ setMethod(
 #' @rdname metadata
 metadata <- function(x) UseMethod("metadata")
 
-#' @importFrom raster metadata
 #' @export
 #' @rdname metadata
 metadata.Raster <- function(x) {
