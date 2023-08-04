@@ -33,7 +33,7 @@ makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
       isCorrectCRS <- compareCRS(crs("epsg:4326"), objLflt)
       #browser()
       out <- try(tiler::tile(tmpFile, tilePath, zoom = "1-10",
-                             crs = as(sf::st_crs("epsg:4326"), "CRS"), ## TODO: tiler needs updating
+                             crs = as(sf::st_crs("epsg:4326"), "CRS"),
                              format = "tms", viewer = FALSE, resume = TRUE), silent = TRUE)
       toDo <- is(out, "try-error")
       files <- dir(tilePath, recursive = TRUE)
