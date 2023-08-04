@@ -30,7 +30,6 @@ Imports:
     quickPlot,
     reproducible (>= 1.2.6.9019),
     raster (>= 2.8.4),
-    rgeos,
     sf,
     stats,
     terra (>= 1.7-0),
