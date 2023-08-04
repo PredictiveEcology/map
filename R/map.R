@@ -430,7 +430,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       message("map already has a studyArea; adding another one as study area ", dts[["studyArea"]])
     } else {
       message("Setting map CRS to this layer because it is the (first) studyArea inserted")
-      map@CRS <- raster::crs(obj)
+      map@CRS <- raster::crs(obj) |> sf::st_crs()
     }
   }
 

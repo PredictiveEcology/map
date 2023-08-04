@@ -28,7 +28,7 @@ setClass(
   slots = list(
     metadata = "data.table",
     #.Data = "environment",
-    CRS = "CRS",
+    CRS = "crs",
     paths = "list",
     analyses = "data.table",
     analysesData = "list"
@@ -49,7 +49,7 @@ setMethod("initialize", "map",
                                            columnNameForLabels = character(),
                                            leaflet = asPath(character()),
                                            studyArea = numeric(), rasterToMatch = logical())
-            .Object@CRS <- sp::CRS()
+            .Object@CRS <- sf::st_crs()
             .Object@analyses <- data.table::data.table(functionName = character())
             .Object@analysesData <- list()
             .Object@paths <- list(dataPath = getOption("map.dataPath", getwd()),

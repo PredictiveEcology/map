@@ -18,8 +18,8 @@ makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
 
     obj[] <- obj[]
     message("  Creating tiles - reprojecting to epsg:4326 (leaflet projection)")
-    objLflt <- try(projectInputs(obj, targetCRS = CRS("+init=epsg:4326"), ...), silent = TRUE)
-    # objLflt <- try(projectRaster(obj, crs = CRS("+init=epsg:4326")), silent = TRUE)
+    objLflt <- try(projectInputs(obj, targetCRS = crs("epsg:4326"), ...), silent = TRUE)
+    # objLflt <- try(projectRaster(obj, crs = crs("epsg:4326")), silent = TRUE)
     if (nchar(filename(objLflt)) == 0) {
       tmpFile <- tempfile(fileext = ".tif")
       message("                   writing to disk")
@@ -32,10 +32,10 @@ makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
     tryNum <- 1
     while (toDo) {
       print(tryNum)
-      isCorrectCRS <- compareCRS(CRS("+init=epsg:4326"), objLflt)
+      isCorrectCRS <- compareCRS(crs("epsg:4326"), objLflt)
       #browser()
       out <- try(tiler::tile(tmpFile, tilePath, zoom = "1-10",
-                             crs = CRS("+init=epsg:4326"),
+                             crs = as(sf::st_crs("epsg:4326"), "CRS"), ## TODO: tiler needs updating
                              format = "tms", viewer = FALSE, resume = TRUE), silent = TRUE)
       toDo <- is(out, "try-error")
       files <- dir(tilePath, recursive = TRUE)

@@ -14,8 +14,7 @@
 #' @importFrom reproducible asPath assessDataType Cache compareNA cropInputs Filenames fixErrors
 #' @importFrom reproducible prepInputs preProcess projectInputs postProcess writeOutputs
 #' @importFrom rgeos gArea
-#' @importFrom sf as_Spatial st_area st_as_sf st_bbox read_sf st_zm
-#' @importFrom sp CRS
+#' @importFrom sf as_Spatial st_area st_as_sf st_bbox st_crs read_sf st_zm
 #' @importFrom stats na.omit
 #' @importFrom tiler tile tiler_options
 #' @importFrom tools file_path_sans_ext

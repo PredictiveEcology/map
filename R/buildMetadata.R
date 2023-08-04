@@ -111,7 +111,7 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
 #' @keywords internal
 #'
 .enforceColumnTypes <- function(metadata) {
-  ## NOTE (2019-11-08): targetCRS needs to be character, not CRS class due to change in data.table
+  ## NOTE (2019-11-08): targetCRS needs to be character, not CRS/crs due to change in data.table
   if (!is.null(metadata[["targetCRS"]]) && !is(metadata[["targetCRS"]], "character"))
     metadata[["targetCRS"]] <- as.character(metadata[["targetCRS"]])
 
