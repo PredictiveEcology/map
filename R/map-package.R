@@ -9,13 +9,14 @@
 #' @importFrom pemisc getLocalArgsFor identifyVectorArgs makeOptimalCluster Map2 MapOrDoCall
 #' @importFrom quickPlot whereInStack
 #' @importFrom raster area compareCRS crs extent filename getValues metadata ncell
-#' @importFrom raster projectRaster raster setValues writeRaster
+#' @importFrom raster projectRaster raster rasterOptions setValues writeRaster
 #' @importFrom reproducible .requireNamespace .robustDigest
 #' @importFrom reproducible asPath assessDataType Cache compareNA cropInputs Filenames fixErrors
 #' @importFrom reproducible prepInputs preProcess projectInputs postProcess writeOutputs
-#' @importFrom sf as_Spatial st_area st_as_sf st_bbox st_crs read_sf st_zm
+#' @importFrom sf as_Spatial gdal_polygonize st_area st_as_sf st_bbox st_crs read_sf st_as_sf st_zm
 #' @importFrom stats na.omit
-#' @importFrom tiler tile tiler_options
+#' @importFrom terra as.polygons rast writeVector
+#' @importFrom tiler tile
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output getS3method
 #' @importMethodsFrom raster area

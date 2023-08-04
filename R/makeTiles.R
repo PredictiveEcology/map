@@ -14,8 +14,6 @@ makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
   dirNotExist <- !dir.exists(tilePath) | isTRUE(overwrite)
 
   if (dirNotExist) { # assume that tilePath is unique for that obj, via .robustDigest
-    .setTilerPythonPath()
-
     obj[] <- obj[]
     message("  Creating tiles - reprojecting to epsg:4326 (leaflet projection)")
     objLflt <- try(projectInputs(obj, targetCRS = crs("epsg:4326"), ...), silent = TRUE)
@@ -50,36 +48,5 @@ makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
     message("  Tiles - skipping creation - directory")
     message(reproducible::normPath(tilePath))
     message(" already exists")
-  }
-}
-
-findOSGeo4W <- function() {
-  if (.isWindows()) {
-    if (reproducible::.requireNamespace("gdalUtils")) {
-      gdalPath <- NULL
-      attemptGDAL <- TRUE
-
-      ## Handle all QGIS possibilities
-      a <- dir("C:/", pattern = "Progra", full.names = TRUE)
-      a <- grep("Program Files", a, value = TRUE)
-      a <- unlist(lapply(a, dir, pattern = "QGIS", full.name = TRUE))
-      # a <- unlist(lapply(a, dir, pattern = "bin", full.name = TRUE))
-
-      possibleWindowsPaths <- c(a, "C:/OSGeo4W64/",
-                                "C:/GuidosToolbox/QGIS/",
-                                "C:/GuidosToolbox/guidos_progs/FWTools_win/",
-                                "C:/Program Files (x86)/Quantum GIS Wroclaw/",
-                                "C:/Program Files/GDAL",
-                                "C:/Program Files (x86)/GDAL")
-      message("Searching for OSGeo4W installation")
-      paths <- file.path(possibleWindowsPaths, "OSGeo4W.bat")
-      OSGeo4WExists <- file.exists(paths)
-      if (any(OSGeo4WExists))
-        OSGeo4WPath <- paths[OSGeo4WExists]
-
-      tiler::tiler_options(osgeo4w = OSGeo4WPath)
-
-      OSGeo4WPath
-    }
   }
 }

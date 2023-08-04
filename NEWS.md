@@ -1,7 +1,9 @@
 # map (development version)
 
 * drop support for R 4.0 due to changes in dependency packages
-* [WIP] remove retiring dependency packages `sp`, `rgeos` in favour of `terra` + `sf`
+* remove retiring dependency packages `sp`, `rgeos`, `rgdal` in favour of `terra` + `sf`
+* remove dependency package `gdalUtils` in favour of `sf` + `terra`
+* use most recent `tiler` version (0.3.0)
 
 # map v0.0.3
 
