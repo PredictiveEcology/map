@@ -10,32 +10,33 @@
 \alias{spatialPolygons}
 \alias{spatialPoints}
 \alias{maps}
-\title{Extract rasters in the \code{map} object}
+\title{Extract objects of specific classes from a \code{map} object}
 \usage{
-rasters(map)
+rasters(map, ...)
 
-\method{rasters}{map}(map)
+\method{rasters}{map}(map, ...)
 
-sp(map)
+sp(map, ...)
 
-\method{sp}{map}(map)
+\method{sp}{map}(map, ...)
 
-sf(map)
+sf(map, ...)
 
-\method{sf}{map}(map)
+\method{sf}{map}(map, ...)
 
-spatialPolygons(map)
+spatialPolygons(map, ...)
 
-spatialPoints(map)
+spatialPoints(map, ...)
 
 maps(map, class = NULL, layerName = NULL)
 }
 \arguments{
-\item{map}{A \code{map} class obj}
+\item{map}{A \code{map} object}
+
+\item{...}{Additional arguments passed to other methods (not used)}
 
 \item{class}{If supplied, this will be the class of objects returned. Default
-is \code{NULL} which is "all", meaning all objects in the \code{map}
-object.}
+is \code{NULL} which is "all", meaning all objects in the \code{map} object.}
 
 \item{layerName}{TODO: description needed}
 }
@@ -43,6 +44,16 @@ object.}
 A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
 }
 \description{
+\itemize{
+\item \code{rasters()} extracts \code{RasterLayer} objects;
+\item \code{sf()} extracts \code{sf} objects;
+\item \code{sp()} extracts \code{Spatial} objects;
+\item \code{spatialPolygons()} extracts \code{SpatialPolygons} objects;
+\item \code{spatialPoints()} extracts \code{SpatialPoints} objects;
+\item \code{spatRasters()} extracts \code{SpatRaster} objects;
+\item \code{spatVectors()} extracts \code{SpatVector} objects;
+}
+
 This will extract all objects in or pointed to within the \code{map}.
 }
 \seealso{

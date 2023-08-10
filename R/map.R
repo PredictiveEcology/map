@@ -163,7 +163,7 @@ utils::globalVariables(c(
 #'
 mapAdd <- function(obj, map, layerName,
                    overwrite = getOption("map.overwrite", FALSE), ...) {
-  UseMethod("mapAdd")
+  UseMethod("mapAdd", obj)
 }
 
 #' @param ... Additonal arguments passed to [reproducible::postProcess()],
@@ -511,17 +511,14 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 #'   m
 #' }
 mapRm <- function(map, layer, ask = TRUE, ...) {
-  UseMethod("mapRm")
+  UseMethod("mapRm", map)
 }
 
 #' @export
 #' @aliases mapRm
 #' @family mapMethods
 #' @rdname mapRm
-mapRm.default <- function(map = NULL, layer = NULL, ask = TRUE, ...) {
-  if (is.null(map)) {
-    stop("Must pass a map")
-  }
+mapRm.map <- function(map, layer = NULL, ask = TRUE, ...) {
   if (is.character(layer))
     layer <- map@metadata[, which(layerName %in% layer)]
 
@@ -571,17 +568,19 @@ setMethod("crs",
 #'
 #' @param layer TODO: document this
 #'
+#' @param ... Additional arguments passed to other methods (not used)
+#'
 #' @export
 #' @family mapMethods
 #' @rdname studyAreaName
-studyAreaName <- function(x, layer) {
-  UseMethod("studyAreaName")
+studyAreaName <- function(x, layer, ...) {
+  UseMethod("studyAreaName", x)
 }
 
 #' @export
 #' @family mapMethods
 #' @rdname studyAreaName
-studyAreaName.map <- function(x, layer = 1) {
+studyAreaName.map <- function(x, layer = 1, ...) {
   if (sum(x@metadata$studyArea, na.rm = TRUE)) {
     if (isTRUE(is.na(layer))) {
       layer <- max(x@metadata$studyArea, na.rm = TRUE)
@@ -595,7 +594,7 @@ studyAreaName.map <- function(x, layer = 1) {
 #' @export
 #' @family mapMethods
 #' @rdname studyAreaName
-studyAreaName.data.table <- function(x, layer = 1) {
+studyAreaName.data.table <- function(x, layer = 1, ...) {
   if (sum(x$studyArea, na.rm = TRUE)) {
     if (isTRUE(is.na(layer))) {
       layer <- max(x$studyArea, na.rm = TRUE)
@@ -707,61 +706,68 @@ setMethod("rasterToMatch", signature = "map",
             }
 })
 
-#' Extract rasters in the `map` object
+################################################################################
+#' Extract objects of specific classes from a `map` object
+#'
+#' - `rasters()` extracts `RasterLayer` objects;
+#' - `sf()` extracts `sf` objects;
+#' - `sp()` extracts `Spatial` objects;
+#' - `spatialPolygons()` extracts `SpatialPolygons` objects;
+#' - `spatialPoints()` extracts `SpatialPoints` objects;
+#' - `spatRasters()` extracts `SpatRaster` objects;
+#' - `spatVectors()` extracts `SpatVector` objects;
 #'
 #' @export
 #' @family mapMethods
 #' @rdname maps
-rasters <- function(map) {
-  UseMethod("rasters")
+rasters <- function(map, ...) {
+  UseMethod("rasters", map)
 }
 
 #' @export
 #' @family mapMethods
 #' @rdname maps
-rasters.map <- function(map) {
+rasters.map <- function(map, ...) {
   maps(map, "RasterLayer")
 }
 
-#' Extract `sp` class objects from the `map` obj
 #' @export
 #' @family mapMethods
 #' @rdname maps
-sp <- function(map) {
+sp <- function(map, ...) {
   UseMethod("sp")
 }
 
 #' @export
 #' @family mapMethods
 #' @rdname maps
-sp.map <- function(map) {
+sp.map <- function(map, ...) {
   maps(map, "Spatial")
 }
 
-#' Extract `sf` class objects from the `map` obj
 #' @export
 #' @family mapMethods
 #' @rdname maps
-sf <- function(map) {
-  UseMethod("sf")
+sf <- function(map, ...) {
+  UseMethod("sf", map)
 }
 
 #' @export
 #' @family mapMethods
 #' @rdname maps
-sf.map <- function(map) {
+sf.map <- function(map, ...) {
   maps(map, "sf")
 }
 
 #' @export
 #' @rdname maps
-spatialPolygons <- function(map) {
+spatialPolygons <- function(map, ...) {
   maps(map, "SpatialPolygons")
 }
 
 #' @export
 #' @rdname maps
-spatialPoints <- function(map) {
+spatialPoints <- function(map, ...) {
   maps(map, "SpatialPoints")
 }
 
@@ -784,11 +790,15 @@ leafletTiles <- function(map) {
 #'
 #' This will extract all objects in or pointed to within the `map`.
 #'
-#' @param map A `map` class obj
+#' @param map A `map` object
+#'
 #' @param class If supplied, this will be the class of objects returned. Default
-#'              is `NULL` which is "all", meaning all objects in the `map`
-#'              object.
+#'              is `NULL` which is "all", meaning all objects in the `map` object.
+#'
 #' @param layerName TODO: description needed
+#'
+#' @param ... Additional arguments passed to other methods (not used)
+#'
 #' @return A list of maps (i.e., sp, raster, or sf objects) of class `class`
 #'
 #' @export
@@ -867,40 +877,88 @@ setMethod(
                                  formalArgs(reproducible::projectInputs)))
 
 ################################################################################
-#' Extract the metadata obj
+#' Extract metadata
 #'
-#' Methods for specific classes exist.
 #'
-#' @param x TODO: description needed
+#'
+#' @param x A `map`, `Raster`, or `SpatRaster` object
+#'
+#' @param ... Additional arguments passed to other methods (not used)
 #'
 #' @export
 #' @rdname metadata
-metadata <- function(x) UseMethod("metadata")
+metadata <- function(x, ...) {
+  UseMethod("metadata", x)
+}
 
 #' @export
 #' @rdname metadata
-metadata.Raster <- function(x) {
+metadata.map <- function(x, ...) {
+  x@metadata
+}
+
+#' @export
+#' @rdname metadata
+metadata.Raster <- function(x, ...) {
   raster::metadata(x)
 }
 
 #' @export
 #' @rdname metadata
-metadata.map <- function(x) {
-  x@metadata
+metadata.SpatRaster <- function(x, ...) {
+  terra::meta(x)
 }
 
-addColumnNameForLabels <- function(x, columnNameForLabels) {
-  if (is(x, "list")) {
-    lapply(x, addColumnNameForLabels, columnNameForLabels = columnNameForLabels)
-  } else if (is(x, "sf")) {
-    if (ncol(x) > 0) {
-      x[["shinyLabel"]] <- x[[columnNameForLabels]]
-    }
-  } else if (is(x, "SpatialPolygonsDataFrame")) {
-    if (ncol(x) > 0) {
-      x[["shinyLabel"]] <- x[[columnNameForLabels]]
-    }
-  }
+################################################################################
+#' Add `shinyLabel` column (attribute) to spatial vectors
+#'
+#' @param x a spatial vector object (`sf`, `SpatialPolygons`, `SpatVector`)
+#'
+#' @param columnNameForLabels character or integer identifying an existing column (attribute)
+#'        to use as the `shinyLabel`.
+#'
+#' @param ... Additional arguments passed to other methods (not used)
+#'
+#' @return a modified object with the same class as `x`
+#'
+#' @export
+#' @rdname addColumnNameForLabels
+addColumnNameForLabels <- function(x, columnNameForLabels, ...) {
+  UseMethod("addColumnNameForLabels", x)
+}
 
+#' @export
+#' @rdname addColumnNameForLabels
+addColumnNameForLabels.default <- function(x, columnNameForLabels, ...) {
   return(x)
+}
+
+#' @export
+#' @rdname addColumnNameForLabels
+addColumnNameForLabels.list <- function(x, columnNameForLabels, ...) {
+  lapply(x, addColumnNameForLabels, columnNameForLabels = columnNameForLabels)
+}
+
+#' @export
+#' @rdname addColumnNameForLabels
+addColumnNameForLabels.sf <- function(x, columnNameForLabels, ...) {
+  if (ncol(x) > 0) {
+    x[["shinyLabel"]] <- x[[columnNameForLabels]]
+  }
+}
+
+#' @export
+#' @rdname addColumnNameForLabels
+addColumnNameForLabels.SpatialPolygonsDataFrame <- function(x, columnNameForLabels, ...) {
+  if (ncol(x) > 0) {
+    x[["shinyLabel"]] <- x[[columnNameForLabels]]
+  }
+}
+
+#' @export
+#' @rdname addColumnNameForLabels
+addColumnNameForLabels.SpatVector <- function(x, columnNameForLabels, ...) {
+  if (ncol(x) > 0) {
+    x[["shinyLabel"]] <- x[[columnNameForLabels]]
+  }
 }

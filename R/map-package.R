@@ -1,3 +1,6 @@
+#' @keywords internal
+"_PACKAGE"
+
 ## usethis namespace: start
 #' @import methods
 #' @importFrom backports import
