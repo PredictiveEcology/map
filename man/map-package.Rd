@@ -6,7 +6,7 @@
 \alias{map-package}
 \title{map: Defines a meta class of geographical objects, the 'map' class, and associated tools}
 \description{
-The map class is a collection of map objects ('sp', 'raster', 'sf'), with a number of metadata additions to enable powerful methods, e.g., for leaflet, reproducible GIS etc.
+The 'map' class is a collection of geospatial objects ('sp', 'raster', 'sf', 'terra'), with a number of metadata additions to enable powerful methods, e.g., for leaflet, reproducible GIS etc.
 }
 \seealso{
 Useful links:
@@ -18,16 +18,16 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Eliot J B McIntire \email{eliot.mcintire@nrcan-rncan.gc.ca} (\href{https://orcid.org/0000-0002-6914-8316}{ORCID})
+\strong{Maintainer}: Alex M Chubaty \email{achubaty@for-cast.ca} (\href{https://orcid.org/0000-0001-7146-8135}{ORCID})
 
 Authors:
 \itemize{
-  \item Alex M Chubaty \email{achubaty@for-cast.ca} (\href{https://orcid.org/0000-0001-7146-8135}{ORCID})
+  \item Eliot J B McIntire \email{eliot.mcintire@nrcan-rncan.gc.ca} (\href{https://orcid.org/0000-0002-6914-8316}{ORCID})
 }
 
 Other contributors:
 \itemize{
-  \item Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources Canada [copyright holder]
+  \item His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources Canada [copyright holder]
 }
 
 }
