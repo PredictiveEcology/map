@@ -42,7 +42,7 @@ areaAndPolyValue.SpatRaster <- function(ras, ...) {
 #'
 #' @param pypath,quiet deprecated. maintained for backwards compatibility only (not used).
 #'
-#' @return if `readpoly = TRUE` (default), an `sf` polygons object; otherwise, `NULL`.
+#' @return if `readpoly = TRUE` (default), a `SpatVector` object; otherwise, `NULL`.
 #'
 gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", # nolint
                              pypath = NULL, readpoly = TRUE, quiet = TRUE) {

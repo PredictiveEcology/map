@@ -26,7 +26,7 @@ gdal_polygonizeR(
 (this was previously using \code{gdal_polygonize} on disk and required reading the file)}
 }
 \value{
-if \code{readpoly = TRUE} (default), an \code{sf} polygons object; otherwise, \code{NULL}.
+if \code{readpoly = TRUE} (default), a \code{SpatVector} object; otherwise, \code{NULL}.
 }
 \description{
 Polygonize a raster
