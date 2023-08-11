@@ -57,6 +57,7 @@ Collate:
     'GIS.R'
     'buildMetadata.R'
     'makeTiles.R'
+    'map-Defunct.R'
     'map-analysis.R'
     'map-class.R'
     'map-package.R'

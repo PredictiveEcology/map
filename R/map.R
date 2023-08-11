@@ -543,11 +543,11 @@ if (!isGeneric("crs")) {
   })
 }
 
-#' Extract the crs of a `map`
+#' Extract the CRS of a `map`
 #'
 #' @inheritParams raster::crs
 #'
-#' @exportMethod crs
+#' @export
 #' @family mapMethods
 #' @importMethodsFrom raster crs
 #' @rdname crs
@@ -557,7 +557,7 @@ setMethod("crs",
             if (!is.null(x@CRS))
               x@CRS
             else
-              NA
+              NA_character_
 })
 
 #' Map class methods

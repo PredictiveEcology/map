@@ -14,7 +14,7 @@ gdal_polygonizeR(
 )
 }
 \arguments{
-\item{x}{a \code{RsaterLayer}, \code{SpatRaster}, or character giving the filepath to a raster.}
+\item{x}{a \code{RasterLayer}, \code{SpatRaster}, or character giving the filepath to a raster.}
 
 \item{outshape}{character giving the filepath for the output shapefile.}
 

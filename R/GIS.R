@@ -1,13 +1,29 @@
-#' `areaAndPolyValue`
+#' Determine the area of each zone in a raster
 #'
-#' Determine the area of each zone in a raster. TODO: improve description
+#' Polygonize a raster and calculate the area of each polygon.
 #'
-#' @param ras A `Raster*` object
+#' @param ras A `Raster` or `SpatRaster` object
+#' @param ... Additional arguments (not used)
 #'
 #' @return list containing: `sizeInHa`, the area; and `polyID`, the polygon ID.
 #'
 #' @export
-areaAndPolyValue <- function(ras) {
+#' @rdname areaAndPolyValue
+areaAndPolyValue <- function(ras, ...) {
+  UseMethod("areaAndPolyValue", ras)
+}
+
+#' @export
+#' @rdname areaAndPolyValue
+areaAndPolyValue.Raster <- function(ras, ...) {
+  polyIndivSpecies <- gdal_polygonizeR(ras)
+  pArea <- as.numeric(sf::st_area(polyIndivSpecies) / 1e4)
+  list(sizeInHa = pArea, polyID = polyIndivSpecies$DN)
+}
+
+#' @export
+#' @rdname areaAndPolyValue
+areaAndPolyValue.SpatRaster <- function(ras, ...) {
   polyIndivSpecies <- gdal_polygonizeR(ras)
   pArea <- as.numeric(sf::st_area(polyIndivSpecies) / 1e4)
   list(sizeInHa = pArea, polyID = polyIndivSpecies$DN)
@@ -15,7 +31,7 @@ areaAndPolyValue <- function(ras) {
 
 #' Polygonize a raster
 #'
-#' @param x a `RsaterLayer`, `SpatRaster`, or character giving the filepath to a raster.
+#' @param x a `RasterLayer`, `SpatRaster`, or character giving the filepath to a raster.
 #'
 #' @param outshape character giving the filepath for the output shapefile.
 #'
@@ -34,13 +50,20 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
     outshape <- tempfile(fileext = ".shp")
   }
   if (is(x, "Raster") || is(x, "character")) {
-    x <- rast(x)
+    x <- terra::rast(x)
   }
-  shp <- as.polygons(x)
-  writeVector(x, outshape, filetype = gdalformat)
+  if (terra::is.factor(x)) {
+    x <- as.numeric(x)
+  }
+
+  p <- terra::as.polygons(x) |>
+    terra::disagg()  ## to get POLYGONS from MULTIPOLYGONS
+  names(p) <- "DN" ## for backwards compatibility
+
+  terra::writeVector(p, outshape, filetype = gdalformat)
 
   if (isTRUE(readpoly)) {
-    return(st_as_sf(shp))
+    return(p)
   } else {
     return(NULL)
   }
@@ -48,16 +71,28 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
 
 #' `.rasterToMemory`
 #'
-#' @param x A `Raster*` object
+#' @param x A `Raster` or `SpatRaster` object
 #'
-#' @param ... Additional arguments passed to `raster`
+#' @param ... Additional arguments passed to raster read function
 #'
 #' @export
 #' @rdname rasterToMemory
 .rasterToMemory <- function(x, ...) {
-  r <- raster(x, ...)
-  r <- raster::setValues(r, raster::getValues(r))
-  return(r)
+  UseMethod(".rasterToMemory", x)
+}
+
+#' @export
+#' @rdname rasterToMemory
+.rasterToMemory.Raster <- function(x, ...) {
+  raster::raster(x, ...) |>
+    raster::setValues(raster::getValues(x))
+}
+
+#' @export
+#' @rdname rasterToMemory
+.rasterToMemory.SpatRaster <- function(x, ...) {
+  terra::rast(x, ...) |>
+    terra::setValues(terra::values(x))
 }
 
 #' Fasterize with crop & spTransform first

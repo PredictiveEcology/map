@@ -16,9 +16,9 @@
 #' @importFrom reproducible .requireNamespace .robustDigest
 #' @importFrom reproducible asPath assessDataType Cache compareNA cropInputs Filenames fixErrors
 #' @importFrom reproducible prepInputs preProcess projectInputs postProcess writeOutputs
-#' @importFrom sf as_Spatial gdal_polygonize st_area st_as_sf st_bbox st_crs read_sf st_as_sf st_zm
+#' @importFrom sf as_Spatial gdal_polygonize st_area st_as_sf st_bbox st_crs st_read st_as_sf st_zm
 #' @importFrom stats na.omit
-#' @importFrom terra as.polygons rast writeVector
+#' @importFrom terra as.polygons disagg is.factor rast setValues values writeVector
 #' @importFrom tiler tile
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output getS3method
