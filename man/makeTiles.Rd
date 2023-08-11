@@ -9,7 +9,7 @@ makeTiles(tilePath, obj, overwrite = FALSE, ...)
 \arguments{
 \item{tilePath}{A director to write tiles}
 
-\item{obj}{A raster objects with or without file-backing}
+\item{obj}{A raster object with or without file-backing}
 
 \item{overwrite}{Logical. If \code{FALSE}, and the director exists,
 then it will not overwrite any files.}
