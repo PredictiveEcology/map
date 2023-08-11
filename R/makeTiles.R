@@ -1,6 +1,3 @@
-#' @keywords internal
-.isWindows <- getFromNamespace("isWindows", "reproducible")
-
 #' Make tiles (pyramids) using `gdal2tiles`
 #'
 #' @param tilePath A director to write tiles
