@@ -945,6 +945,8 @@ addColumnNameForLabels.sf <- function(x, columnNameForLabels, ...) {
   if (ncol(x) > 0) {
     x[["shinyLabel"]] <- x[[columnNameForLabels]]
   }
+
+  return(x)
 }
 
 #' @export
@@ -953,6 +955,8 @@ addColumnNameForLabels.SpatialPolygonsDataFrame <- function(x, columnNameForLabe
   if (ncol(x) > 0) {
     x[["shinyLabel"]] <- x[[columnNameForLabels]]
   }
+
+  return(x)
 }
 
 #' @export
@@ -961,4 +965,6 @@ addColumnNameForLabels.SpatVector <- function(x, columnNameForLabels, ...) {
   if (ncol(x) > 0) {
     x[["shinyLabel"]] <- x[[columnNameForLabels]]
   }
+
+  return(x)
 }
