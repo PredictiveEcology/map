@@ -289,10 +289,18 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
       list2env(dots, envir = environment()) # put any arguments from the ... into this local env
       x <- obj ## put it into memory so identifyVectorArgs finds it
-      args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialClasses"),
-                                            getS3method("maskInputs", "Raster"),
-                                            projectInputs, cropInputs, projectRaster, writeOutputs),
-                                  ls(), environment(), dots = dots)
+      args1 <- identifyVectorArgs(
+        fn = list(reproducible::Cache,
+                  getS3method("postProcess", "default"),
+                  reproducible::maskTo,
+                  reproducible::projectTo,
+                  reproducible::cropTo,
+                  raster::projectRaster, ## TODO use terra
+                  reproducible::writeOutputs),
+        ls(),
+        environment(),
+        dots = dots
+      )
 
       maxNumClus <- if (length(args1$argsMulti)) {
         max(unlist(lapply(args1$argsMulti, NROW)), na.rm = TRUE)
@@ -413,6 +421,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       parallel::clusterEvalQ(cl, .clInit())
     }
     on.exit(try(stopCluster(cl), silent = TRUE))
+
     tilePath <- dts[["leafletTiles"]]
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
     out <- MapOrDoCall(makeTiles, multiple = args1$argsMulti,

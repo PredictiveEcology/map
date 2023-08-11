@@ -43,18 +43,17 @@ test_that("addColumnNameForLabels handles multiple object classes", {
   pl1 <- addColumnNameForLabels(pl, 1)
   pl2 <- addColumnNameForLabels(pl, "lyr.1")
   expect_true(is.list(pl1))
-  expect_equal(pl1[[1]], pt1)
+  expect_true(all.equal(pl1[[1]], pt1)) ## use terra::all.equal
   expect_equal(pl1[[2]], pf1)
   expect_equal(pl1[[3]], ps1)
 
   expect_true(is.list(pl2))
-  expect_equal(pl2[[1]], pt2)
+  expect_true(all.equal(pl2[[1]], pt2)) ## use terra::all.equal
   expect_equal(pl2[[2]], pf2)
   expect_equal(pl2[[3]], ps2)
 })
 
 test_that("gdal_polygonizer rewrite works as previously", {
-  skip_if_not_installed("gdalUtils")
   skip_on_cran()
 
   ## dummy example
@@ -64,19 +63,19 @@ test_that("gdal_polygonizer rewrite works as previously", {
   p <- gdal_polygonizeR(r)
   p.old <- map:::.gdal_polygonizeR(raster(r)) |> terra::vect()
 
-  expect_equal(p, p.old)
+  expect_true(all.equal(p, p.old))  ## use terra::all.equal
 
   ## raster
   f <- system.file("external/vegTypeMap.grd", package = "map")
   r <- raster::raster(f)
   p <- gdal_polygonizeR(r)
   p.old <- map:::.gdal_polygonizeR(r) |> terra::vect()
-  expect_equal(p, p.old)
+  expect_true(all.equal(p, p.old))  ## use terra::all.equal
 
   ## terra
   f <- system.file("external/vegTypeMap.grd", package = "map")
   r <- terra::rast(f)
   p <- gdal_polygonizeR(r)
   p.old <- map:::.gdal_polygonizeR(r) |> terra::vect()
-  expect_equal(p, p.old)
+  expect_true(all.equal(p, p.old))  ## use terra::all.equal
 })

@@ -28,7 +28,7 @@ Imports:
     parallelly,
     pemisc (>= 0.0.4.9008),
     quickPlot,
-    reproducible (>= 1.2.6.9019),
+    reproducible (>= 2.0.6),
     raster (>= 2.8.4),
     sf,
     stats,
@@ -40,8 +40,9 @@ Suggests:
     knitr,
     rmarkdown,
     SpaDES.tools,
-    testthat,
-    usethis
+    testthat (>= 3.0.0),
+    usethis,
+    withr
 Remotes:
     ropensci/tiler,
     PredictiveEcology/pemisc@development,
@@ -66,3 +67,4 @@ Collate:
     'zzz.R'
 RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
+Config/testthat/edition: 3

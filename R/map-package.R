@@ -15,7 +15,7 @@
 #' @importFrom raster projectRaster raster rasterOptions setValues writeRaster
 #' @importFrom reproducible .requireNamespace .robustDigest
 #' @importFrom reproducible asPath assessDataType Cache compareNA cropInputs Filenames fixErrors
-#' @importFrom reproducible prepInputs preProcess projectInputs postProcess writeOutputs
+#' @importFrom reproducible postProcess prepInputs preProcess projectInputs projectTo writeOutputs
 #' @importFrom sf as_Spatial gdal_polygonize st_area st_as_sf st_bbox st_crs st_read st_as_sf st_zm
 #' @importFrom stats na.omit
 #' @importFrom terra as.polygons disagg is.factor rast setValues values writeVector

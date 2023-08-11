@@ -10,11 +10,12 @@
 makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
   dirNotExist <- !dir.exists(tilePath) | isTRUE(overwrite)
 
-  if (dirNotExist) { # assume that tilePath is unique for that obj, via .robustDigest
-    obj[] <- obj[]
+  if (!is.na(tilePath) && dirNotExist) {
+    ## assume that tilePath is unique for that obj, via .robustDigest
     message("  Creating tiles - reprojecting to epsg:4326 (leaflet projection)")
-    objLflt <- try(projectInputs(obj, targetCRS = crs("epsg:4326"), ...), silent = TRUE)
-    # objLflt <- try(projectRaster(obj, crs = crs("epsg:4326")), silent = TRUE)
+    objLflt <- try(projectTo(obj, projectTo = crs("epsg:4326"), ...), silent = TRUE)
+    browser() ## TODO: above fails with:
+    ##> unable to find an inherited method for function ‘res’ for signature ‘"character"’
     if (nchar(filename(objLflt)) == 0) {
       tmpFile <- tempfile(fileext = ".tif")
       message("                   writing to disk")
@@ -44,6 +45,6 @@ makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
   } else {
     message("  Tiles - skipping creation - directory")
     message(reproducible::normPath(tilePath))
-    message(" already exists")
+    message(" already exists or is not specified")
   }
 }
