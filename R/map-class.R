@@ -5,14 +5,14 @@
 #'
 #' @slot metadata  `data.table` with columns describing metadata of map objects in `maps` slot.
 #'
-#' @slot .xData Named environment of map-type objects (e.g., `sf`, `Raster*`, `Spatial*`.
+#' @slot .xData Named environment of map-type objects (e.g., `sf`, `Raster*`, `Spatial*`).
 #'              Each entry may also be simply an environment, which indicates
 #'              where to find the object, i.e., via `get(layerName, envir = environment)`.
 #'
 #' @slot CRS  The common CRS of all layers.
 #'
 #' @slot paths A named list of file paths. The default is a list of length 2 specifying
-#'             `dataPath` and `tilePath`
+#'             `dataPath` and `tilePath`.
 #'
 #' @slot analyses    A `data.table` or `data.frame` of the types of analyses to perform.
 #'

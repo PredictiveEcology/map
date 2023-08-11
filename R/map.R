@@ -174,11 +174,10 @@ mapAdd <- function(obj, map, layerName,
 #' @param envir An optional environment. If supplied, then the obj
 #'        will not be placed "into" the maps slot, rather the environment label will
 #'        be placed into the maps slot. Upon re
-#' @param useCache Logical. If `TRUE`, then internal calls to `Cache` will
-#'        be used. Default is `TRUE`
-#' @param useParallel Logical. If `TRUE`, then if there is more than one
-#'        calculation to do at any stage, it will create and use a parallel
-#'        cluster via `makeOptimalCluster`.
+#' @param useCache Logical. If `TRUE`, then internal calls to `Cache` will be used.
+#'        Default is `TRUE`.
+#' @param useParallel Logical. If `TRUE`, then if there is more than one calculation to do
+#'        at any stage, it will create and use a parallel cluster via `makeOptimalCluster`.
 #'        If running analyses in parallel, it may be useful to pass a function (via `.clInit`)
 #'        to be run on each of the nodes immediately upon cluster creation (e.g., to set options).
 #'
@@ -206,9 +205,9 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ###########################################
   # Get obj, if missing, via prepInputs url, or targetFile
   ###########################################
-  if (is.null(obj)) {    # with no obj, we get it first, then pass to mapAdd
-    # Don't run postProcess because that will happen in next mapAdd when obj is
-    #   in hand
+  if (is.null(obj)) {
+    ## with no obj, we get it first, then pass to mapAdd
+    ## don't run postProcess because that will happen in next mapAdd when obj is in hand
     args1 <- identifyVectorArgs(fn = list(Cache, preProcess), ls(), environment(), dots)
     maxNumClus <- if (length(args1$argsMulti)) {
       max(unlist(lapply(args1$argsMulti, NROW)), na.rm = TRUE)

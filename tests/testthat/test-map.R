@@ -5,29 +5,29 @@ test_that("mapAdd doesn't work", {
   ## TODO: `LargePatches` and `LeadingVegTypeByAgeClass` were moved to `LandWebUtils`,
   ##  which is a reverse dependency of this package, so it can't be used here.
 
-  testInitOut <- testInit(c("raster", "sp", "reproducible", "SpaDES.tools")) ## , "LandWebUtils"
-  on.exit({
-    testOnExit(testInitOut)
-  }, add = TRUE)
+  # withr::local_package("raster")
+  # withr::local_package("sp")
+  # withr::local_package("reproducible")
+  # withr::local_package("SpaDES.tools")
 
   setwd(tmpdir)
   coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98, 59.9, 65.73, 63.58, 54.79, 59.9),
                       .Dim = c(5L, 2L))
-  sr1 <- Polygon(coords)
-  srs1 <- Polygons(list(sr1), "s1")
-  studyArea <- SpatialPolygons(list(srs1), 1L)
-  crs(studyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
-  studyArea <- SpatialPolygonsDataFrame(studyArea,
-                                        data = data.frame(ID = 1, shinyLabel = "zone2"),
-                                        match.ID = FALSE)
+  sr1 <- sp::Polygon(coords)
+  srs1 <- sp::Polygons(list(sr1), "s1")
+  studyArea <- sp::SpatialPolygons(list(srs1), 1L)
+  raster::crs(studyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+  studyArea <- sp::SpatialPolygonsDataFrame(studyArea,
+                                            data = data.frame(ID = 1, shinyLabel = "zone2"),
+                                            match.ID = FALSE)
 
   ml <- mapAdd(studyArea, isStudyArea = TRUE, layerName = "Small Study Area",
                poly = TRUE, analysisGroup2 = "Small Study Area")
 
-  smallStudyArea <- randomPolygon(studyArea(ml), 1e5)
-  smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,
-                                             data = data.frame(ID = 1, shinyLabel = "zone1"),
-                                             match.ID = FALSE)
+  smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml), 1e5)
+  smallStudyArea <- sp::SpatialPolygonsDataFrame(smallStudyArea,
+                                                 data = data.frame(ID = 1, shinyLabel = "zone1"),
+                                                 match.ID = FALSE)
   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
                analysisGroup2 = "Smaller Study Area",
                poly = TRUE,

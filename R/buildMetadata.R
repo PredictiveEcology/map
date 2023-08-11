@@ -24,7 +24,8 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
 
   # If it is studyArea
   if (isTRUE(isStudyArea)) {
-    area <- ifelse(is(obj, "sf"), obj, sf::st_as_sf(obj)) |> sf::st_area()
+    area <- if (is(obj, "sf")) obj else sf::st_as_sf(obj) |>
+      sf::st_area()
     studyAreaNumber <- 1 + NROW(metadata[compareNA(studyArea, TRUE) |
                                            (is.numeric(studyArea) & studyArea > 0)])
     set(b, NULL, "studyArea", studyAreaNumber)
@@ -116,7 +117,6 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
     metadata[["targetCRS"]] <- as.character(metadata[["targetCRS"]])
 
   ## TODO: manual workarounds to deal with column typing for LandWeb
-  ## -- even this is not enough, as Path class not consistently defined; see reproducible#263
   if (!is.null(metadata[["destinationPath"]]) && !is(metadata[["destinationPath"]], "Path"))
     set(metadata, NULL, "destinationPath", asPath(metadata[["destinationPath"]]))
 

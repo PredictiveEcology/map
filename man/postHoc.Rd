@@ -28,9 +28,8 @@ i.e., \code{"analysisGroup1"} or \code{"analysisGroup2"}.}
 (which will do all \code{analysisGroups}; default),
 or 1 or more of the the \code{functionName}s that are in the analyses slot.}
 
-\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one
-calculation to do at any stage, it will create and use a parallel
-cluster via \code{makeOptimalCluster}.
+\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one calculation to do
+at any stage, it will create and use a parallel cluster via \code{makeOptimalCluster}.
 If running analyses in parallel, it may be useful to pass a function (via \code{.clInit})
 to be run on each of the nodes immediately upon cluster creation (e.g., to set options).}
 
