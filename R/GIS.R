@@ -95,22 +95,23 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
     terra::setValues(terra::values(x))
 }
 
-#' Fasterize with crop & spTransform first
+#' `fasterize` following crop & reproject
 #'
-#' @param emptyRaster An empty raster with res, crs, extent all
-#'        correct for to pass to `fasterize`
-#' @param polygonToFasterize passed to `fasterize`, but it
-#'        will be cropped first if
-#'        `extent(emptyRaster) < extent(polygonToFasterize)`
-#' @param field passed to `fasterize`
+#' @param emptyRaster An empty `RasterLayer` with `res`, `crs`, `extent` all
+#'        correct for to pass to [fasterize()]
+#'
+#' @param polygonToFasterize passed to [fasterize()];
+#'        will be cropped first if `extent(emptyRaster) < extent(polygonToFasterize)`.
+#'
+#' @param field passed to [fasterize()]
 #'
 #' @export
 fasterize2 <- function(emptyRaster, polygonToFasterize, field) {
-  ras <- raster(emptyRaster)
-  if (extent(polygonToFasterize) > extent(ras)) {
-    polygonToFasterize <- Cache(cropInputs, polygonToFasterize, rasterToMatch = ras)
+  ras <- raster::raster(emptyRaster)
+  if (raster::extent(polygonToFasterize) > raster::extent(ras)) {
+    polygonToFasterize <- reproducible::Cache(cropInputs, polygonToFasterize, rasterToMatch = ras)
   }
-  thePoly <- projectInputs(polygonToFasterize, targetCRS = crs(ras))
+  thePoly <- reproducible::projectInputs(polygonToFasterize, targetCRS = raster::crs(ras))
   thePoly$polygonNum <- seq_along(thePoly)
   if (!is.factor(thePoly[[field]])) {
     thePoly[[field]] <- factor(thePoly[[field]])

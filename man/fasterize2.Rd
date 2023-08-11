@@ -2,20 +2,19 @@
 % Please edit documentation in R/GIS.R
 \name{fasterize2}
 \alias{fasterize2}
-\title{Fasterize with crop & spTransform first}
+\title{\code{fasterize} following crop & reproject}
 \usage{
 fasterize2(emptyRaster, polygonToFasterize, field)
 }
 \arguments{
-\item{emptyRaster}{An empty raster with res, crs, extent all
-correct for to pass to \code{fasterize}}
+\item{emptyRaster}{An empty \code{RasterLayer} with \code{res}, \code{crs}, \code{extent} all
+correct for to pass to \code{\link[=fasterize]{fasterize()}}}
 
-\item{polygonToFasterize}{passed to \code{fasterize}, but it
-will be cropped first if
-\code{extent(emptyRaster) < extent(polygonToFasterize)}}
+\item{polygonToFasterize}{passed to \code{\link[=fasterize]{fasterize()}};
+will be cropped first if \code{extent(emptyRaster) < extent(polygonToFasterize)}.}
 
-\item{field}{passed to \code{fasterize}}
+\item{field}{passed to \code{\link[=fasterize]{fasterize()}}}
 }
 \description{
-Fasterize with crop & spTransform first
+\code{fasterize} following crop & reproject
 }
