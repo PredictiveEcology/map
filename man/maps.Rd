@@ -9,6 +9,10 @@
 \alias{sf.map}
 \alias{spatialPolygons}
 \alias{spatialPoints}
+\alias{spatRasters}
+\alias{spatRasters.map}
+\alias{spatVectors}
+\alias{spatVectors.map}
 \alias{maps}
 \title{Extract objects of specific classes from a \code{map} object}
 \usage{
@@ -27,6 +31,14 @@ sf(map, ...)
 spatialPolygons(map, ...)
 
 spatialPoints(map, ...)
+
+spatRasters(map, ...)
+
+\method{spatRasters}{map}(map, ...)
+
+spatVectors(map, ...)
+
+\method{spatVectors}{map}(map, ...)
 
 maps(map, class = NULL, layerName = NULL)
 }
@@ -57,6 +69,34 @@ A list of geospatial objects of class \code{class}
 This will extract all objects in or pointed to within the \code{map}.
 }
 \seealso{
+Other mapMethods: 
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyAreaName}()},
+\code{\link{studyArea}()}
+
+Other mapMethods: 
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyAreaName}()},
+\code{\link{studyArea}()}
+
+Other mapMethods: 
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyAreaName}()},
+\code{\link{studyArea}()}
+
+Other mapMethods: 
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyAreaName}()},
+\code{\link{studyArea}()}
+
 Other mapMethods: 
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},

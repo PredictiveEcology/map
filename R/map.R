@@ -779,6 +779,34 @@ spatialPoints <- function(map, ...) {
   maps(map, "SpatialPoints")
 }
 
+#' @export
+#' @family mapMethods
+#' @rdname maps
+spatRasters <- function(map, ...) {
+  UseMethod("spatRasters", map)
+}
+
+#' @export
+#' @family mapMethods
+#' @rdname maps
+spatRasters.map <- function(map, ...) {
+  maps(map, "SpatRasters")
+}
+
+#' @export
+#' @family mapMethods
+#' @rdname maps
+spatVectors <- function(map, ...) {
+  UseMethod("spatVectors", map)
+}
+
+#' @export
+#' @family mapMethods
+#' @rdname maps
+spatVectors.map <- function(map, ...) {
+  maps(map, "SpatVectors")
+}
+
 #' Extract leaflet tile paths from a `map` obj
 #'
 #' @param map A `map` class obj
