@@ -2,14 +2,14 @@
 % Please edit documentation in R/map.R
 \name{rasterToMatch,map-method}
 \alias{rasterToMatch,map-method}
-\title{Extract the rasterToMatch(s) from a \code{x}}
+\title{Extract the \code{rasterToMatch}(s) from a \code{map} object}
 \usage{
 \S4method{rasterToMatch}{map}(x, layer = 1)
 }
 \arguments{
-\item{x}{TODO: describe this}
+\item{x}{a \code{map} object}
 
-\item{layer}{TODO: describe this}
+\item{layer}{an integer identifying the index of the \code{rasterToMatch} to extract}
 }
 \description{
 If \code{layer} is not provided and there is more than one \code{studyArea},
@@ -17,7 +17,6 @@ then this will extract the last one added.
 }
 \seealso{
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasters}()},

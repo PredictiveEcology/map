@@ -686,14 +686,14 @@ if (!isGeneric("rasterToMatch")) {
   })
 }
 
-#' Extract the rasterToMatch(s) from a `x`
+#' Extract the `rasterToMatch`(s) from a `map` object
 #'
 #' If `layer` is not provided and there is more than one `studyArea`,
 #' then this will extract the last one added.
 #'
-#' @param x TODO: describe this
+#' @param x a `map` object
 #'
-#' @param layer TODO: describe this
+#' @param layer an integer identifying the index of the `rasterToMatch` to extract
 #'
 #' @export
 #' @exportMethod rasterToMatch
@@ -800,14 +800,14 @@ leafletTiles <- function(map) {
 #'
 #' @param map A `map` object
 #'
-#' @param class If supplied, this will be the class of objects returned. Default
-#'              is `NULL` which is "all", meaning all objects in the `map` object.
+#' @param class If supplied, this will be the class of objects returned.
+#'              Default is `NULL` which is "all", meaning all objects in the `map` object.
 #'
-#' @param layerName TODO: description needed
+#' @param layerName character string giving the name(s) of layer(s) to extract.
 #'
 #' @param ... Additional arguments passed to other methods (not used)
 #'
-#' @return A list of maps (i.e., sp, raster, or sf objects) of class `class`
+#' @return A list of geospatial objects of class `class`
 #'
 #' @export
 maps <- function(map, class = NULL, layerName = NULL) {
@@ -830,39 +830,18 @@ maps <- function(map, class = NULL, layerName = NULL) {
     out <- out[classOnly]
   }
 
-  out
+  return(out)
 }
 
 #' @keywords internal
 .singleMetadataNAEntry <- data.table::data.table(
-  layerName = NA_character_, layerType = NA_character_, #url = NA_character_,
-  columnNameForLabels = NA_character_, envir = list(), leaflet = FALSE, studyArea = 0
+  layerName = NA_character_,
+  layerType = NA_character_,
+  columnNameForLabels = NA_character_,
+  envir = list(),
+  leaflet = FALSE,
+  studyArea = 0
 )
-
-if (!isGeneric("area")) {
-  setGeneric("area", function(x, ...) {
-    standardGeneric("area")
-  })
-}
-
-#' Calculate area of (named) objects the `map` obj
-#'
-#' @inheritParams raster::area
-#'
-#' @export
-#' @family mapMethods
-#' @rdname area
-setMethod("area",
-          signature = "map",
-          function(x) {
-            lsObjs <- ls(x@.xData)
-            logicalRasters <- unlist(lapply(mget(lsObjs, x@.xData), is, "RasterLayer"))
-            if (any(logicalRasters)) {
-              mget(names(logicalRasters)[logicalRasters], x@.xData)
-            } else {
-              NULL
-            }
-})
 
 #' Show method for map class objects
 #'
@@ -877,12 +856,15 @@ setMethod(
     show(object@metadata)
 })
 
-.formalsReproducible <- unique(c(formalArgs(reproducible::preProcess),
-                                 formalArgs(reproducible::postProcess),
-                                 formalArgs(reproducible:::determineFilename),
-                                 formalArgs(reproducible::cropInputs),
-                                 formalArgs(reproducible::maskInputs),
-                                 formalArgs(reproducible::projectInputs)))
+.formalsReproducible <- c(
+  formalArgs(reproducible::preProcess),
+  formalArgs(reproducible::postProcess),
+  formalArgs(reproducible:::determineFilename),
+  formalArgs(reproducible::cropInputs),
+  formalArgs(reproducible::maskInputs),
+  formalArgs(reproducible::projectInputs)
+) |>
+  unique()
 
 ################################################################################
 #' Extract metadata
@@ -903,6 +885,12 @@ metadata <- function(x, ...) {
 #' @rdname metadata
 metadata.map <- function(x, ...) {
   x@metadata
+}
+
+#' @export
+#' @rdname metadata
+metadata.Map <- function(x, ...) {
+  x$metadata
 }
 
 #' @export

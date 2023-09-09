@@ -2,19 +2,21 @@
 % Please edit documentation in R/GIS.R
 \name{fasterize2}
 \alias{fasterize2}
-\title{\code{fasterize} following crop & reproject}
+\title{Rasterize following crop and reproject}
 \usage{
 fasterize2(emptyRaster, polygonToFasterize, field)
 }
 \arguments{
-\item{emptyRaster}{An empty \code{RasterLayer} with \code{res}, \code{crs}, \code{extent} all
-correct for to pass to \code{\link[=fasterize]{fasterize()}}}
+\item{emptyRaster}{An empty \code{RasterLayer} or\code{SpatRaster} to use as a template.}
 
-\item{polygonToFasterize}{passed to \code{\link[=fasterize]{fasterize()}};
-will be cropped first if \code{extent(emptyRaster) < extent(polygonToFasterize)}.}
+\item{polygonToFasterize}{an \code{sf} or \code{SpatVector} object, which will be cropped first
+if \code{extent(emptyRaster) < extent(polygonToFasterize)}.}
 
-\item{field}{passed to \code{\link[=fasterize]{fasterize()}}}
+\item{field}{character or numeric. If \code{field} is a character, it should a variable name in \code{x}. If \code{field} is numeric it typically is a single number or a vector of length \code{nrow(x)}. The values are recycled to \code{nrow(x)}}
+}
+\value{
+an object of the same class as \code{emptyRaster}
 }
 \description{
-\code{fasterize} following crop & reproject
+Rasterize following crop and reproject
 }

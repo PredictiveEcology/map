@@ -10,7 +10,7 @@
 #' @param objHash TODO: description needed
 #' @param leaflet Logical or Character vector of path(s) to write tiles.
 #'  If `TRUE` or a character vector, then this layer will be added to a leaflet map.
-#'  For `RasterLayer` object, this will trigger a call to `gdal2tiles`, making tiles.
+#'  For `RasterLayer` or `SpatRaster` object, this will make tiles.
 #'  If path is not specified, it will be the current path.
 #'  The tile base file path will be `paste0(layerName, "_", rndstr(1, 6))`.
 #' @param envir TODO: description needed
@@ -54,7 +54,7 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
     set(b, NULL, "leafletTiles", asPath(NA_character_))
   } else {
     set(b, NULL, "leaflet", leaflet)
-    if (is(obj, "Raster")) {
+    if (is(obj, "Raster") || is(obj, "SpatRaster")) {
       dig <- .robustDigest(obj)
       defaultTilePath <- file.path(leaflet, paste0("tiles_", layerName, "_", substr(dig, 1, 6)))
       tilePath <- ifelse(is.na(leaflet), NA_character_, defaultTilePath)
@@ -71,10 +71,10 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
     dots <- dots[!unlist(lapply(dots, is.null))] # remove NULL because that isn't added anyway
     if (!is.null(dots$filename2)) {
       if (!isFALSE(dots$filename2)) {
-        if (inherits(obj, "RasterLayer")) {
+        if (is(obj) %in% c("RasterLayer", "SpatRaster")) {
           if (endsWith(dots$filename2, suffix = "tif")) {
-            if (raster::is.factor(obj)) {
-              dots$filename2 <- basename(raster::filename(obj))
+            if (is.factor(obj)) {
+              dots$filename2 <- basename(reproducible::Filenames(obj))
             }
           }
         }

@@ -5,9 +5,9 @@ Description: The 'map' class is a collection of geospatial objects ('sp', 'raste
     with a number of metadata additions to enable powerful methods,
     e.g., for leaflet, reproducible GIS etc.
 URL: 
-    http://map.predictiveecology.org,
+    https://map.predictiveecology.org,
     https://github.com/PredictiveEcology/map
-Date: 2023-08-10
+Date: 2023-09-05
 Version: 1.0.0
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
@@ -23,13 +23,12 @@ Imports:
     backports,
     data.table (>= 1.10.4),
     fastdigest,
-    fasterize,
     methods,
     parallelly,
     pemisc (>= 0.0.4.9008),
     quickPlot,
-    reproducible (>= 2.0.6),
     raster (>= 2.8.4),
+    reproducible (>= 2.0.6),
     sf,
     stats,
     terra (>= 1.7-0),

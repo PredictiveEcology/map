@@ -95,31 +95,47 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
     terra::setValues(terra::values(x))
 }
 
-#' `fasterize` following crop & reproject
+#' Rasterize following crop and reproject
 #'
-#' @param emptyRaster An empty `RasterLayer` with `res`, `crs`, `extent` all
-#'        correct for to pass to [fasterize()]
+#' @param emptyRaster An empty `RasterLayer` or`SpatRaster` to use as a template.
 #'
-#' @param polygonToFasterize passed to [fasterize()];
-#'        will be cropped first if `extent(emptyRaster) < extent(polygonToFasterize)`.
+#' @param polygonToFasterize an `sf` or `SpatVector` object, which will be cropped first
+#'        if `extent(emptyRaster) < extent(polygonToFasterize)`.
 #'
-#' @param field passed to [fasterize()]
+#' @inheritParams terra::rasterize
+#'
+#' @return an object of the same class as `emptyRaster`
 #'
 #' @export
 fasterize2 <- function(emptyRaster, polygonToFasterize, field) {
-  ras <- raster::raster(emptyRaster)
-  if (raster::extent(polygonToFasterize) > raster::extent(ras)) {
+  if (is(emptyRaster, "RasterLayer")) {
+    asRaster <- TRUE
+  }
+
+  if (!is(polygonToFasterize, "SpatVector")) {
+    polygonToFasterize <- terra::vect(polygonToFasterize)
+  }
+
+  ras <- terra::rast(emptyRaster)
+  if (terra::ext(polygonToFasterize) > terra::ext(ras)) {
     polygonToFasterize <- reproducible::Cache(cropInputs, polygonToFasterize, rasterToMatch = ras)
   }
   thePoly <- reproducible::projectInputs(polygonToFasterize, targetCRS = raster::crs(ras))
+  if (!is(thePoly, "SpatVector")) {
+    thePoly <- terra::vect(thePoly)
+  }
   thePoly$polygonNum <- seq_along(thePoly)
   if (!is.factor(thePoly[[field]])) {
     thePoly[[field]] <- factor(thePoly[[field]])
   }
-  aa2 <- fasterize::fasterize(sf::st_as_sf(thePoly), ras, field = field)
+  aa2 <- terra::rasterize(thePoly, ras, field = field)
   levels(aa2) <- data.frame(ID = seq_along(thePoly[[field]]),
                             Factor = as.character(thePoly[[field]]),
                             as.data.frame(thePoly))
 
-  aa2
+  if (isTRUE(asRaster)) {
+    return(raster::raster(aa2))
+  } else {
+    return(aa2)
+  }
 }

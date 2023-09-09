@@ -8,31 +8,44 @@
 #'
 #' @export
 makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
+  stopifnot(is(obj) %in% c("Raster", "SpatRaster"))
+
+  if (is(obj, "Raster")) {
+    obj <- terra::rast(obj)
+  }
+
   dirNotExist <- !dir.exists(tilePath) | isTRUE(overwrite)
 
   if (!is.na(tilePath) && dirNotExist) {
     ## assume that tilePath is unique for that obj, via .robustDigest
     message("  Creating tiles - reprojecting to epsg:4326 (leaflet projection)")
-    objLflt <- try(projectTo(obj, projectTo = crs("epsg:4326"), ...), silent = TRUE)
-    browser() ## TODO: above fails with:
-    ##> unable to find an inherited method for function ‘res’ for signature ‘"character"’
-    if (nchar(filename(objLflt)) == 0) {
+    objLflt <- try({
+      ## TODO: using projectTo() fails; reproducible#355
+      # reproducible::projectTo(obj, projectTo = sf::st_crs("epsg:4326"), ...)
+      terra::project(obj, "epsg:4326", ...)
+    }, silent = TRUE)
+    fname <- reproducible::Filenames(objLflt)
+
+    if (length(fname) == 0 | nchar(fname) == 0) {
       tmpFile <- tempfile(fileext = ".tif")
       message("                   writing to disk")
-      objLflt <- try(writeRaster(objLflt, tmpFile), silent = TRUE)
+      objLflt <- try({
+        terra::writeRaster(objLflt, tmpFile)
+      }, silent = TRUE)
     } else {
-      tmpFile <- filename(objLflt)
+      tmpFile <- fname
     }
 
     toDo <- TRUE
     tryNum <- 1
     while (toDo) {
       print(tryNum)
-      isCorrectCRS <- compareCRS(crs("epsg:4326"), objLflt)
-      #browser()
-      out <- try(tiler::tile(tmpFile, tilePath, zoom = "1-10",
-                             crs = as(sf::st_crs("epsg:4326"), "CRS"),
-                             format = "tms", viewer = FALSE, resume = TRUE), silent = TRUE)
+      isCorrectCRS <- terra::same.crs("epsg:4326", objLflt)
+      out <- try({
+        tiler::tile(tmpFile, tilePath, zoom = "1-10",
+                    crs = as(sf::st_crs("epsg:4326"), "CRS"),
+                    format = "tms", viewer = FALSE, resume = TRUE)
+      }, silent = TRUE)
       toDo <- is(out, "try-error")
       files <- dir(tilePath, recursive = TRUE)
       if (length(files) < 5) {

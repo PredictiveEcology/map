@@ -6,7 +6,6 @@
 #' @importFrom backports import
 #' @importFrom data.table copy data.table rbindlist set setDT
 #' @importFrom fastdigest fastdigest
-#' @importFrom fasterize fasterize
 #' @importFrom parallel stopCluster
 #' @importFrom parallelly availableCores
 #' @importFrom pemisc getLocalArgsFor identifyVectorArgs makeOptimalCluster Map2 MapOrDoCall
@@ -18,7 +17,8 @@
 #' @importFrom reproducible postProcess prepInputs preProcess projectInputs projectTo writeOutputs
 #' @importFrom sf as_Spatial gdal_polygonize st_area st_as_sf st_bbox st_crs st_read st_as_sf st_zm
 #' @importFrom stats na.omit
-#' @importFrom terra as.polygons disagg is.factor rast setValues values writeVector
+#' @importFrom terra as.polygons ext disagg is.factor rast same.crs setValues
+#' @importFrom terra values vect writeRaster writeVector
 #' @importFrom tiler tile
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output getS3method

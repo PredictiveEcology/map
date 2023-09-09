@@ -36,7 +36,6 @@ if (require("SpaDES.tools", quietly = TRUE)) {
 }
 \seealso{
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{rasterToMatch,map-method}},
 \code{\link{rasters}()},
@@ -44,7 +43,6 @@ Other mapMethods:
 \code{\link{studyArea}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{rasterToMatch,map-method}},
 \code{\link{rasters}()},

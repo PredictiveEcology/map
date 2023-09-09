@@ -24,7 +24,6 @@ Tools for getting objects and metadata in and out of a \code{map} class.
 }
 \seealso{
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
@@ -32,7 +31,6 @@ Other mapMethods:
 \code{\link{studyArea}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
@@ -40,7 +38,6 @@ Other mapMethods:
 \code{\link{studyArea}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},

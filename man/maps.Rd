@@ -35,13 +35,13 @@ maps(map, class = NULL, layerName = NULL)
 
 \item{...}{Additional arguments passed to other methods (not used)}
 
-\item{class}{If supplied, this will be the class of objects returned. Default
-is \code{NULL} which is "all", meaning all objects in the \code{map} object.}
+\item{class}{If supplied, this will be the class of objects returned.
+Default is \code{NULL} which is "all", meaning all objects in the \code{map} object.}
 
-\item{layerName}{TODO: description needed}
+\item{layerName}{character string giving the name(s) of layer(s) to extract.}
 }
 \value{
-A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
+A list of geospatial objects of class \code{class}
 }
 \description{
 \itemize{
@@ -58,7 +58,6 @@ This will extract all objects in or pointed to within the \code{map}.
 }
 \seealso{
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
@@ -66,7 +65,6 @@ Other mapMethods:
 \code{\link{studyArea}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
@@ -74,7 +72,6 @@ Other mapMethods:
 \code{\link{studyArea}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
@@ -82,7 +79,6 @@ Other mapMethods:
 \code{\link{studyArea}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
@@ -90,7 +86,6 @@ Other mapMethods:
 \code{\link{studyArea}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
@@ -98,7 +93,6 @@ Other mapMethods:
 \code{\link{studyArea}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},

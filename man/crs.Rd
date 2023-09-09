@@ -16,7 +16,6 @@ Extract the CRS of a \code{map}
 }
 \seealso{
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
 \code{\link{rasters}()},

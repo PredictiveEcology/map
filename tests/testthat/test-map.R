@@ -52,7 +52,7 @@ test_that("mapAdd doesn't work", {
   levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
                             VALUE = c("black spruce", "white spruce", "aspen", "fir"))
 
-  ## TODO: RESUME (HERE)
+
   ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
                tsf = "tsf1.tif",
                analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)
@@ -63,7 +63,7 @@ test_that("mapAdd doesn't work", {
   ageClasses <- c("Young", "Immature", "Mature", "Old")
   ageClassCutOffs <- c(0, 40, 80, 120)
 
-  skip("need LandWebUtils") ## TODO: RESUME (HERE)
+  skip("need LandWebUtils")
   ## TODO: `LargePatches` and `LeadingVegTypeByAgeClass` were moved to `LandWebUtils`,
   ##  which is a reverse dependency of this package, so it can't be used here.
 

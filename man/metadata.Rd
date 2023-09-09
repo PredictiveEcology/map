@@ -3,6 +3,7 @@
 \name{metadata}
 \alias{metadata}
 \alias{metadata.map}
+\alias{metadata.Map}
 \alias{metadata.Raster}
 \alias{metadata.SpatRaster}
 \title{Extract metadata}
@@ -10,6 +11,8 @@
 metadata(x, ...)
 
 \method{metadata}{map}(x, ...)
+
+\method{metadata}{Map}(x, ...)
 
 \method{metadata}{Raster}(x, ...)
 

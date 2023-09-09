@@ -3,9 +3,9 @@
 #' Contains a common system for organizing geospatial vector and raster data,
 #' principally for use with \pkg{leaflet} and \pkg{shiny}.
 #'
-#' @slot metadata  `data.table` with columns describing metadata of map objects in `maps` slot.
+#' @slot metadata  `data.table` with columns describing metadata of objects in the `map`.
 #'
-#' @slot .xData Named environment of map-type objects (e.g., `sf`, `Raster*`, `Spatial*`).
+#' @slot .xData Named environment of geospatial data objects (e.g., `sf`, `Raster*`, `Spatial*`).
 #'              Each entry may also be simply an environment, which indicates
 #'              where to find the object, i.e., via `get(layerName, envir = environment)`.
 #'
@@ -25,7 +25,7 @@ setClass(
   contains = "environment",
   slots = list(
     metadata = "data.table",
-    #.Data = "environment",
+    #.xData = "environment",
     CRS = "crs",
     paths = "list",
     analyses = "data.table",
@@ -45,10 +45,15 @@ setMethod("initialize", "map",
               rasterToMatch = logical()
             )
             .Object@CRS <- sf::st_crs()
-            .Object@analyses <- data.table::data.table(functionName = character())
+            .Object@paths <- list(
+              dataPath = getOption("map.dataPath", file.path(getwd(), "data")),
+              tilePath = getOption("map.tilePath", file.path(getwd(), "tiles"))
+              ## TODO : scratch/raster/terra path?
+            )
+            .Object@analyses <- data.table::data.table(
+              functionName = character()
+            )
             .Object@analysesData <- list()
-            .Object@paths <- list(dataPath = getOption("map.dataPath", getwd()),
-                                  tilePath = getOption("map.tilePath", getwd()))
 
-            .Object
+            return(.Object)
 })

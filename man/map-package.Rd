@@ -11,7 +11,7 @@ The 'map' class is a collection of geospatial objects ('sp', 'raster', 'sf', 'te
 \seealso{
 Useful links:
 \itemize{
-  \item \url{http://map.predictiveecology.org}
+  \item \url{https://map.predictiveecology.org}
   \item \url{https://github.com/PredictiveEcology/map}
   \item Report bugs at \url{https://github.com/PredictiveEcology/map/issues}
 }
