@@ -97,6 +97,8 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
 
 #' Rasterize following crop and reproject
 #'
+#' A simple wrapper around [terra::rasterize()].
+#'
 #' @param emptyRaster An empty `RasterLayer` or`SpatRaster` to use as a template.
 #'
 #' @param polygonToFasterize an `sf` or `SpatVector` object, which will be cropped first
@@ -107,10 +109,25 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
 #' @return an object of the same class as `emptyRaster`
 #'
 #' @export
+#'
+#' @examples
+#'
+#' ## using sf + raster
+#' f1 <- system.file("external/lux.shp", package = "raster")
+#' v1 <- sf::st_read(f1)
+#' r1 <- raster::raster(v1, ncols = 75, nrows = 100)
+#' raster::crs(r1) <- "epsg:4326"
+#' z1 <- fasterize2(r1, v1, "NAME_2")
+#'
+#' ## using terra
+#' f2 <- system.file("ex/lux.shp", package = "terra")
+#' v2 <- terra::vect(f2)
+#' r2 <- terra::rast(v2, ncols = 75, nrows = 100)
+#' z2 <- fasterize2(r2, v2, "NAME_2")
+#'
+#' terra::compareGeom(terra::rast(z1), z2)
 fasterize2 <- function(emptyRaster, polygonToFasterize, field) {
-  if (is(emptyRaster, "RasterLayer")) {
-    asRaster <- TRUE
-  }
+  asRaster <- ifelse(is(emptyRaster, "RasterLayer"), TRUE, FALSE)
 
   if (!is(polygonToFasterize, "SpatVector")) {
     polygonToFasterize <- terra::vect(polygonToFasterize)
@@ -125,13 +142,13 @@ fasterize2 <- function(emptyRaster, polygonToFasterize, field) {
     thePoly <- terra::vect(thePoly)
   }
   thePoly$polygonNum <- seq_along(thePoly)
-  if (!is.factor(thePoly[[field]])) {
-    thePoly[[field]] <- factor(thePoly[[field]])
+  if (!is.factor(thePoly[[field]][[1]])) {
+    thePoly[[field]][[1]] <- factor(thePoly[[field]][[1]])
   }
   aa2 <- terra::rasterize(thePoly, ras, field = field)
-  levels(aa2) <- data.frame(ID = seq_along(thePoly[[field]]),
-                            Factor = as.character(thePoly[[field]]),
-                            as.data.frame(thePoly))
+  # levels(aa2) <- data.frame(ID = seq_along(thePoly[[field]][[1]]),
+  #                           category = as.character(thePoly[[field]][[1]]),
+  #                           as.data.frame(thePoly))
 
   if (isTRUE(asRaster)) {
     return(raster::raster(aa2))

@@ -18,5 +18,22 @@ if \code{extent(emptyRaster) < extent(polygonToFasterize)}.}
 an object of the same class as \code{emptyRaster}
 }
 \description{
-Rasterize following crop and reproject
+A simple wrapper around \code{\link[terra:rasterize]{terra::rasterize()}}.
+}
+\examples{
+
+## using sf + raster
+f1 <- system.file("external/lux.shp", package = "raster")
+v1 <- sf::st_read(f1)
+r1 <- raster::raster(v1, ncols = 75, nrows = 100)
+raster::crs(r1) <- "epsg:4326"
+z1 <- fasterize2(r1, v1, "NAME_2")
+
+## using terra
+f2 <- system.file("ex/lux.shp", package = "terra")
+v2 <- terra::vect(f2)
+r2 <- terra::rast(v2, ncols = 75, nrows = 100)
+z2 <- fasterize2(r2, v2, "NAME_2")
+
+terra::compareGeom(terra::rast(z1), z2)
 }
