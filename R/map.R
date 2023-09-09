@@ -768,14 +768,28 @@ sf.map <- function(map, ...) {
 }
 
 #' @export
+#' @family mapMethods
 #' @rdname maps
 spatialPolygons <- function(map, ...) {
-  maps(map, "SpatialPolygons")
+  UseMethod("spatialPolygons", map)
 }
 
 #' @export
 #' @rdname maps
+spatialPolygons.map <- function(map, ...) {
+  maps(map, "SpatialPolygons")
+}
+
+#' @export
+#' @family mapMethods
+#' @rdname maps
 spatialPoints <- function(map, ...) {
+  UseMethod("spatialPoints", map)
+}
+
+#' @export
+#' @rdname maps
+spatialPoints.map <- function(map, ...) {
   maps(map, "SpatialPoints")
 }
 

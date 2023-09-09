@@ -8,7 +8,9 @@
 \alias{sf}
 \alias{sf.map}
 \alias{spatialPolygons}
+\alias{spatialPolygons.map}
 \alias{spatialPoints}
+\alias{spatialPoints.map}
 \alias{spatRasters}
 \alias{spatRasters.map}
 \alias{spatVectors}
@@ -30,7 +32,11 @@ sf(map, ...)
 
 spatialPolygons(map, ...)
 
+\method{spatialPolygons}{map}(map, ...)
+
 spatialPoints(map, ...)
+
+\method{spatialPoints}{map}(map, ...)
 
 spatRasters(map, ...)
 
@@ -69,6 +75,20 @@ A list of geospatial objects of class \code{class}
 This will extract all objects in or pointed to within the \code{map}.
 }
 \seealso{
+Other mapMethods: 
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyAreaName}()},
+\code{\link{studyArea}()}
+
+Other mapMethods: 
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyAreaName}()},
+\code{\link{studyArea}()}
+
 Other mapMethods: 
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
