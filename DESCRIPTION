@@ -1,13 +1,14 @@
 Package: map
 Type: Package
 Title: Defines a meta class of geographical objects, the 'map' class, and associated tools
-Description: The 'map' class is a collection of geospatial objects ('sp', 'raster', 'sf', 'terra'),
+Description: The 'map' class is a collection of geospatial objects
+   (e.g., from the 'sp', 'raster', 'sf', and 'terra' packages),
     with a number of metadata additions to enable powerful methods,
     e.g., for leaflet, reproducible GIS etc.
 URL: 
     https://map.predictiveecology.org,
     https://github.com/PredictiveEcology/map
-Date: 2023-09-05
+Date: 2023-09-12
 Version: 1.0.0
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
@@ -28,7 +29,7 @@ Imports:
     pemisc (>= 0.0.4.9008),
     quickPlot,
     raster (>= 2.8.4),
-    reproducible (>= 2.0.6),
+    reproducible (>= 2.0.8.9001),
     sf,
     stats,
     terra (>= 1.7-0),
@@ -38,7 +39,7 @@ Suggests:
     covr,
     knitr,
     rmarkdown,
-    SpaDES.tools,
+    SpaDES.tools (>= 2.0.4.9001),
     testthat (>= 3.0.0),
     usethis,
     withr

@@ -29,7 +29,8 @@ at any stage, it will create and use a parallel cluster via \code{makeOptimalClu
 If running analyses in parallel, it may be useful to pass a function (via \code{.clInit})
 to be run on each of the nodes immediately upon cluster creation (e.g., to set options).}
 
-\item{...}{Additonal arguments passed to \code{\link[reproducible:postProcess]{reproducible::postProcess()}},
+\item{...}{Additonal arguments passed to:
+\code{\link[reproducible:postProcess]{reproducible::postProcess()}},
 \code{\link[reproducible:deprecated]{reproducible::projectInputs()}},
 \code{\link[reproducible:deprecated]{reproducible::fixErrors()}}, and
 \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
