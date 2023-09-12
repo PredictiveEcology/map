@@ -39,7 +39,7 @@ Suggests:
     covr,
     knitr,
     rmarkdown,
-    SpaDES.tools (>= 2.0.4.9001),
+    SpaDES.tools (>= 2.0.4.9002),
     testthat (>= 3.0.0),
     usethis,
     withr
