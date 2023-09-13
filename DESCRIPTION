@@ -46,6 +46,7 @@ Suggests:
 Remotes:
     ropensci/tiler,
     PredictiveEcology/pemisc@development,
+    PredictiveEcology/quickPlot@development,
     PredictiveEcology/reproducible@development,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
