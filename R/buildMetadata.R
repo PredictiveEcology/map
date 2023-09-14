@@ -25,7 +25,8 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
   # If it is studyArea
   if (isTRUE(isStudyArea)) {
     area <- (if (is(obj, "sf")) obj else sf::st_as_sf(obj)) |>
-      sf::st_area()
+      sf::st_area() |>
+      sum()
     studyAreaNumber <- 1 + NROW(metadata[compareNA(studyArea, TRUE) |
                                            (is.numeric(studyArea) & studyArea > 0)])
     set(b, NULL, "studyArea", studyAreaNumber)
