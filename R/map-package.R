@@ -22,6 +22,5 @@
 #' @importFrom tiler tile
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output getS3method
-#' @importMethodsFrom raster area
 ## usethis namespace: end
 NULL
