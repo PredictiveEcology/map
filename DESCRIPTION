@@ -51,6 +51,7 @@ Remotes:
     gearslaboratory/gdalUtils,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/reproducible@development,
+    cran/rgdal,
     cran/rgeos,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
