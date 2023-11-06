@@ -47,6 +47,7 @@ Remotes:
     ropensci/tiler,
     gearslaboratory/gdalUtils,
     PredictiveEcology/pemisc@development,
+    cran/rgeos
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
 Language: en-CA
