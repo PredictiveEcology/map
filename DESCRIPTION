@@ -37,8 +37,6 @@ Imports:
     utils
 Suggests:
     covr,
-    knitr,
-    rmarkdown,
     SpaDES.tools (>= 2.0.4.9002),
     testthat (>= 3.0.0),
     usethis,
@@ -52,7 +50,6 @@ Remotes:
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
-VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/map/issues
 ByteCompile: yes
 Collate: 

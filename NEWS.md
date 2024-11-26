@@ -5,6 +5,7 @@
 * remove dependency package `gdalUtils` in favour of `sf` + `terra`;
 * use most recent `tiler` version (0.3.0);
 * use `digest::digest(x, algo = "spooky")` instead of `fastdigest` (which was archived on CRAN);
+* remove unused dependencies `knitr` and `rmarkdown`;
 
 # map v0.0.3
 
