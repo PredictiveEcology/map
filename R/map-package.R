@@ -5,7 +5,7 @@
 #' @import methods
 #' @importFrom backports import
 #' @importFrom data.table copy data.table rbindlist set setDT
-#' @importFrom fastdigest fastdigest
+#' @importFrom digest digest
 #' @importFrom parallel stopCluster
 #' @importFrom parallelly availableCores
 #' @importFrom pemisc getLocalArgsFor identifyVectorArgs makeOptimalCluster Map2 MapOrDoCall
