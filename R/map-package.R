@@ -2,7 +2,7 @@
 #' @import methods
 #' @importFrom backports import
 #' @importFrom data.table copy data.table rbindlist set setDT
-#' @importFrom fastdigest fastdigest
+#' @importFrom digest digest
 #' @importFrom fasterize fasterize
 #' @importFrom parallel stopCluster
 #' @importFrom parallelly availableCores

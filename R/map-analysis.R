@@ -170,9 +170,10 @@ mapAddAnalysis <- function(map, functionName,
   b <- data.table(functionName = functionName, t(dots))
   prevEntry <- map@analyses$functionName == functionName
   purgeAnalyses <- NULL # Set default as NULL
-  newDigest <- fastdigest::fastdigest(
+  newDigest <- digest::digest(
     c(.robustDigest(get(b[, functionName])),
-      .robustDigest(b[, !"functionName"]))
+      .robustDigest(b[, !"functionName"])),
+    algo = "spooky"
   )
   set(b, NULL, "argHash", newDigest)
   doRbindlist <- TRUE
@@ -233,9 +234,10 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
   }
   prevEntry <- map@analyses$functionName == functionName
   purgeAnalyses <- NULL # Set default as NULL
-  newDigest <- fastdigest::fastdigest(
+  newDigest <- digest::digest(
     c(.robustDigest(get(b[, functionName])),
-      .robustDigest(b[, !"functionName"]))
+      .robustDigest(b[, !"functionName"])),
+    algo = "spooky"
   )
   set(b, NULL, "argHash", newDigest)
   doRbindlist <- TRUE

@@ -20,7 +20,7 @@ Other mapMethods:
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
 \code{\link{rasters}()},
-\code{\link{studyAreaName}()},
-\code{\link{studyArea}()}
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
 }
 \concept{mapMethods}

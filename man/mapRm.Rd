@@ -40,15 +40,15 @@ Other mapMethods:
 \code{\link{crs,map-method}},
 \code{\link{rasterToMatch,map-method}},
 \code{\link{rasters}()},
-\code{\link{studyAreaName}()},
-\code{\link{studyArea}()}
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
 
 Other mapMethods: 
 \code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{rasterToMatch,map-method}},
 \code{\link{rasters}()},
-\code{\link{studyAreaName}()},
-\code{\link{studyArea}()}
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
 }
 \concept{mapMethods}
