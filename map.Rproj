@@ -23,4 +23,3 @@ PackageRoxygenize: rd,collate,namespace,vignette
 UseNativePipeOperator: Yes
 
 QuitChildProcessesOnExit: Yes
-DisableExecuteRprofile: Yes

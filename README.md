@@ -24,9 +24,8 @@ Defines a meta class of geographical objects, the `map` class, which is a collec
 **Install from GitHub:**
     
 ```r
-#install.packages("devtools")
-library("devtools")
-install_github("PredictiveEcology/map", dependencies = TRUE) 
+# install.packages("remotes")
+remotes::install_github("PredictiveEcology/map", dependencies = TRUE) 
 ```
 
 ### Development version
@@ -37,7 +36,6 @@ install_github("PredictiveEcology/map", dependencies = TRUE)
 **Install from GitHub:**
 
 ```r
-#install.packages("devtools")
-library("devtools")
-install_github("PredictiveEcology/map", ref = "development", dependencies = TRUE) 
+# install.packages("remotes")
+remotes::install_github("PredictiveEcology/map@development", dependencies = TRUE) 
 ```

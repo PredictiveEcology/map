@@ -25,9 +25,9 @@ mapAdd(obj, map, layerName, overwrite = getOption("map.overwrite", FALSE), ...)
 \arguments{
 \item{obj}{Optional spatial object, currently \code{RasterLayer}, \code{SpatialPolygons}.}
 
-\item{map}{Optional map object. If not provided, then one will be
-created. If provided, then the present \code{object} or options passed to
-\code{prepInputs} e.g., \code{url}, will be appended to this \code{map}.}
+\item{map}{Optional map object. If not provided, then one will be created.
+If provided, then the present \code{obj} or options passed to
+\code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} (e.g., \code{url}), will be appended to this \code{map}.}
 
 \item{layerName}{Required. A label for this map layer. This can be the same as
 the object name.}
@@ -39,11 +39,11 @@ the \code{map}, then it will replace the existing object. Default is
 \item{...}{Additonal arguments passed to:
 \code{\link[reproducible:postProcess]{reproducible::postProcess()}},
 \code{\link[reproducible:deprecated]{reproducible::projectInputs()}},
-\code{\link[reproducible:deprecated]{reproducible::fixErrors()}}, and
-\code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
+\code{\link[reproducible:deprecated]{reproducible::fixErrors()}},
+and \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
-\item{columnNameForLabels}{A character string indicating which column to use
-for labels. This is currently only used if the object is a \code{SpatialPolygonsDataFrame}.}
+\item{columnNameForLabels}{A character string indicating which column to use for labels.
+This is currently only used if the object is a \link[sp:SpatialPolygonsDataFrame-class]{sp::SpatialPolygonsDataFrame}.}
 
 \item{leaflet}{Logical or Character vector of path(s) to write tiles.
 If \code{TRUE} or a character vector, then this layer will be added to a leaflet map.
@@ -51,9 +51,8 @@ For \code{RasterLayer} object, this will trigger a call to \code{gdal2tiles}, ma
 If path is not specified, it will be the current path.
 The tile base file path will be \code{paste0(layerName, "_", rndstr(1, 6))}.}
 
-\item{isStudyArea}{Logical. If \code{TRUE}, this will be assigned the label,
-"StudyArea", and will be passed into \code{prepInputs} for any future layers
-added.}
+\item{isStudyArea}{Logical. If \code{TRUE}, this will be assigned the label "StudyArea",
+and will be passed into \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} for any future layers added.}
 
 \item{isRasterToMatch}{Logical indicating whether the object to be added should be considered
 a \code{rasterToMatch}.}
@@ -62,10 +61,11 @@ a \code{rasterToMatch}.}
 will not be placed "into" the maps slot, rather the environment label will
 be placed into the maps slot.}
 
-\item{useCache}{Logical. If \code{TRUE} (default), then internal calls to \code{Cache} will be used.}
+\item{useCache}{Logical. If \code{TRUE} (default), then internal calls to
+\code{\link[reproducible:Cache]{reproducible::Cache()}} will be used.}
 
 \item{useParallel}{Logical. If \code{TRUE}, then if there is more than one calculation to do
-at any stage, it will create and use a parallel cluster via \code{makeOptimalCluster}.
+at any stage, it will create and use a parallel cluster via \code{\link[=makeOptimalCluster]{makeOptimalCluster()}}.
 If running analyses in parallel, it may be useful to pass a function (via \code{.clInit})
 to be run on each of the nodes immediately upon cluster creation (e.g., to set options).}
 }

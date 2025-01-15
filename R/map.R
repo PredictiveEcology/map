@@ -11,9 +11,9 @@ utils::globalVariables(c(
 #'
 #' @param obj    Optional spatial object, currently `RasterLayer`, `SpatialPolygons`.
 #'
-#' @param map       Optional map object. If not provided, then one will be
-#'  created. If provided, then the present `object` or options passed to
-#'  `prepInputs` e.g., `url`, will be appended to this `map`.
+#' @param map       Optional map object. If not provided, then one will be created.
+#'  If provided, then the present `obj` or options passed to
+#'  [reproducible::prepInputs()] (e.g., `url`), will be appended to this `map`.
 #'
 #' @param layerName Required. A label for this map layer. This can be the same as
 #'  the object name.
@@ -22,8 +22,8 @@ utils::globalVariables(c(
 #'  the `map`, then it will replace the existing object. Default is
 #'  `getOption("map.overwrite")`
 #'
-#' @param columnNameForLabels A character string indicating which column to use
-#'  for labels. This is currently only used if the object is a `SpatialPolygonsDataFrame`.
+#' @param columnNameForLabels A character string indicating which column to use for labels.
+#'  This is currently only used if the object is a [sp::SpatialPolygonsDataFrame-class].
 #'
 #' @param leaflet Logical or Character vector of path(s) to write tiles.
 #'  If `TRUE` or a character vector, then this layer will be added to a leaflet map.
@@ -31,9 +31,8 @@ utils::globalVariables(c(
 #'  If path is not specified, it will be the current path.
 #'  The tile base file path will be `paste0(layerName, "_", rndstr(1, 6))`.
 #'
-#' @param isStudyArea Logical. If `TRUE`, this will be assigned the label,
-#'  "StudyArea", and will be passed into `prepInputs` for any future layers
-#'  added.
+#' @param isStudyArea Logical. If `TRUE`, this will be assigned the label "StudyArea",
+#'   and will be passed into [reproducible::prepInputs()] for any future layers added.
 #'
 #' @export
 #' @include map-class.R
@@ -168,8 +167,8 @@ mapAdd <- function(obj, map, layerName,
 #' @param ... Additonal arguments passed to:
 #'            [reproducible::postProcess()],
 #'            [reproducible::projectInputs()],
-#'            [reproducible::fixErrors()], and
-#'            [reproducible::prepInputs()].
+#'            [reproducible::fixErrors()],
+#'            and [reproducible::prepInputs()].
 #'
 #' @param isRasterToMatch  Logical indicating whether the object to be added should be considered
 #'        a `rasterToMatch`.
@@ -178,10 +177,11 @@ mapAdd <- function(obj, map, layerName,
 #'        will not be placed "into" the maps slot, rather the environment label will
 #'        be placed into the maps slot.
 #'
-#' @param useCache Logical. If `TRUE` (default), then internal calls to `Cache` will be used.
+#' @param useCache Logical. If `TRUE` (default), then internal calls to
+#'    [reproducible::Cache()] will be used.
 #'
 #' @param useParallel Logical. If `TRUE`, then if there is more than one calculation to do
-#'        at any stage, it will create and use a parallel cluster via `makeOptimalCluster`.
+#'        at any stage, it will create and use a parallel cluster via [makeOptimalCluster()].
 #'        If running analyses in parallel, it may be useful to pass a function (via `.clInit`)
 #'        to be run on each of the nodes immediately upon cluster creation (e.g., to set options).
 #'
@@ -205,10 +205,8 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   if (is.logical(leaflet))
     leaflet <- asPath(ifelse(leaflet, getwd(), NA_character_))
 
-  # Some of the arguments will need to be passed into Cache
-  ###########################################
-  # Get obj, if missing, via prepInputs url, or targetFile
-  ###########################################
+  ## Some of the arguments will need to be passed into Cache
+  ## Get obj, if missing, via prepInputs url, or targetFile
   if (is.null(obj)) {
     ## with no obj, we get it first, then pass to mapAdd
     ## don't run postProcess because that will happen in next mapAdd when obj is in hand
@@ -222,7 +220,9 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
     message("  Running prepInputs for:\n",
             paste(capture.output(data.table(file = layerName)), collapse = "\n"))
-    cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel, outfile = .outfile)
+    cl <- makeOptimalCluster(maxNumClusters = maxNumClus,
+                             useParallel = useParallel,
+                             outfile = .outfile)
     if (!is.null(cl) && !is.null(.clInit)) {
       parallel::clusterExport(cl, c(".clInit"), envir = environment())
       parallel::clusterEvalQ(cl, .clInit())
@@ -251,9 +251,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     FALSE
   }
 
-  ####################################################
-  # postProcess -- determine studyArea and rasterToMatch from map
-  ####################################################
+  ## postProcess -- determine studyArea and rasterToMatch from map
   if (is.null(studyArea(map)) && is.null(rasterToMatch(map))) {
     argsFixErrors <- getLocalArgsFor(list(Cache, fixErrors), dots = dots)
     theList <- append(list(x = obj), argsFixErrors)
@@ -291,16 +289,18 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
         rasterToMatch <- rasterToMatch(map)
       }
 
-      list2env(dots, envir = environment()) # put any arguments from the ... into this local env
+      list2env(dots, envir = environment()) ## put arguments from `...` into this local env
       x <- obj ## put it into memory so identifyVectorArgs finds it
       args1 <- identifyVectorArgs(
-        fn = list(reproducible::Cache,
-                  getS3method("postProcess", "default"),
-                  reproducible::maskTo,
-                  reproducible::projectTo,
-                  reproducible::cropTo,
-                  raster::projectRaster, ## TODO use terra
-                  reproducible::writeOutputs),
+        fn = list(
+          reproducible::Cache,
+          getS3method("postProcess", "default"),
+          reproducible::maskTo,
+          reproducible::projectTo,
+          reproducible::cropTo,
+          raster::projectRaster, ## TODO use terra
+          reproducible::writeOutputs
+        ),
         ls(),
         environment(),
         dots = dots
@@ -314,7 +314,9 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       maxNumClus <- min(maxNumClus, getOption("map.maxNumCores"))
 
       message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
-      cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel, outfile = .outfile)
+      cl <- makeOptimalCluster(maxNumClusters = maxNumClus,
+                               useParallel = useParallel,
+                               outfile = .outfile)
       if (!is.null(cl) && !is.null(.clInit)) {
         parallel::clusterExport(cl, c(".clInit"), envir = environment())
         parallel::clusterEvalQ(cl, .clInit())
@@ -327,11 +329,9 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     }
   }
 
-  ###############################################
-  # Purge obj(s) from metadata, if overwrite is TRUE
-  ###############################################
+  ## Purge obj(s) from metadata, if overwrite is TRUE
   objHash <- .robustDigest(obj)
-  purgeAnalyses <- NULL # Set default as NULL
+  purgeAnalyses <- NULL ## set default as NULL
   if (layerNameExistsInMetadata) {
     ln <- layerName
     purge <- isFALSE(map@metadata[(layerName %in% ln), objectHash] == objHash)
@@ -343,21 +343,18 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     map@metadata <- map@metadata[!(layerName %in% ln)]
   }
 
-  ###################################################
-  # Add "shinyLabel" column if it is a SpatialPolygonsDataFrame
-  ###################################################
+  ## Add "shinyLabel" column if it is a SpatialPolygonsDataFrame
   args1 <- identifyVectorArgs(fn = addColumnNameForLabels,
                               c(x = "obj", columnNameForLabels = "columnNameForLabels"),
                               environment(), dots = dots)
   obj <- MapOrDoCall(addColumnNameForLabels, multiple = args1$argsMulti,
                      single = args1$argsSingle, useCache = FALSE, cl = NULL)
 
-  ####################################################
-  # Assign obj to map@.xData
-  ####################################################
+  ## Assign obj to map@.xData
   if (is.null(envir)) {
-    envir <- map@.xData # keep envir for later
-    # Put map into map slot
+    envir <- map@.xData ## keep envir for later
+
+    ## Put map into map slot
     a <- list()
     objTmp <- if (is(obj, "list")) obj else list(obj)
     a[layerName] <- objTmp
@@ -379,9 +376,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     }
   }
 
-  ####################################################
-  # Metadata -- build new entries in data.table -- vectorized
-  ####################################################
+  ## Metadata -- build new entries in data.table -- vectorized
   args1 <- identifyVectorArgs(fn = list(buildMetadata, prepInputs), ls(), environment(), dots = dots) # nolint
   if (length(dots)) {
     howLong <- unlist(lapply(dots, length))
@@ -394,12 +389,10 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   } else {
     dtsList <- do.call(Map, args = append(args1$argsMulti,
                                           list(f = buildMetadata, MoreArgs = moreArgs)))
-    dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE) ## TODO: falis here provMB postprocess
+    dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE) ## TODO: fails here provMB postprocess
   }
 
-  ########################################################
-  # make tiles, if it is leaflet
-  ########################################################
+  ## make tiles, if it is leaflet
   if (any(!is.na(leaflet)) && !is.null(dts[["leafletTiles"]])) {
     MBadjustment <- 4000 ## some approx, empirically derived number. Likely only good in some cases.
     MBper <- if (is(obj, "RasterLayer")) { # nolint
@@ -430,13 +423,11 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
     out <- MapOrDoCall(makeTiles, multiple = args1$argsMulti,
                        single = args1$argsSingle, useCache = FALSE, cl = cl)
-    # If the rasters are identical, then there may be errors
+    ## if the rasters are identical, then there may be errors
     tryCatch({ stopCluster(cl); rm(cl) }, error = function(x) invisible())
   }
 
-  ######################################
-  # set CRS
-  ######################################
+  ## set CRS
   if (isTRUE(isStudyArea)) {
     if ((!is.null(studyArea(map))) && isStudyArea) {
       message("map already has a studyArea; adding another one as study area ", dts[["studyArea"]])
@@ -446,9 +437,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     }
   }
 
-  ######################################
-  # rbindlist new metadata with existing metadata
-  ######################################
+  ## rbindlist new metadata with existing metadata
 
   ## 2022-10-04: workaround path columns having same class() but sorted slightly differently, e.g.,
   ## Browse[4]> class(map@metadata$leaflet) == class(dts$leaflet)
@@ -489,9 +478,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
   map@metadata <- rbindlist(list(map@metadata, dts), use.names = TRUE, fill = TRUE)
 
-  ######################################
-  # run map analyses
-  ######################################
+  ## run map analyses
   map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
 
   return(map)

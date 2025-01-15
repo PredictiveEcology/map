@@ -1,5 +1,9 @@
 # map (development version)
 
+* improved documentation
+
+# map v1.1.0
+
 * drop support for R 4.0 due to changes in dependency packages;
 * remove retiring dependency packages `sp`, `rgeos`, `rgdal` in favour of `terra` + `sf`;
 * remove dependency package `gdalUtils` in favour of `sf` + `terra`;

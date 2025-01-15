@@ -14,7 +14,7 @@ makeTiles(tilePath, obj, overwrite = FALSE, ...)
 \item{overwrite}{Logical. If \code{FALSE}, and the director exists,
 then it will not overwrite any files.}
 
-\item{...}{Passed to \code{reproducible::projectInputs} e.g., \code{useGDAL}}
+\item{...}{Arguments passed to \code{\link[reproducible:deprecated]{reproducible::projectInputs()}} (e.g., \code{useGDAL}).}
 }
 \description{
 Make tiles (pyramids) using \code{gdal2tiles}

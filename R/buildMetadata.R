@@ -1,19 +1,28 @@
-#' Build `map` obj metadata table
+#' Build `map` object metadata table
 #'
-#' @param metadata TODO: description needed
-#' @param isStudyArea TODO: description needed
-#' @param isRasterToMatch Logical. Is this(these) layer(s) the `rasterToMatch` layers.
-#'        If `TRUE`, then this layer can be accessed by `rasterToMatch(map)`
-#' @param layerName TODO: description needed
-#' @param obj TODO: description needed
-#' @param columnNameForLabels TODO: description needed
-#' @param objHash TODO: description needed
+#' @param metadata metadata `data.table`.
+#'
+#' @param isStudyArea Logical indicating whether `obj` a study area.
+#'
+#' @param isRasterToMatch Logical indicating whether `obj` is a `rasterToMatch` layer.
+#'        If `TRUE`, then this layer can be accessed by `rasterToMatch(map)`.
+#'
+#' @param layerName Character specifying a label for this layer.
+#'
+#' @param obj The geospatial object being added to the `map` object.
+#'
+#' @param columnNameForLabels Character specifying the column name to use for labels.
+#'
+#' @param objHash Character specifying the digest hash of the object.
+#'
 #' @param leaflet Logical or Character vector of path(s) to write tiles.
 #'  If `TRUE` or a character vector, then this layer will be added to a leaflet map.
 #'  For `RasterLayer` or `SpatRaster` object, this will make tiles.
 #'  If path is not specified, it will be the current path.
 #'  The tile base file path will be `paste0(layerName, "_", rndstr(1, 6))`.
+#'
 #' @param envir TODO: description needed
+#'
 #' @param ... Additional arguments.
 #'
 #' @rdname buildMetadata
@@ -22,7 +31,6 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
   b <- copy(.singleMetadataNAEntry)
   dots <- list(...)
 
-  # If it is studyArea
   if (isTRUE(isStudyArea)) {
     area <- (if (is(obj, "sf")) obj else sf::st_as_sf(obj)) |>
       sf::st_area() |>
@@ -39,8 +47,9 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
     set(b, NULL, "rasterToMatch", rasterToMatchNumber)
   }
 
-  if (!is.null(dots[["url"]]))
+  if (!is.null(dots[["url"]])) {
     set(b, NULL, "url", dots[["url"]])
+  }
 
   set(b, NULL, "layerName", layerName)
   set(b, NULL, "layerType", class(obj)[1])
@@ -84,10 +93,11 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
   }
   columnsToAdd <- dots
 
-  # Add columns by reference to "b"
+  ## Add columns by reference to "b"
   Map(cta = columnsToAdd, nta = names(columnsToAdd),
       function(cta, nta) {
-        ## a data.table can't handle all types of objects. need to wrap in a list to stick it there
+        ## a data.table can't handle all types of objects.
+        ## need to wrap in a list to stick it there.
         ## try first without a list wrapper, then try once with a list.
         needToSet <- TRUE
         tries <- 0

@@ -13,9 +13,9 @@ mapAnalysis(
 )
 }
 \arguments{
-\item{map}{Optional map object. If not provided, then one will be
-created. If provided, then the present \code{object} or options passed to
-\code{prepInputs} e.g., \code{url}, will be appended to this \code{map}.}
+\item{map}{Optional map object. If not provided, then one will be created.
+If provided, then the present \code{obj} or options passed to
+\code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} (e.g., \code{url}), will be appended to this \code{map}.}
 
 \item{functionName}{A function name that will be run on combinations of
 inputs in the map object. See details.}
@@ -25,15 +25,15 @@ combination or part thereof (e.g., the name entered into the row under
 \code{analysisGroup2} column of the \code{map@metadata} or a \code{functionName}.}
 
 \item{useParallel}{Logical. If \code{TRUE}, then if there is more than one calculation to do
-at any stage, it will create and use a parallel cluster via \code{makeOptimalCluster}.
+at any stage, it will create and use a parallel cluster via \code{\link[=makeOptimalCluster]{makeOptimalCluster()}}.
 If running analyses in parallel, it may be useful to pass a function (via \code{.clInit})
 to be run on each of the nodes immediately upon cluster creation (e.g., to set options).}
 
 \item{...}{Additonal arguments passed to:
 \code{\link[reproducible:postProcess]{reproducible::postProcess()}},
 \code{\link[reproducible:deprecated]{reproducible::projectInputs()}},
-\code{\link[reproducible:deprecated]{reproducible::fixErrors()}}, and
-\code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
+\code{\link[reproducible:deprecated]{reproducible::fixErrors()}},
+and \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 }
 \value{
 TODO

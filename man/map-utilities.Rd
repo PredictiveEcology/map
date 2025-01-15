@@ -8,9 +8,9 @@
 rbindlistAG(map, functionName, analysisGroups)
 }
 \arguments{
-\item{map}{Optional map object. If not provided, then one will be
-created. If provided, then the present \code{object} or options passed to
-\code{prepInputs} e.g., \code{url}, will be appended to this \code{map}.}
+\item{map}{Optional map object. If not provided, then one will be created.
+If provided, then the present \code{obj} or options passed to
+\code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} (e.g., \code{url}), will be appended to this \code{map}.}
 
 \item{functionName}{TODO: description needed}
 

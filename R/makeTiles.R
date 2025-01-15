@@ -1,10 +1,13 @@
 #' Make tiles (pyramids) using `gdal2tiles`
 #'
 #' @param tilePath A director to write tiles
+#'
 #' @param obj A raster object with or without file-backing
+#'
 #' @param overwrite Logical. If `FALSE`, and the director exists,
 #'   then it will not overwrite any files.
-#' @param ... Passed to `reproducible::projectInputs` e.g., `useGDAL`
+#'
+#' @param ... Arguments passed to [reproducible::projectInputs()] (e.g., `useGDAL`).
 #'
 #' @export
 makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
