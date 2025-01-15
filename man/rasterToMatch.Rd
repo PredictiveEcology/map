@@ -21,7 +21,7 @@ Other mapMethods:
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasters}()},
-\code{\link{studyAreaName}()},
-\code{\link{studyArea}()}
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
 }
 \concept{mapMethods}

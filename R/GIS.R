@@ -50,7 +50,6 @@
 #' @return list containing: `sizeInHa`, the area; and `polyID`, the polygon ID.
 #'
 #' @export
-#' @importFrom sf st_area
 areaAndPolyValue <- function(ras) {
   polyIndivSpecies <- gdal_polygonizeR(ras) # 99 seconds with full ras
   pArea <- as.numeric(sf::st_area(polyIndivSpecies) / 1e4)
@@ -69,11 +68,6 @@ areaAndPolyValue <- function(ras) {
 #' @param readpoly TODO: description needed
 #' @param quiet TODO: description needed
 #'
-#' @importFrom raster extent writeRaster
-#' @importFrom reproducible assessDataType
-#' @importFrom sf st_bbox read_sf
-#' @importFrom tiler tiler_options
-#' @importFrom tools file_path_sans_ext
 gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", # nolint
                              pypath = NULL, readpoly = TRUE, quiet = TRUE) {
   .setTilerPythonPath()
@@ -133,7 +127,6 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
 #' @param ... Additional arguments passed to `raster`
 #'
 #' @export
-#' @importFrom raster getValues raster setValues
 #' @rdname rasterToMemory
 .rasterToMemory <- function(x, ...) {
   r <- raster(x, ...)
@@ -151,10 +144,6 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
 #' @param field passed to `fasterize`
 #'
 #' @export
-#' @importFrom fasterize fasterize
-#' @importFrom raster crs extent raster
-#' @importFrom reproducible Cache cropInputs projectInputs
-#' @importFrom sf st_as_sf
 fasterize2 <- function(emptyRaster, polygonToFasterize, field) {
   ras <- raster(emptyRaster)
   if (extent(polygonToFasterize) > extent(ras)) {

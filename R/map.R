@@ -183,16 +183,6 @@ mapAdd <- function(obj, map, layerName,
 #'        to be run on each of the nodes immediately upon cluster creation (e.g., to set options).
 #'
 #' @export
-#' @importFrom data.table copy rbindlist set
-#' @importFrom parallel stopCluster
-#' @importFrom pemisc getLocalArgsFor identifyVectorArgs makeOptimalCluster MapOrDoCall
-#' @importFrom quickPlot whereInStack
-#' @importFrom raster crs ncell projectRaster writeRaster
-#' @importFrom reproducible .robustDigest asPath Cache compareNA cropInputs Filenames fixErrors
-#' @importFrom reproducible prepInputs preProcess projectInputs postProcess writeOutputs
-#' @importFrom sf as_Spatial st_zm
-#' @importFrom sp CRS
-#' @importFrom utils capture.output getS3method
 #' @rdname mapAdd
 mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            overwrite = getOption("map.overwrite"),
@@ -510,10 +500,10 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 #' @rdname mapRm
 #' @examples
 #' if (require("SpaDES.tools", quietly = TRUE)) {
-#'   library(sp)
-#'   longLatCRS <- CRS(paste("+init=epsg:4326 +proj=longlat +datum=WGS84",
-#'                           "+no_defs +ellps=WGS84 +towgs84=0,0,0"))
-#'   p <- randomPolygon(SpatialPoints(cbind(-120, 60), proj4string = longLatCRS), area = 1e5)
+#'   p <- terra::vect(cbind(-120, 60), crs = "epsg:4326") |>
+#'     SpaDES.tools::randomPolygon(area = 1e5) |>
+#'     sf::st_as_sf() |>
+#'     sf::as_Spatial()
 #'   m <- mapAdd(p, layerName = "p")
 #'   m
 #'
@@ -563,7 +553,6 @@ if (!isGeneric("crs")) {
 #' @exportMethod crs
 #' @family mapMethods
 #' @importMethodsFrom raster crs
-#' @importFrom raster crs
 #' @rdname crs
 setMethod("crs",
           signature = "map",
@@ -844,8 +833,6 @@ if (!isGeneric("area")) {
 #'
 #' @export
 #' @family mapMethods
-#' @importMethodsFrom raster area
-#' @importFrom raster area
 #' @rdname area
 setMethod("area",
           signature = "map",
@@ -890,7 +877,6 @@ setMethod(
 #' @rdname metadata
 metadata <- function(x) UseMethod("metadata")
 
-#' @importFrom raster metadata
 #' @export
 #' @rdname metadata
 metadata.Raster <- function(x) {

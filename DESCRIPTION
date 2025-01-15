@@ -7,8 +7,8 @@ Description: The map class is a collection of map objects ('sp', 'raster', 'sf')
 URL: 
     http://map.predictiveecology.org,
     https://github.com/PredictiveEcology/map
-Date: 2023-01-19
-Version: 0.0.5
+Date: 2024-11-25
+Version: 0.0.5.9005
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment=c(ORCID = "0000-0002-6914-8316")),
@@ -18,11 +18,11 @@ Authors@R: c(
            role = "cph")
     )
 Depends:
-    R (>= 4.0)
+    R (>= 4.1)
 Imports:
     backports,
     data.table (>= 1.10.4),
-    fastdigest,
+    digest,
     fasterize,
     methods,
     parallelly,
@@ -34,17 +34,16 @@ Imports:
     sf,
     sp,
     stats,
+    terra (>= 1.7-0),
     tiler (>= 0.2.6),
     utils
 Suggests:
     covr,
     gdalUtils,
-    knitr,
     rgdal,
-    rmarkdown,
     SpaDES.tools,
-    terra (>= 1.7-0),
-    testthat
+    testthat,
+    usethis
 Remotes:
     ropensci/tiler,
     gearslaboratory/gdalUtils,
@@ -52,12 +51,10 @@ Remotes:
     PredictiveEcology/reproducible@development,
     cran/rgdal,
     cran/rgeos,
-    PredictiveEcology/SpaDES.tools@development,
-    rspatial/terra@6a3ea837be88de5a66cd0577c6d79c1091562547
+    PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
-VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/map/issues
 ByteCompile: yes
 Collate: 
@@ -70,5 +67,5 @@ Collate:
     'map.R'
     'rbindlistAG.R'
     'zzz.R'
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)

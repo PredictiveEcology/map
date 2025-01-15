@@ -21,8 +21,6 @@
 #'
 #' @aliases map
 #' @exportClass map
-#' @importFrom data.table data.table
-#' @importFrom raster crs raster
 #' @rdname map-class
 setClass(
   "map",
