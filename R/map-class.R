@@ -1,25 +1,23 @@
 #' The `map` class
 #'
-#' Contains a common system for organzing vector and raster layers,
+#' Contains a common system for organizing geospatial vector and raster data,
 #' principally for use with \pkg{leaflet} and \pkg{shiny}.
 #'
-#' @slot metadata  `data.table` with columns describing metadata of map objects in
-#'                 `maps` slot.
+#' @slot metadata  `data.table` with columns describing metadata of objects in the `map`.
 #'
-#' @slot .xData Named environment of map-type objects (e.g., `sf`, `Raster*`,
-#'              `Spatial*`. Each entry may also be simply an environment, which indicates
+#' @slot .xData Named environment of geospatial data objects (e.g., `sf`, `Raster*`, `Spatial*`).
+#'              Each entry may also be simply an environment, which indicates
 #'              where to find the object, i.e., via `get(layerName, envir = environment)`.
 #'
-#' @slot CRS  The common crs of all layers
+#' @slot CRS  The common CRS of all layers.
 #'
-#' @slot paths File paths. A named list of paths. The default is a list of length 2,
-#'             `dataPath` and `tilePath`
+#' @slot paths A named list of file paths. The default is a list of length 2 specifying
+#'             `dataPath` and `tilePath`.
 #'
 #' @slot analyses    A `data.table` or `data.frame` of the types of analyses to perform.
 #'
 #' @slot analysesData A `data.table` or `data.frame` of the results of the analyses.
 #'
-#' @aliases map
 #' @exportClass map
 #' @rdname map-class
 setClass(
@@ -27,33 +25,35 @@ setClass(
   contains = "environment",
   slots = list(
     metadata = "data.table",
-    #.Data = "environment",
-    CRS = "CRS",
+    #.xData = "environment",
+    CRS = "crs",
     paths = "list",
     analyses = "data.table",
     analysesData = "list"
-  )#,
-  # validity = function(object) {
-  #   ## TODO: add additional checks!
-  #   identical(vapply(object@metadata, class, character(1)),
-  #             c(layerName = "character", layerType = "character",
-  #               columnNameForLabels = "character", leaflet = "character",
-  #               studyArea = "numeric", rasterToMatch = "logical"))
-  # }
+  )
 )
 
 setMethod("initialize", "map",
           function(.Object, ...) {
             .Object <- callNextMethod()
-            .Object@metadata <- data.table(layerName = character(), layerType = character(),
-                                           columnNameForLabels = character(),
-                                           leaflet = asPath(character()),
-                                           studyArea = numeric(), rasterToMatch = logical())
-            .Object@CRS <- sp::CRS()
-            .Object@analyses <- data.table::data.table(functionName = character())
+            .Object@metadata <- data.table(
+              layerName = character(),
+              layerType = character(),
+              columnNameForLabels = character(),
+              leaflet = asPath(character()),
+              studyArea = numeric(),
+              rasterToMatch = logical()
+            )
+            .Object@CRS <- sf::st_crs()
+            .Object@paths <- list(
+              dataPath = getOption("map.dataPath", file.path(getwd(), "data")),
+              tilePath = getOption("map.tilePath", file.path(getwd(), "tiles"))
+              ## TODO : scratch/raster/terra path?
+            )
+            .Object@analyses <- data.table::data.table(
+              functionName = character()
+            )
             .Object@analysesData <- list()
-            .Object@paths <- list(dataPath = getOption("map.dataPath", getwd()),
-                                  tilePath = getOption("map.tilePath", getwd()))
 
-            .Object
+            return(.Object)
 })

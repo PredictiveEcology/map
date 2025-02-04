@@ -2,7 +2,7 @@
 % Please edit documentation in R/map.R
 \name{crs,map-method}
 \alias{crs,map-method}
-\title{Extract the crs of a \code{map}}
+\title{Extract the CRS of a \code{map}}
 \usage{
 \S4method{crs}{map}(x, ...)
 }
@@ -12,11 +12,10 @@
 \item{...}{additional arguments. None implemented}
 }
 \description{
-Extract the crs of a \code{map}
+Extract the CRS of a \code{map}
 }
 \seealso{
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
 \code{\link{rasters}()},

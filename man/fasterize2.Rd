@@ -2,20 +2,38 @@
 % Please edit documentation in R/GIS.R
 \name{fasterize2}
 \alias{fasterize2}
-\title{Fasterize with crop & spTransform first}
+\title{Rasterize following crop and reproject}
 \usage{
 fasterize2(emptyRaster, polygonToFasterize, field)
 }
 \arguments{
-\item{emptyRaster}{An empty raster with res, crs, extent all
-correct for to pass to \code{fasterize}}
+\item{emptyRaster}{An empty \code{RasterLayer} or\code{SpatRaster} to use as a template.}
 
-\item{polygonToFasterize}{passed to \code{fasterize}, but it
-will be cropped first if
-\code{extent(emptyRaster) < extent(polygonToFasterize)}}
+\item{polygonToFasterize}{an \code{sf} or \code{SpatVector} object, which will be cropped first
+if \code{extent(emptyRaster) < extent(polygonToFasterize)}.}
 
-\item{field}{passed to \code{fasterize}}
+\item{field}{character or numeric. If \code{field} is a character, it should a variable name in \code{x}. If \code{field} is numeric it typically is a single number or a vector of length \code{nrow(x)}. The values are recycled to \code{nrow(x)}}
+}
+\value{
+an object of the same class as \code{emptyRaster}
 }
 \description{
-Fasterize with crop & spTransform first
+A simple wrapper around \code{\link[terra:rasterize]{terra::rasterize()}}.
+}
+\examples{
+
+## using sf + raster
+f1 <- system.file("external/lux.shp", package = "raster")
+v1 <- sf::st_read(f1)
+r1 <- raster::raster(v1, ncols = 75, nrows = 100)
+raster::crs(r1) <- "epsg:4326"
+z1 <- fasterize2(r1, v1, "NAME_2")
+
+## using terra
+f2 <- system.file("ex/lux.shp", package = "terra")
+v2 <- terra::vect(f2)
+r2 <- terra::rast(v2, ncols = 75, nrows = 100)
+z2 <- fasterize2(r2, v2, "NAME_2")
+
+terra::compareGeom(terra::rast(z1), z2)
 }

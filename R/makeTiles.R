@@ -1,42 +1,54 @@
-#' @keywords internal
-.isWindows <- getFromNamespace("isWindows", "reproducible")
-
 #' Make tiles (pyramids) using `gdal2tiles`
 #'
 #' @param tilePath A director to write tiles
-#' @param obj A raster objects with or without file-backing
+#'
+#' @param obj A raster object with or without file-backing
+#'
 #' @param overwrite Logical. If `FALSE`, and the director exists,
 #'   then it will not overwrite any files.
-#' @param ... Passed to `reproducible::projectInputs` e.g., `useGDAL`
+#'
+#' @param ... Arguments passed to [reproducible::projectInputs()] (e.g., `useGDAL`).
 #'
 #' @export
 makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
+  stopifnot(is(obj) %in% c("Raster", "SpatRaster"))
+
+  if (is(obj, "Raster")) {
+    obj <- terra::rast(obj)
+  }
+
   dirNotExist <- !dir.exists(tilePath) | isTRUE(overwrite)
 
-  if (dirNotExist) { # assume that tilePath is unique for that obj, via .robustDigest
-    .setTilerPythonPath()
-
-    obj[] <- obj[]
+  if (!is.na(tilePath) && dirNotExist) {
+    ## assume that tilePath is unique for that obj, via .robustDigest
     message("  Creating tiles - reprojecting to epsg:4326 (leaflet projection)")
-    objLflt <- try(projectInputs(obj, targetCRS = CRS("+init=epsg:4326"), ...), silent = TRUE)
-    # objLflt <- try(projectRaster(obj, crs = CRS("+init=epsg:4326")), silent = TRUE)
-    if (nchar(filename(objLflt)) == 0) {
+    objLflt <- try({
+      ## TODO: using projectTo() fails; reproducible#355
+      # reproducible::projectTo(obj, projectTo = sf::st_crs("epsg:4326"), ...)
+      terra::project(obj, "epsg:4326", ...)
+    }, silent = TRUE)
+    fname <- reproducible::Filenames(objLflt)
+
+    if (length(fname) == 0 | nchar(fname) == 0) {
       tmpFile <- tempfile(fileext = ".tif")
       message("                   writing to disk")
-      objLflt <- try(writeRaster(objLflt, tmpFile), silent = TRUE)
+      objLflt <- try({
+        terra::writeRaster(objLflt, tmpFile)
+      }, silent = TRUE)
     } else {
-      tmpFile <- filename(objLflt)
+      tmpFile <- fname
     }
 
     toDo <- TRUE
     tryNum <- 1
     while (toDo) {
       print(tryNum)
-      isCorrectCRS <- compareCRS(CRS("+init=epsg:4326"), objLflt)
-      #browser()
-      out <- try(tiler::tile(tmpFile, tilePath, zoom = "1-10",
-                             crs = CRS("+init=epsg:4326"),
-                             format = "tms", viewer = FALSE, resume = TRUE), silent = TRUE)
+      isCorrectCRS <- terra::same.crs("epsg:4326", objLflt)
+      out <- try({
+        tiler::tile(tmpFile, tilePath, zoom = "1-10",
+                    crs = as(sf::st_crs("epsg:4326"), "CRS"),
+                    format = "tms", viewer = FALSE, resume = TRUE)
+      }, silent = TRUE)
       toDo <- is(out, "try-error")
       files <- dir(tilePath, recursive = TRUE)
       if (length(files) < 5) {
@@ -49,37 +61,6 @@ makeTiles <- function(tilePath, obj, overwrite = FALSE, ...) {
   } else {
     message("  Tiles - skipping creation - directory")
     message(reproducible::normPath(tilePath))
-    message(" already exists")
-  }
-}
-
-findOSGeo4W <- function() {
-  if (.isWindows()) {
-    if (reproducible::.requireNamespace("gdalUtils")) {
-      gdalPath <- NULL
-      attemptGDAL <- TRUE
-
-      ## Handle all QGIS possibilities
-      a <- dir("C:/", pattern = "Progra", full.names = TRUE)
-      a <- grep("Program Files", a, value = TRUE)
-      a <- unlist(lapply(a, dir, pattern = "QGIS", full.name = TRUE))
-      # a <- unlist(lapply(a, dir, pattern = "bin", full.name = TRUE))
-
-      possibleWindowsPaths <- c(a, "C:/OSGeo4W64/",
-                                "C:/GuidosToolbox/QGIS/",
-                                "C:/GuidosToolbox/guidos_progs/FWTools_win/",
-                                "C:/Program Files (x86)/Quantum GIS Wroclaw/",
-                                "C:/Program Files/GDAL",
-                                "C:/Program Files (x86)/GDAL")
-      message("Searching for OSGeo4W installation")
-      paths <- file.path(possibleWindowsPaths, "OSGeo4W.bat")
-      OSGeo4WExists <- file.exists(paths)
-      if (any(OSGeo4WExists))
-        OSGeo4WPath <- paths[OSGeo4WExists]
-
-      tiler::tiler_options(osgeo4w = OSGeo4WPath)
-
-      OSGeo4WPath
-    }
+    message(" already exists or is not specified")
   }
 }

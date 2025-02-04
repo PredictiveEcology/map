@@ -25,9 +25,9 @@ mapAdd(obj, map, layerName, overwrite = getOption("map.overwrite", FALSE), ...)
 \arguments{
 \item{obj}{Optional spatial object, currently \code{RasterLayer}, \code{SpatialPolygons}.}
 
-\item{map}{Optional map object. If not provided, then one will be
-created. If provided, then the present \code{object} or options passed to
-\code{prepInputs} e.g., \code{url}, will be appended to this \code{map}.}
+\item{map}{Optional map object. If not provided, then one will be created.
+If provided, then the present \code{obj} or options passed to
+\code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} (e.g., \code{url}), will be appended to this \code{map}.}
 
 \item{layerName}{Required. A label for this map layer. This can be the same as
 the object name.}
@@ -36,13 +36,14 @@ the object name.}
 the \code{map}, then it will replace the existing object. Default is
 \code{getOption("map.overwrite")}}
 
-\item{...}{Additonal arguments passed to \code{\link[reproducible:postProcess]{reproducible::postProcess()}},
+\item{...}{Additonal arguments passed to:
+\code{\link[reproducible:postProcess]{reproducible::postProcess()}},
 \code{\link[reproducible:deprecated]{reproducible::projectInputs()}},
-\code{\link[reproducible:deprecated]{reproducible::fixErrors()}}, and
-\code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
+\code{\link[reproducible:deprecated]{reproducible::fixErrors()}},
+and \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
-\item{columnNameForLabels}{A character string indicating which column to use
-for labels. This is currently only used if the object is a \code{SpatialPolygonsDataFrame}.}
+\item{columnNameForLabels}{A character string indicating which column to use for labels.
+This is currently only used if the object is a \link[sp:SpatialPolygonsDataFrame-class]{sp::SpatialPolygonsDataFrame}.}
 
 \item{leaflet}{Logical or Character vector of path(s) to write tiles.
 If \code{TRUE} or a character vector, then this layer will be added to a leaflet map.
@@ -50,22 +51,21 @@ For \code{RasterLayer} object, this will trigger a call to \code{gdal2tiles}, ma
 If path is not specified, it will be the current path.
 The tile base file path will be \code{paste0(layerName, "_", rndstr(1, 6))}.}
 
-\item{isStudyArea}{Logical. If \code{TRUE}, this will be assigned the label,
-"StudyArea", and will be passed into \code{prepInputs} for any future layers
-added.}
+\item{isStudyArea}{Logical. If \code{TRUE}, this will be assigned the label "StudyArea",
+and will be passed into \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} for any future layers added.}
 
-\item{isRasterToMatch}{Logical indicating ... TODO: need description}
+\item{isRasterToMatch}{Logical indicating whether the object to be added should be considered
+a \code{rasterToMatch}.}
 
 \item{envir}{An optional environment. If supplied, then the obj
 will not be placed "into" the maps slot, rather the environment label will
-be placed into the maps slot. Upon re}
+be placed into the maps slot.}
 
-\item{useCache}{Logical. If \code{TRUE}, then internal calls to \code{Cache} will
-be used. Default is \code{TRUE}}
+\item{useCache}{Logical. If \code{TRUE} (default), then internal calls to
+\code{\link[reproducible:Cache]{reproducible::Cache()}} will be used.}
 
-\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one
-calculation to do at any stage, it will create and use a parallel
-cluster via \code{makeOptimalCluster}.
+\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one calculation to do
+at any stage, it will create and use a parallel cluster via \code{\link[=makeOptimalCluster]{makeOptimalCluster()}}.
 If running analyses in parallel, it may be useful to pass a function (via \code{.clInit})
 to be run on each of the nodes immediately upon cluster creation (e.g., to set options).}
 }
@@ -78,23 +78,22 @@ set to \code{max(studyArea(map)) + 1}.
 }
 }
 \examples{
-\dontrun{
-library(sp)
-library(raster)
+library(sf)
+library(terra)
 library(reproducible)
+
+\dontshow{
 cwd <- getwd()
 setwd(tempdir())
-coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98,
-                      59.9, 65.73, 63.58, 54.79, 59.9),
-                    .Dim = c(5L, 2L))
-Sr1 <- Polygon(coords)
-Srs1 <- Polygons(list(Sr1), "s1")
-StudyArea <- SpatialPolygons(list(Srs1), 1L)
-crs(StudyArea) <- paste("+init=epsg:4326 +proj=longlat +datum=WGS84",
-                        "+no_defs +ellps=WGS84 +towgs84=0,0,0")
-StudyArea <- SpatialPolygonsDataFrame(StudyArea,
-                           data = data.frame(ID = 1, shinyLabel = "zone2"),
-                           match.ID = FALSE)
+}
+
+StudyArea <- list(cbind(
+  x = c(-122.98, -116.1, -99.2, -106, -122.98),
+  y = c(59.9, 65.73, 63.58, 54.79, 59.9)
+)) |>
+  st_polygon() |>
+  st_sfc() |>
+  st_sf(geometry = _, ID = 1L, shinyLabel = "zone2", crs = "epsg:4326")
 
 ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area",
              poly = TRUE, analysisGroup2 = "Small Study Area")
@@ -102,21 +101,20 @@ ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area",
 if (require("SpaDES.tools", quietly = TRUE)) {
   options(map.useParallel = FALSE)
   smallStudyArea <- randomPolygon(studyArea(ml), 1e5)
-  smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,
-                           data = data.frame(ID = 1, shinyLabel = "zone1"),
-                           match.ID = FALSE)
+  smallStudyArea$ID <- 1L
+  smallStudyArea$shinyLabel <- "zone2"
+
   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
                analysisGroup2 = "Smaller Study Area",
                poly = TRUE,
                layerName = "Smaller Study Area") # adds a second studyArea within 1st
 
-  rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
+  rasTemplate <- rast(ext(studyArea(ml)), res = 0.001)
   tsf <- randomPolygons(rasTemplate, numTypes = 8)*30
-  crs(tsf) <- crs(ml)
   vtm <- randomPolygons(tsf, numTypes = 4)
   levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
                             Factor = c("black spruce", "white spruce", "aspen", "fir"))
-  crs(vtm) <- crs(ml)
+
   ml <- mapAdd(tsf, ml, layerName = "tsf1",
                filename2 = "tsf1.tif", # to postProcess
                # to map object
@@ -129,74 +127,75 @@ if (require("SpaDES.tools", quietly = TRUE)) {
                vtm = "vtm1.grd",
                analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)
 
+  ## these map analyses are in `LandWebUtils` package, which is reverse dependency of this one
   ageClasses <- c("Young", "Immature", "Mature", "Old")
   ageClassCutOffs <- c(0, 40, 80, 120)
 
-  # add an analysis -- this will trigger analyses because there are already objects in the map
-  #    This will trigger 2 analyses:
-  #    LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
-  #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
-  ml <- mapAddAnalysis(ml, functionName ="LeadingVegTypeByAgeClass",
-                       ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
-  # add an analysis -- this will trigger analyses because there are already objects in the map
-  #    This will trigger 2 more analyses:
-  #    largePatches on each raster x polygon combo (only 1 currently)
-  #    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
-  ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
-                       id = "1", labelColumn = "shinyLabel",
-                       ageClassCutOffs = ageClassCutOffs)
+  ## add an analysis -- this will trigger analyses because there are already objects in the map
+  ##    This will trigger 2 analyses:
+  ##    LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
+  ##    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
+  # ml <- mapAddAnalysis(ml, functionName = "LeadingVegTypeByAgeClass",
+  #                      ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
 
-  # Add a second polygon, trigger
-  smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
-  smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
-                           data = data.frame(ID = 1, shinyLabel = "zone1"),
-                           match.ID = FALSE)
-  # add a new layer -- this will trigger analyses because there are already analyese in the map
-  #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
-  #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
-  ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
-               analysisGroup2 = "Smaller Study Area 2",
-               poly = TRUE,
-               layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+  ## add an analysis -- this will trigger analyses because there are already objects in the map
+  ##    This will trigger 2 more analyses:
+  ##    largePatches on each raster x polygon combo (only 1 currently)
+  ##    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
+  # ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
+  #                      id = "1", labelColumn = "shinyLabel",
+  #                      ageClassCutOffs = ageClassCutOffs)
 
-  # Add a *different* second polygon, via overwrite. This should trigger new analyses
-  smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
-  smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
-                           data = data.frame(ID = 1, shinyLabel = "zone1"),
-                           match.ID = FALSE)
-  # add a new layer -- this will trigger analyses because there are already analyses in the map
-  #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
-  #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
-  ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
-               analysisGroup2 = "Smaller Study Area 2",
-               poly = TRUE,
-               layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+  ## Add a second polygon, trigger
+  # smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
+  # smallStudyArea2$ID <- 1L
+  # smallStudyArea2$shinyLabel <- "zone2"
 
-  # Add a 2nd pair of rasters
-  rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
-  tsf2 <- randomPolygons(rasTemplate, numTypes = 8)*30
-  crs(tsf2) <- crs(ml)
-  vtm2 <- randomPolygons(tsf2, numTypes = 4)
-  levels(vtm2) <- data.frame(ID = sort(unique(vtm2[])),
-                            Factor = c("black spruce", "white spruce", "aspen", "fir"))
-  crs(vtm2) <- crs(ml)
-  ml <- mapAdd(tsf2, ml, filename2 = "tsf2.tif", layerName = "tsf2",
-               tsf = "tsf2.tif",
-               analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
-  ml <- mapAdd(vtm2, ml, filename2 = "vtm2.grd", layerName = "vtm2",
-               vtm = "vtm2.grd",
-               analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+  ## add a new layer -- this will trigger analyses because there are already analyese in the map
+  ##    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
+  ##    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
+  # ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
+  #              analysisGroup2 = "Smaller Study Area 2",
+  #              poly = TRUE,
+  #              layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
 
-  # post hoc analysis of data
-  #  use or create a specialized function that can handle the analysesData slot
-  ml <- mapAddPostHocAnalysis(map = ml, functionName = "rbindlistAG",
-                              postHocAnalysisGroups = "analysisGroup2",
-                              postHocAnalyses = "all")
+  ## Add a *different* second polygon, via overwrite. This should trigger new analyses.
+  # smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
+  # smallStudyArea2$ID <- 1
+  # smallStudyArea2$shinyLabel = "zone1"
+
+  ## add a new layer -- this will trigger analyses because there are already analyses in the map
+  ##    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
+  ##    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
+  # ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
+  #              analysisGroup2 = "Smaller Study Area 2",
+  #              poly = TRUE,
+  #              layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+
+  ## Add a 2nd pair of rasters
+  # rasTemplate <- rast(ext(studyArea(ml)), res = 0.001)
+  # tsf2 <- randomPolygons(rasTemplate, numTypes = 8)*30
+  # vtm2 <- randomPolygons(tsf2, numTypes = 4)
+  # levels(vtm2) <- data.frame(ID = sort(unique(vtm2[])),
+  #                            Factor = c("black spruce", "white spruce", "aspen", "fir"))
+
+  # ml <- mapAdd(tsf2, ml, filename2 = "tsf2.tif", layerName = "tsf2",
+  #              tsf = "tsf2.tif",
+  #              analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+  # ml <- mapAdd(vtm2, ml, filename2 = "vtm2.grd", layerName = "vtm2",
+  #              vtm = "vtm2.grd",
+  #              analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+
+  ## post hoc analysis of data
+  ##  use or create a specialized function that can handle the analysesData slot
+  # ml <- mapAddPostHocAnalysis(map = ml, functionName = "rbindlistAG",
+  #                             postHocAnalysisGroups = "analysisGroup2",
+  #                             postHocAnalyses = "all")
 }
 
+\dontshow{
 ## cleanup
 setwd(cwd)
 unlink(tempdir(), recursive = TRUE)
 }
-
 }

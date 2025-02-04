@@ -2,12 +2,12 @@
 % Please edit documentation in R/map.R
 \name{mapRm}
 \alias{mapRm}
-\alias{mapRm.default}
+\alias{mapRm.map}
 \title{Remove objects from a \code{map}}
 \usage{
 mapRm(map, layer, ask = TRUE, ...)
 
-\method{mapRm}{default}(map = NULL, layer = NULL, ask = TRUE, ...)
+\method{mapRm}{map}(map, layer = NULL, ask = TRUE, ...)
 }
 \arguments{
 \item{map}{TODO: document this}
@@ -36,7 +36,6 @@ if (require("SpaDES.tools", quietly = TRUE)) {
 }
 \seealso{
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{rasterToMatch,map-method}},
 \code{\link{rasters}()},
@@ -44,7 +43,6 @@ Other mapMethods:
 \code{\link{studyAreaName}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{rasterToMatch,map-method}},
 \code{\link{rasters}()},

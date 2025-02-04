@@ -2,7 +2,7 @@
 % Please edit documentation in R/GIS.R
 \name{gdal_polygonizeR}
 \alias{gdal_polygonizeR}
-\title{Polygonize with GDAL}
+\title{Polygonize a raster}
 \usage{
 gdal_polygonizeR(
   x,
@@ -14,19 +14,20 @@ gdal_polygonizeR(
 )
 }
 \arguments{
-\item{x}{TODO: description needed}
+\item{x}{a \code{RasterLayer}, \code{SpatRaster}, or character giving the filepath to a raster.}
 
-\item{outshape}{TODO: description needed}
+\item{outshape}{character giving the filepath for the output shapefile.}
 
-\item{gdalformat}{TODO: description needed}
+\item{gdalformat}{GDAL driver to use. See \code{terra::gdal(drivers=TRUE)}.}
 
-\item{pypath}{TODO: description needed}
+\item{pypath, quiet}{deprecated. maintained for backwards compatibility only (not used).}
 
-\item{readpoly}{TODO: description needed}
-
-\item{quiet}{TODO: description needed}
+\item{readpoly}{logical indicating whether the polygons object should be returned
+(this was previously using \code{gdal_polygonize} on disk and required reading the file)}
+}
+\value{
+if \code{readpoly = TRUE} (default), a \code{SpatVector} object; otherwise, \code{NULL}.
 }
 \description{
-Based on
-\url{https://johnbaumgartner.wordpress.com/2012/07/26/getting-rasters-into-shape-from-r/}.
+Polygonize a raster
 }

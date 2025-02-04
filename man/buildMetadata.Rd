@@ -2,7 +2,7 @@
 % Please edit documentation in R/buildMetadata.R
 \name{buildMetadata}
 \alias{buildMetadata}
-\title{Build \code{map} obj metadata table}
+\title{Build \code{map} object metadata table}
 \usage{
 buildMetadata(
   metadata,
@@ -18,24 +18,24 @@ buildMetadata(
 )
 }
 \arguments{
-\item{metadata}{TODO: description needed}
+\item{metadata}{metadata \code{data.table}.}
 
-\item{isStudyArea}{TODO: description needed}
+\item{isStudyArea}{Logical indicating whether \code{obj} a study area.}
 
-\item{isRasterToMatch}{Logical. Is this(these) layer(s) the \code{rasterToMatch} layers.
-If \code{TRUE}, then this layer can be accessed by \code{rasterToMatch(map)}}
+\item{isRasterToMatch}{Logical indicating whether \code{obj} is a \code{rasterToMatch} layer.
+If \code{TRUE}, then this layer can be accessed by \code{rasterToMatch(map)}.}
 
-\item{layerName}{TODO: description needed}
+\item{layerName}{Character specifying a label for this layer.}
 
-\item{obj}{TODO: description needed}
+\item{obj}{The geospatial object being added to the \code{map} object.}
 
-\item{columnNameForLabels}{TODO: description needed}
+\item{columnNameForLabels}{Character specifying the column name to use for labels.}
 
-\item{objHash}{TODO: description needed}
+\item{objHash}{Character specifying the digest hash of the object.}
 
 \item{leaflet}{Logical or Character vector of path(s) to write tiles.
 If \code{TRUE} or a character vector, then this layer will be added to a leaflet map.
-For \code{RasterLayer} object, this will trigger a call to \code{gdal2tiles}, making tiles.
+For \code{RasterLayer} or \code{SpatRaster} object, this will make tiles.
 If path is not specified, it will be the current path.
 The tile base file path will be \code{paste0(layerName, "_", rndstr(1, 6))}.}
 
@@ -44,5 +44,5 @@ The tile base file path will be \code{paste0(layerName, "_", rndstr(1, 6))}.}
 \item{...}{Additional arguments.}
 }
 \description{
-Build \code{map} obj metadata table
+Build \code{map} object metadata table
 }

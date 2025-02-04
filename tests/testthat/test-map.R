@@ -1,46 +1,58 @@
 test_that("mapAdd doesn't work", {
-  testthat::skip_on_cran()
-  testthat::skip_on_ci()
+  skip_on_cran()
+  skip_on_ci()
 
   ## TODO: `LargePatches` and `LeadingVegTypeByAgeClass` were moved to `LandWebUtils`,
   ##  which is a reverse dependency of this package, so it can't be used here.
 
-  testInitOut <- testInit(c("raster", "sp", "reproducible", "SpaDES.tools")) ## , "LandWebUtils"
-  on.exit({
-    testOnExit(testInitOut)
-  }, add = TRUE)
+  withr::local_package("sf")
+  withr::local_package("terra")
+  withr::local_package("reproducible")
+  withr::local_package("SpaDES.tools")
 
-  setwd(tmpdir)
-  coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98, 59.9, 65.73, 63.58, 54.79, 59.9),
-                      .Dim = c(5L, 2L))
-  sr1 <- Polygon(coords)
-  srs1 <- Polygons(list(sr1), "s1")
-  studyArea <- SpatialPolygons(list(srs1), 1L)
-  crs(studyArea) <- "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
-  studyArea <- SpatialPolygonsDataFrame(studyArea,
-                                        data = data.frame(ID = 1, shinyLabel = "zone2"),
-                                        match.ID = FALSE)
+  tmpdir <- file.path(tempdir(), reproducible:::rndstr(1, 6)) |>
+    checkPath(create = TRUE)
+  withr::local_dir(tmpdir)
+
+  coords <- matrix(c(-122.98, -116.1,
+                     -99.2, -106,
+                     -122.98, 59.9,
+                     65.73, 63.58,
+                     54.79, 59.9), ncol = 2)
+
+  center <- st_multipoint(coords) |>
+    st_centroid() |>
+    as.matrix()
+
+  studyArea <- randomPolygon(center, area = 1e5) |>
+    st_as_sf(crs = "epsg:4326")
+  studyArea[["ID"]] <- 1L
+  studyArea[["shinyLabel"]] = "zone2"
+  studyArea <- sf::as_Spatial(studyArea)
 
   ml <- mapAdd(studyArea, isStudyArea = TRUE, layerName = "Small Study Area",
                poly = TRUE, analysisGroup2 = "Small Study Area")
 
-  smallStudyArea <- randomPolygon(studyArea(ml), 1e5)
-  smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,
-                                             data = data.frame(ID = 1, shinyLabel = "zone1"),
-                                             match.ID = FALSE)
+  ## add second study area within the first
+  smallStudyArea <- randomPolygon(center, area = 1e4) |>
+    st_as_sf(crs = "epsg:4326")
+  smallStudyArea[["ID"]] <- 1L
+  smallStudyArea[["shinyLabel"]] = "zone1"
+  smallStudyArea <- as_Spatial(smallStudyArea)
+
   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
                analysisGroup2 = "Smaller Study Area",
                poly = TRUE,
-               layerName = "Smaller Study Area") # adds a second studyArea within 1st
+               layerName = "Smaller Study Area")
 
-  rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
+  rasTemplate <- rast(ext(studyArea(ml)), resolution = 1e-5, crs = "epsg:4326")
   tsf <- randomPolygons(rasTemplate, numTypes = 8) * 30
-  crs(tsf) <- crs(ml)
   vtm <- randomPolygons(tsf, numTypes = 4)
-  vtm[] <- as.factor(vtm[])
+  vtm <- terra::as.factor(vtm)
   levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
                             VALUE = c("black spruce", "white spruce", "aspen", "fir"))
-  crs(vtm) <- crs(ml)
+
+
   ml <- mapAdd(tsf, ml, filename2 = "tsf1.tif", layerName = "tsf1",
                tsf = "tsf1.tif",
                analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)

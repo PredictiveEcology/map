@@ -11,9 +11,9 @@ utils::globalVariables(c(
 #'
 #' @param obj    Optional spatial object, currently `RasterLayer`, `SpatialPolygons`.
 #'
-#' @param map       Optional map object. If not provided, then one will be
-#'  created. If provided, then the present `object` or options passed to
-#'  `prepInputs` e.g., `url`, will be appended to this `map`.
+#' @param map       Optional map object. If not provided, then one will be created.
+#'  If provided, then the present `obj` or options passed to
+#'  [reproducible::prepInputs()] (e.g., `url`), will be appended to this `map`.
 #'
 #' @param layerName Required. A label for this map layer. This can be the same as
 #'  the object name.
@@ -22,8 +22,8 @@ utils::globalVariables(c(
 #'  the `map`, then it will replace the existing object. Default is
 #'  `getOption("map.overwrite")`
 #'
-#' @param columnNameForLabels A character string indicating which column to use
-#'  for labels. This is currently only used if the object is a `SpatialPolygonsDataFrame`.
+#' @param columnNameForLabels A character string indicating which column to use for labels.
+#'  This is currently only used if the object is a [sp::SpatialPolygonsDataFrame-class].
 #'
 #' @param leaflet Logical or Character vector of path(s) to write tiles.
 #'  If `TRUE` or a character vector, then this layer will be added to a leaflet map.
@@ -31,32 +31,30 @@ utils::globalVariables(c(
 #'  If path is not specified, it will be the current path.
 #'  The tile base file path will be `paste0(layerName, "_", rndstr(1, 6))`.
 #'
-#' @param isStudyArea Logical. If `TRUE`, this will be assigned the label,
-#'  "StudyArea", and will be passed into `prepInputs` for any future layers
-#'  added.
+#' @param isStudyArea Logical. If `TRUE`, this will be assigned the label "StudyArea",
+#'   and will be passed into [reproducible::prepInputs()] for any future layers added.
 #'
 #' @export
 #' @include map-class.R
 #' @rdname mapAdd
 #'
 #' @examples
-#' \dontrun{
-#' library(sp)
-#' library(raster)
+#' library(sf)
+#' library(terra)
 #' library(reproducible)
+#'
+#' \dontshow{
 #' cwd <- getwd()
 #' setwd(tempdir())
-#' coords <- structure(c(-122.98, -116.1, -99.2, -106, -122.98,
-#'                       59.9, 65.73, 63.58, 54.79, 59.9),
-#'                     .Dim = c(5L, 2L))
-#' Sr1 <- Polygon(coords)
-#' Srs1 <- Polygons(list(Sr1), "s1")
-#' StudyArea <- SpatialPolygons(list(Srs1), 1L)
-#' crs(StudyArea) <- paste("+init=epsg:4326 +proj=longlat +datum=WGS84",
-#'                         "+no_defs +ellps=WGS84 +towgs84=0,0,0")
-#' StudyArea <- SpatialPolygonsDataFrame(StudyArea,
-#'                            data = data.frame(ID = 1, shinyLabel = "zone2"),
-#'                            match.ID = FALSE)
+#' }
+#'
+#' StudyArea <- list(cbind(
+#'   x = c(-122.98, -116.1, -99.2, -106, -122.98),
+#'   y = c(59.9, 65.73, 63.58, 54.79, 59.9)
+#' )) |>
+#'   st_polygon() |>
+#'   st_sfc() |>
+#'   st_sf(geometry = _, ID = 1L, shinyLabel = "zone2", crs = "epsg:4326")
 #'
 #' ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area",
 #'              poly = TRUE, analysisGroup2 = "Small Study Area")
@@ -64,21 +62,20 @@ utils::globalVariables(c(
 #' if (require("SpaDES.tools", quietly = TRUE)) {
 #'   options(map.useParallel = FALSE)
 #'   smallStudyArea <- randomPolygon(studyArea(ml), 1e5)
-#'   smallStudyArea <- SpatialPolygonsDataFrame(smallStudyArea,
-#'                            data = data.frame(ID = 1, shinyLabel = "zone1"),
-#'                            match.ID = FALSE)
+#'   smallStudyArea$ID <- 1L
+#'   smallStudyArea$shinyLabel <- "zone2"
+#'
 #'   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
 #'                analysisGroup2 = "Smaller Study Area",
 #'                poly = TRUE,
 #'                layerName = "Smaller Study Area") # adds a second studyArea within 1st
 #'
-#'   rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
+#'   rasTemplate <- rast(ext(studyArea(ml)), res = 0.001)
 #'   tsf <- randomPolygons(rasTemplate, numTypes = 8)*30
-#'   crs(tsf) <- crs(ml)
 #'   vtm <- randomPolygons(tsf, numTypes = 4)
 #'   levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
 #'                             Factor = c("black spruce", "white spruce", "aspen", "fir"))
-#'   crs(vtm) <- crs(ml)
+#'
 #'   ml <- mapAdd(tsf, ml, layerName = "tsf1",
 #'                filename2 = "tsf1.tif", # to postProcess
 #'                # to map object
@@ -91,94 +88,100 @@ utils::globalVariables(c(
 #'                vtm = "vtm1.grd",
 #'                analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)
 #'
+#'   ## these map analyses are in `LandWebUtils` package, which is reverse dependency of this one
 #'   ageClasses <- c("Young", "Immature", "Mature", "Old")
 #'   ageClassCutOffs <- c(0, 40, 80, 120)
 #'
-#'   # add an analysis -- this will trigger analyses because there are already objects in the map
-#'   #    This will trigger 2 analyses:
-#'   #    LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
-#'   #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
-#'   ml <- mapAddAnalysis(ml, functionName ="LeadingVegTypeByAgeClass",
-#'                        ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
-#'   # add an analysis -- this will trigger analyses because there are already objects in the map
-#'   #    This will trigger 2 more analyses:
-#'   #    largePatches on each raster x polygon combo (only 1 currently)
-#'   #    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
-#'   ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
-#'                        id = "1", labelColumn = "shinyLabel",
-#'                        ageClassCutOffs = ageClassCutOffs)
+#'   ## add an analysis -- this will trigger analyses because there are already objects in the map
+#'   ##    This will trigger 2 analyses:
+#'   ##    LeadingVegTypeByAgeClass on each raster x polygon combo (only 1 currently)
+#'   ##    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
+#'   # ml <- mapAddAnalysis(ml, functionName = "LeadingVegTypeByAgeClass",
+#'   #                      ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs)
 #'
-#'   # Add a second polygon, trigger
-#'   smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
-#'   smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
-#'                            data = data.frame(ID = 1, shinyLabel = "zone1"),
-#'                            match.ID = FALSE)
-#'   # add a new layer -- this will trigger analyses because there are already analyese in the map
-#'   #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
-#'   #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
-#'   ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
-#'                analysisGroup2 = "Smaller Study Area 2",
-#'                poly = TRUE,
-#'                layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+#'   ## add an analysis -- this will trigger analyses because there are already objects in the map
+#'   ##    This will trigger 2 more analyses:
+#'   ##    largePatches on each raster x polygon combo (only 1 currently)
+#'   ##    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
+#'   # ml <- mapAddAnalysis(ml, functionName = "LargePatches", ageClasses = ageClasses,
+#'   #                      id = "1", labelColumn = "shinyLabel",
+#'   #                      ageClassCutOffs = ageClassCutOffs)
 #'
-#'   # Add a *different* second polygon, via overwrite. This should trigger new analyses
-#'   smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
-#'   smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
-#'                            data = data.frame(ID = 1, shinyLabel = "zone1"),
-#'                            match.ID = FALSE)
-#'   # add a new layer -- this will trigger analyses because there are already analyses in the map
-#'   #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
-#'   #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
-#'   ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
-#'                analysisGroup2 = "Smaller Study Area 2",
-#'                poly = TRUE,
-#'                layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+#'   ## Add a second polygon, trigger
+#'   # smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
+#'   # smallStudyArea2$ID <- 1L
+#'   # smallStudyArea2$shinyLabel <- "zone2"
 #'
-#'   # Add a 2nd pair of rasters
-#'   rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
-#'   tsf2 <- randomPolygons(rasTemplate, numTypes = 8)*30
-#'   crs(tsf2) <- crs(ml)
-#'   vtm2 <- randomPolygons(tsf2, numTypes = 4)
-#'   levels(vtm2) <- data.frame(ID = sort(unique(vtm2[])),
-#'                             Factor = c("black spruce", "white spruce", "aspen", "fir"))
-#'   crs(vtm2) <- crs(ml)
-#'   ml <- mapAdd(tsf2, ml, filename2 = "tsf2.tif", layerName = "tsf2",
-#'                tsf = "tsf2.tif",
-#'                analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
-#'   ml <- mapAdd(vtm2, ml, filename2 = "vtm2.grd", layerName = "vtm2",
-#'                vtm = "vtm2.grd",
-#'                analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+#'   ## add a new layer -- this will trigger analyses because there are already analyese in the map
+#'   ##    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
+#'   ##    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
+#'   # ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
+#'   #              analysisGroup2 = "Smaller Study Area 2",
+#'   #              poly = TRUE,
+#'   #              layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
 #'
-#'   # post hoc analysis of data
-#'   #  use or create a specialized function that can handle the analysesData slot
-#'   ml <- mapAddPostHocAnalysis(map = ml, functionName = "rbindlistAG",
-#'                               postHocAnalysisGroups = "analysisGroup2",
-#'                               postHocAnalyses = "all")
+#'   ## Add a *different* second polygon, via overwrite. This should trigger new analyses.
+#'   # smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
+#'   # smallStudyArea2$ID <- 1
+#'   # smallStudyArea2$shinyLabel = "zone1"
+#'
+#'   ## add a new layer -- this will trigger analyses because there are already analyses in the map
+#'   ##    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
+#'   ##    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
+#'   # ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
+#'   #              analysisGroup2 = "Smaller Study Area 2",
+#'   #              poly = TRUE,
+#'   #              layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
+#'
+#'   ## Add a 2nd pair of rasters
+#'   # rasTemplate <- rast(ext(studyArea(ml)), res = 0.001)
+#'   # tsf2 <- randomPolygons(rasTemplate, numTypes = 8)*30
+#'   # vtm2 <- randomPolygons(tsf2, numTypes = 4)
+#'   # levels(vtm2) <- data.frame(ID = sort(unique(vtm2[])),
+#'   #                            Factor = c("black spruce", "white spruce", "aspen", "fir"))
+#'
+#'   # ml <- mapAdd(tsf2, ml, filename2 = "tsf2.tif", layerName = "tsf2",
+#'   #              tsf = "tsf2.tif",
+#'   #              analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+#'   # ml <- mapAdd(vtm2, ml, filename2 = "vtm2.grd", layerName = "vtm2",
+#'   #              vtm = "vtm2.grd",
+#'   #              analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+#'
+#'   ## post hoc analysis of data
+#'   ##  use or create a specialized function that can handle the analysesData slot
+#'   # ml <- mapAddPostHocAnalysis(map = ml, functionName = "rbindlistAG",
+#'   #                             postHocAnalysisGroups = "analysisGroup2",
+#'   #                             postHocAnalyses = "all")
 #' }
 #'
+#' \dontshow{
 #' ## cleanup
 #' setwd(cwd)
 #' unlink(tempdir(), recursive = TRUE)
 #' }
-#'
 mapAdd <- function(obj, map, layerName,
                    overwrite = getOption("map.overwrite", FALSE), ...) {
-  UseMethod("mapAdd")
+  UseMethod("mapAdd", obj)
 }
 
-#' @param ... Additonal arguments passed to [reproducible::postProcess()],
+#' @param ... Additonal arguments passed to:
+#'            [reproducible::postProcess()],
 #'            [reproducible::projectInputs()],
-#'            [reproducible::fixErrors()], and
-#'            [reproducible::prepInputs()].
-#' @param isRasterToMatch  Logical indicating ... TODO: need description
+#'            [reproducible::fixErrors()],
+#'            and [reproducible::prepInputs()].
+#'
+#' @param isRasterToMatch  Logical indicating whether the object to be added should be considered
+#'        a `rasterToMatch`.
+#'
 #' @param envir An optional environment. If supplied, then the obj
 #'        will not be placed "into" the maps slot, rather the environment label will
-#'        be placed into the maps slot. Upon re
-#' @param useCache Logical. If `TRUE`, then internal calls to `Cache` will
-#'        be used. Default is `TRUE`
-#' @param useParallel Logical. If `TRUE`, then if there is more than one
-#'        calculation to do at any stage, it will create and use a parallel
-#'        cluster via `makeOptimalCluster`.
+#'        be placed into the maps slot.
+#'
+#' @param useCache Logical. If `TRUE` (default), then internal calls to
+#'    [reproducible::Cache()] will be used.
+#'
+#' @param useParallel Logical. If `TRUE`, then if there is more than one calculation to do
+#'        at any stage, it will create and use a parallel cluster via [makeOptimalCluster()].
 #'        If running analyses in parallel, it may be useful to pass a function (via `.clInit`)
 #'        to be run on each of the nodes immediately upon cluster creation (e.g., to set options).
 #'
@@ -202,13 +205,11 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   if (is.logical(leaflet))
     leaflet <- asPath(ifelse(leaflet, getwd(), NA_character_))
 
-  # Some of the arguments will need to be passed into Cache
-  ###########################################
-  # Get obj, if missing, via prepInputs url, or targetFile
-  ###########################################
-  if (is.null(obj)) {    # with no obj, we get it first, then pass to mapAdd
-    # Don't run postProcess because that will happen in next mapAdd when obj is
-    #   in hand
+  ## Some of the arguments will need to be passed into Cache
+  ## Get obj, if missing, via prepInputs url, or targetFile
+  if (is.null(obj)) {
+    ## with no obj, we get it first, then pass to mapAdd
+    ## don't run postProcess because that will happen in next mapAdd when obj is in hand
     args1 <- identifyVectorArgs(fn = list(Cache, preProcess), ls(), environment(), dots)
     maxNumClus <- if (length(args1$argsMulti)) {
       max(unlist(lapply(args1$argsMulti, NROW)), na.rm = TRUE)
@@ -219,7 +220,9 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
     message("  Running prepInputs for:\n",
             paste(capture.output(data.table(file = layerName)), collapse = "\n"))
-    cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel, outfile = .outfile)
+    cl <- makeOptimalCluster(maxNumClusters = maxNumClus,
+                             useParallel = useParallel,
+                             outfile = .outfile)
     if (!is.null(cl) && !is.null(.clInit)) {
       parallel::clusterExport(cl, c(".clInit"), envir = environment())
       parallel::clusterEvalQ(cl, .clInit())
@@ -248,9 +251,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     FALSE
   }
 
-  ####################################################
-  # postProcess -- determine studyArea and rasterToMatch from map
-  ####################################################
+  ## postProcess -- determine studyArea and rasterToMatch from map
   if (is.null(studyArea(map)) && is.null(rasterToMatch(map))) {
     argsFixErrors <- getLocalArgsFor(list(Cache, fixErrors), dots = dots)
     theList <- append(list(x = obj), argsFixErrors)
@@ -288,12 +289,22 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
         rasterToMatch <- rasterToMatch(map)
       }
 
-      list2env(dots, envir = environment()) # put any arguments from the ... into this local env
+      list2env(dots, envir = environment()) ## put arguments from `...` into this local env
       x <- obj ## put it into memory so identifyVectorArgs finds it
-      args1 <- identifyVectorArgs(fn = list(Cache, getS3method("postProcess", "spatialClasses"),
-                                            getS3method("maskInputs", "Raster"),
-                                            projectInputs, cropInputs, projectRaster, writeOutputs),
-                                  ls(), environment(), dots = dots)
+      args1 <- identifyVectorArgs(
+        fn = list(
+          reproducible::Cache,
+          getS3method("postProcess", "default"),
+          reproducible::maskTo,
+          reproducible::projectTo,
+          reproducible::cropTo,
+          raster::projectRaster, ## TODO use terra
+          reproducible::writeOutputs
+        ),
+        ls(),
+        environment(),
+        dots = dots
+      )
 
       maxNumClus <- if (length(args1$argsMulti)) {
         max(unlist(lapply(args1$argsMulti, NROW)), na.rm = TRUE)
@@ -303,7 +314,9 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       maxNumClus <- min(maxNumClus, getOption("map.maxNumCores"))
 
       message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
-      cl <- makeOptimalCluster(maxNumClusters = maxNumClus, useParallel = useParallel, outfile = .outfile)
+      cl <- makeOptimalCluster(maxNumClusters = maxNumClus,
+                               useParallel = useParallel,
+                               outfile = .outfile)
       if (!is.null(cl) && !is.null(.clInit)) {
         parallel::clusterExport(cl, c(".clInit"), envir = environment())
         parallel::clusterEvalQ(cl, .clInit())
@@ -316,11 +329,9 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     }
   }
 
-  ###############################################
-  # Purge obj(s) from metadata, if overwrite is TRUE
-  ###############################################
+  ## Purge obj(s) from metadata, if overwrite is TRUE
   objHash <- .robustDigest(obj)
-  purgeAnalyses <- NULL # Set default as NULL
+  purgeAnalyses <- NULL ## set default as NULL
   if (layerNameExistsInMetadata) {
     ln <- layerName
     purge <- isFALSE(map@metadata[(layerName %in% ln), objectHash] == objHash)
@@ -332,21 +343,18 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     map@metadata <- map@metadata[!(layerName %in% ln)]
   }
 
-  ###################################################
-  # Add "shinyLabel" column if it is a SpatialPolygonsDataFrame
-  ###################################################
+  ## Add "shinyLabel" column if it is a SpatialPolygonsDataFrame
   args1 <- identifyVectorArgs(fn = addColumnNameForLabels,
                               c(x = "obj", columnNameForLabels = "columnNameForLabels"),
                               environment(), dots = dots)
   obj <- MapOrDoCall(addColumnNameForLabels, multiple = args1$argsMulti,
                      single = args1$argsSingle, useCache = FALSE, cl = NULL)
 
-  ####################################################
-  # Assign obj to map@.xData
-  ####################################################
+  ## Assign obj to map@.xData
   if (is.null(envir)) {
-    envir <- map@.xData # keep envir for later
-    # Put map into map slot
+    envir <- map@.xData ## keep envir for later
+
+    ## Put map into map slot
     a <- list()
     objTmp <- if (is(obj, "list")) obj else list(obj)
     a[layerName] <- objTmp
@@ -368,9 +376,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     }
   }
 
-  ####################################################
-  # Metadata -- build new entries in data.table -- vectorized
-  ####################################################
+  ## Metadata -- build new entries in data.table -- vectorized
   args1 <- identifyVectorArgs(fn = list(buildMetadata, prepInputs), ls(), environment(), dots = dots) # nolint
   if (length(dots)) {
     howLong <- unlist(lapply(dots, length))
@@ -383,12 +389,10 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   } else {
     dtsList <- do.call(Map, args = append(args1$argsMulti,
                                           list(f = buildMetadata, MoreArgs = moreArgs)))
-    dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE) ## TODO: falis here provMB postprocess
+    dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE) ## TODO: fails here provMB postprocess
   }
 
-  ########################################################
-  # make tiles, if it is leaflet
-  ########################################################
+  ## make tiles, if it is leaflet
   if (any(!is.na(leaflet)) && !is.null(dts[["leafletTiles"]])) {
     MBadjustment <- 4000 ## some approx, empirically derived number. Likely only good in some cases.
     MBper <- if (is(obj, "RasterLayer")) { # nolint
@@ -414,29 +418,26 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       parallel::clusterEvalQ(cl, .clInit())
     }
     on.exit(try(stopCluster(cl), silent = TRUE))
+
     tilePath <- dts[["leafletTiles"]]
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
     out <- MapOrDoCall(makeTiles, multiple = args1$argsMulti,
                        single = args1$argsSingle, useCache = FALSE, cl = cl)
-    # If the rasters are identical, then there may be errors
+    ## if the rasters are identical, then there may be errors
     tryCatch({ stopCluster(cl); rm(cl) }, error = function(x) invisible())
   }
 
-  ######################################
-  # set CRS
-  ######################################
+  ## set CRS
   if (isTRUE(isStudyArea)) {
     if ((!is.null(studyArea(map))) && isStudyArea) {
       message("map already has a studyArea; adding another one as study area ", dts[["studyArea"]])
     } else {
       message("Setting map CRS to this layer because it is the (first) studyArea inserted")
-      map@CRS <- raster::crs(obj)
+      map@CRS <- raster::crs(obj) |> sf::st_crs()
     }
   }
 
-  ######################################
-  # rbindlist new metadata with existing metadata
-  ######################################
+  ## rbindlist new metadata with existing metadata
 
   ## 2022-10-04: workaround path columns having same class() but sorted slightly differently, e.g.,
   ## Browse[4]> class(map@metadata$leaflet) == class(dts$leaflet)
@@ -477,9 +478,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
   map@metadata <- rbindlist(list(map@metadata, dts), use.names = TRUE, fill = TRUE)
 
-  ######################################
-  # run map analyses
-  ######################################
+  ## run map analyses
   map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
 
   return(map)
@@ -511,17 +510,14 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 #'   m
 #' }
 mapRm <- function(map, layer, ask = TRUE, ...) {
-  UseMethod("mapRm")
+  UseMethod("mapRm", map)
 }
 
 #' @export
 #' @aliases mapRm
 #' @family mapMethods
 #' @rdname mapRm
-mapRm.default <- function(map = NULL, layer = NULL, ask = TRUE, ...) {
-  if (is.null(map)) {
-    stop("Must pass a map")
-  }
+mapRm.map <- function(map, layer = NULL, ask = TRUE, ...) {
   if (is.character(layer))
     layer <- map@metadata[, which(layerName %in% layer)]
 
@@ -546,11 +542,11 @@ if (!isGeneric("crs")) {
   })
 }
 
-#' Extract the crs of a `map`
+#' Extract the CRS of a `map`
 #'
 #' @inheritParams raster::crs
 #'
-#' @exportMethod crs
+#' @export
 #' @family mapMethods
 #' @importMethodsFrom raster crs
 #' @rdname crs
@@ -560,7 +556,7 @@ setMethod("crs",
             if (!is.null(x@CRS))
               x@CRS
             else
-              NA
+              NA_character_
 })
 
 #' Map class methods
@@ -571,17 +567,19 @@ setMethod("crs",
 #'
 #' @param layer TODO: document this
 #'
+#' @param ... Additional arguments passed to other methods (not used)
+#'
 #' @export
 #' @family mapMethods
 #' @rdname studyAreaName
-studyAreaName <- function(x, layer) {
-  UseMethod("studyAreaName")
+studyAreaName <- function(x, layer, ...) {
+  UseMethod("studyAreaName", x)
 }
 
 #' @export
 #' @family mapMethods
 #' @rdname studyAreaName
-studyAreaName.map <- function(x, layer = 1) {
+studyAreaName.map <- function(x, layer = 1, ...) {
   if (sum(x@metadata$studyArea, na.rm = TRUE)) {
     if (isTRUE(is.na(layer))) {
       layer <- max(x@metadata$studyArea, na.rm = TRUE)
@@ -595,7 +593,7 @@ studyAreaName.map <- function(x, layer = 1) {
 #' @export
 #' @family mapMethods
 #' @rdname studyAreaName
-studyAreaName.data.table <- function(x, layer = 1) {
+studyAreaName.data.table <- function(x, layer = 1, ...) {
   if (sum(x$studyArea, na.rm = TRUE)) {
     if (isTRUE(is.na(layer))) {
       layer <- max(x$studyArea, na.rm = TRUE)
@@ -679,14 +677,14 @@ if (!isGeneric("rasterToMatch")) {
   })
 }
 
-#' Extract the rasterToMatch(s) from a `x`
+#' Extract the `rasterToMatch`(s) from a `map` object
 #'
 #' If `layer` is not provided and there is more than one `studyArea`,
 #' then this will extract the last one added.
 #'
-#' @param x TODO: describe this
+#' @param x a `map` object
 #'
-#' @param layer TODO: describe this
+#' @param layer an integer identifying the index of the `rasterToMatch` to extract
 #'
 #' @export
 #' @exportMethod rasterToMatch
@@ -707,62 +705,111 @@ setMethod("rasterToMatch", signature = "map",
             }
 })
 
-#' Extract rasters in the `map` object
+################################################################################
+#' Extract objects of specific classes from a `map` object
+#'
+#' - `rasters()` extracts `RasterLayer` objects;
+#' - `sf()` extracts `sf` objects;
+#' - `sp()` extracts `Spatial` objects;
+#' - `spatialPolygons()` extracts `SpatialPolygons` objects;
+#' - `spatialPoints()` extracts `SpatialPoints` objects;
+#' - `spatRasters()` extracts `SpatRaster` objects;
+#' - `spatVectors()` extracts `SpatVector` objects;
 #'
 #' @export
 #' @family mapMethods
 #' @rdname maps
-rasters <- function(map) {
-  UseMethod("rasters")
+rasters <- function(map, ...) {
+  UseMethod("rasters", map)
 }
 
 #' @export
 #' @family mapMethods
 #' @rdname maps
-rasters.map <- function(map) {
+rasters.map <- function(map, ...) {
   maps(map, "RasterLayer")
 }
 
-#' Extract `sp` class objects from the `map` obj
 #' @export
 #' @family mapMethods
 #' @rdname maps
-sp <- function(map) {
+sp <- function(map, ...) {
   UseMethod("sp")
 }
 
 #' @export
 #' @family mapMethods
 #' @rdname maps
-sp.map <- function(map) {
+sp.map <- function(map, ...) {
   maps(map, "Spatial")
 }
 
-#' Extract `sf` class objects from the `map` obj
 #' @export
 #' @family mapMethods
 #' @rdname maps
-sf <- function(map) {
-  UseMethod("sf")
+sf <- function(map, ...) {
+  UseMethod("sf", map)
 }
 
 #' @export
 #' @family mapMethods
 #' @rdname maps
-sf.map <- function(map) {
+sf.map <- function(map, ...) {
   maps(map, "sf")
 }
 
 #' @export
+#' @family mapMethods
 #' @rdname maps
-spatialPolygons <- function(map) {
-  maps(map, "SpatialPolygons")
+spatialPolygons <- function(map, ...) {
+  UseMethod("spatialPolygons", map)
 }
 
 #' @export
 #' @rdname maps
-spatialPoints <- function(map) {
+spatialPolygons.map <- function(map, ...) {
+  maps(map, "SpatialPolygons")
+}
+
+#' @export
+#' @family mapMethods
+#' @rdname maps
+spatialPoints <- function(map, ...) {
+  UseMethod("spatialPoints", map)
+}
+
+#' @export
+#' @rdname maps
+spatialPoints.map <- function(map, ...) {
   maps(map, "SpatialPoints")
+}
+
+#' @export
+#' @family mapMethods
+#' @rdname maps
+spatRasters <- function(map, ...) {
+  UseMethod("spatRasters", map)
+}
+
+#' @export
+#' @family mapMethods
+#' @rdname maps
+spatRasters.map <- function(map, ...) {
+  maps(map, "SpatRasters")
+}
+
+#' @export
+#' @family mapMethods
+#' @rdname maps
+spatVectors <- function(map, ...) {
+  UseMethod("spatVectors", map)
+}
+
+#' @export
+#' @family mapMethods
+#' @rdname maps
+spatVectors.map <- function(map, ...) {
+  maps(map, "SpatVectors")
 }
 
 #' Extract leaflet tile paths from a `map` obj
@@ -784,12 +831,16 @@ leafletTiles <- function(map) {
 #'
 #' This will extract all objects in or pointed to within the `map`.
 #'
-#' @param map A `map` class obj
-#' @param class If supplied, this will be the class of objects returned. Default
-#'              is `NULL` which is "all", meaning all objects in the `map`
-#'              object.
-#' @param layerName TODO: description needed
-#' @return A list of maps (i.e., sp, raster, or sf objects) of class `class`
+#' @param map A `map` object
+#'
+#' @param class If supplied, this will be the class of objects returned.
+#'              Default is `NULL` which is "all", meaning all objects in the `map` object.
+#'
+#' @param layerName character string giving the name(s) of layer(s) to extract.
+#'
+#' @param ... Additional arguments passed to other methods (not used)
+#'
+#' @return A list of geospatial objects of class `class`
 #'
 #' @export
 maps <- function(map, class = NULL, layerName = NULL) {
@@ -812,39 +863,18 @@ maps <- function(map, class = NULL, layerName = NULL) {
     out <- out[classOnly]
   }
 
-  out
+  return(out)
 }
 
 #' @keywords internal
 .singleMetadataNAEntry <- data.table::data.table(
-  layerName = NA_character_, layerType = NA_character_, #url = NA_character_,
-  columnNameForLabels = NA_character_, envir = list(), leaflet = FALSE, studyArea = 0
+  layerName = NA_character_,
+  layerType = NA_character_,
+  columnNameForLabels = NA_character_,
+  envir = list(),
+  leaflet = FALSE,
+  studyArea = 0
 )
-
-if (!isGeneric("area")) {
-  setGeneric("area", function(x, ...) {
-    standardGeneric("area")
-  })
-}
-
-#' Calculate area of (named) objects the `map` obj
-#'
-#' @inheritParams raster::area
-#'
-#' @export
-#' @family mapMethods
-#' @rdname area
-setMethod("area",
-          signature = "map",
-          function(x) {
-            lsObjs <- ls(x@.xData)
-            logicalRasters <- unlist(lapply(mget(lsObjs, x@.xData), is, "RasterLayer"))
-            if (any(logicalRasters)) {
-              mget(names(logicalRasters)[logicalRasters], x@.xData)
-            } else {
-              NULL
-            }
-})
 
 #' Show method for map class objects
 #'
@@ -859,47 +889,110 @@ setMethod(
     show(object@metadata)
 })
 
-.formalsReproducible <- unique(c(formalArgs(reproducible::preProcess),
-                                 formalArgs(reproducible::postProcess),
-                                 formalArgs(reproducible:::determineFilename),
-                                 formalArgs(reproducible::cropInputs),
-                                 formalArgs(reproducible::maskInputs),
-                                 formalArgs(reproducible::projectInputs)))
+.formalsReproducible <- c(
+  formalArgs(reproducible::preProcess),
+  formalArgs(reproducible::postProcess),
+  formalArgs(reproducible:::determineFilename),
+  formalArgs(reproducible::cropInputs),
+  formalArgs(reproducible::maskInputs),
+  formalArgs(reproducible::projectInputs)
+) |>
+  unique()
 
 ################################################################################
-#' Extract the metadata obj
+#' Extract metadata
 #'
-#' Methods for specific classes exist.
 #'
-#' @param x TODO: description needed
+#'
+#' @param x A `map`, `Raster`, or `SpatRaster` object
+#'
+#' @param ... Additional arguments passed to other methods (not used)
 #'
 #' @export
 #' @rdname metadata
-metadata <- function(x) UseMethod("metadata")
+metadata <- function(x, ...) {
+  UseMethod("metadata", x)
+}
 
 #' @export
 #' @rdname metadata
-metadata.Raster <- function(x) {
+metadata.map <- function(x, ...) {
+  x@metadata
+}
+
+#' @export
+#' @rdname metadata
+metadata.Map <- function(x, ...) {
+  x$metadata
+}
+
+#' @export
+#' @rdname metadata
+metadata.Raster <- function(x, ...) {
   raster::metadata(x)
 }
 
 #' @export
 #' @rdname metadata
-metadata.map <- function(x) {
-  x@metadata
+metadata.SpatRaster <- function(x, ...) {
+  terra::meta(x)
 }
 
-addColumnNameForLabels <- function(x, columnNameForLabels) {
-  if (is(x, "list")) {
-    lapply(x, addColumnNameForLabels, columnNameForLabels = columnNameForLabels)
-  } else if (is(x, "sf")) {
-    if (ncol(x) > 0) {
-      x[["shinyLabel"]] <- x[[columnNameForLabels]]
-    }
-  } else if (is(x, "SpatialPolygonsDataFrame")) {
-    if (ncol(x) > 0) {
-      x[["shinyLabel"]] <- x[[columnNameForLabels]]
-    }
+################################################################################
+#' Add `shinyLabel` column (attribute) to spatial vectors
+#'
+#' @param x a spatial vector object (`sf`, `SpatialPolygons`, `SpatVector`)
+#'
+#' @param columnNameForLabels character or integer identifying an existing column (attribute)
+#'        to use as the `shinyLabel`.
+#'
+#' @param ... Additional arguments passed to other methods (not used)
+#'
+#' @return a modified object with the same class as `x`
+#'
+#' @export
+#' @rdname addColumnNameForLabels
+addColumnNameForLabels <- function(x, columnNameForLabels, ...) {
+  UseMethod("addColumnNameForLabels", x)
+}
+
+#' @export
+#' @rdname addColumnNameForLabels
+addColumnNameForLabels.default <- function(x, columnNameForLabels, ...) {
+  return(x)
+}
+
+#' @export
+#' @rdname addColumnNameForLabels
+addColumnNameForLabels.list <- function(x, columnNameForLabels, ...) {
+  lapply(x, addColumnNameForLabels, columnNameForLabels = columnNameForLabels)
+}
+
+#' @export
+#' @rdname addColumnNameForLabels
+addColumnNameForLabels.sf <- function(x, columnNameForLabels, ...) {
+  if (ncol(x) > 0) {
+    x[["shinyLabel"]] <- x[[columnNameForLabels]]
+  }
+
+  return(x)
+}
+
+#' @export
+#' @rdname addColumnNameForLabels
+addColumnNameForLabels.SpatialPolygonsDataFrame <- function(x, columnNameForLabels, ...) {
+  if (ncol(x) > 0) {
+    x[["shinyLabel"]] <- x[[columnNameForLabels]]
+  }
+
+  return(x)
+}
+
+#' @export
+#' @rdname addColumnNameForLabels
+addColumnNameForLabels.SpatVector <- function(x, columnNameForLabels, ...) {
+  if (ncol(x) > 0) {
+    x[["shinyLabel"]] <- x[[columnNameForLabels]]
   }
 
   return(x)
