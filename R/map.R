@@ -177,8 +177,7 @@ mapAdd <- function(obj, map, layerName,
 #'        will not be placed "into" the maps slot, rather the environment label will
 #'        be placed into the maps slot.
 #'
-#' @param useCache Logical. If `TRUE` (default), then internal calls to
-#'    [reproducible::Cache()] will be used.
+#' @param useCache Logical. If `TRUE`, internal calls to [reproducible::Cache()] will be used.
 #'
 #' @param useParallel Logical. If `TRUE`, then if there is more than one calculation to do
 #'        at any stage, it will create and use a parallel cluster via [makeOptimalCluster()].
@@ -190,7 +189,8 @@ mapAdd <- function(obj, map, layerName,
 mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
                            overwrite = getOption("map.overwrite"),
                            columnNameForLabels = 1, leaflet = FALSE, isStudyArea = FALSE,
-                           isRasterToMatch = FALSE, envir = NULL, useCache = TRUE,
+                           isRasterToMatch = FALSE, envir = NULL,
+                           useCache = getOption("reproducible.useCache", TRUE),
                            useParallel = getOption("map.useParallel", FALSE), ...) {
   dots <- list(...)
   .outfile <- dots$outfile

@@ -17,7 +17,7 @@ mapAdd(obj, map, layerName, overwrite = getOption("map.overwrite", FALSE), ...)
   isStudyArea = FALSE,
   isRasterToMatch = FALSE,
   envir = NULL,
-  useCache = TRUE,
+  useCache = getOption("reproducible.useCache", TRUE),
   useParallel = getOption("map.useParallel", FALSE),
   ...
 )
@@ -61,8 +61,7 @@ a \code{rasterToMatch}.}
 will not be placed "into" the maps slot, rather the environment label will
 be placed into the maps slot.}
 
-\item{useCache}{Logical. If \code{TRUE} (default), then internal calls to
-\code{\link[reproducible:Cache]{reproducible::Cache()}} will be used.}
+\item{useCache}{Logical. If \code{TRUE}, internal calls to \code{\link[reproducible:Cache]{reproducible::Cache()}} will be used.}
 
 \item{useParallel}{Logical. If \code{TRUE}, then if there is more than one calculation to do
 at any stage, it will create and use a parallel cluster via \code{\link[=makeOptimalCluster]{makeOptimalCluster()}}.
