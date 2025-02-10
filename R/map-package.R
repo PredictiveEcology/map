@@ -17,6 +17,7 @@
 #' @importFrom sf as_Spatial st_area st_as_sf st_bbox read_sf st_zm
 #' @importFrom sp CRS
 #' @importFrom stats na.omit
+#' @importFrom terra vect
 #' @importFrom tiler tile tiler_options
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output getS3method

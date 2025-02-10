@@ -34,7 +34,7 @@ Imports:
     sf,
     sp,
     stats,
-    terra (>= 1.7-0),
+    terra,
     tiler (>= 0.2.6),
     utils
 Suggests:
