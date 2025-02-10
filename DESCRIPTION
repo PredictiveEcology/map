@@ -7,14 +7,14 @@ Description: The map class is a collection of map objects ('sp', 'raster', 'sf')
 URL: 
     http://map.predictiveecology.org,
     https://github.com/PredictiveEcology/map
-Date: 2025-02-07
-Version: 0.0.5.9006
+Date: 2025-02-10
+Version: 0.0.5.9007
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
-           role = c("aut", "cre"), comment=c(ORCID = "0000-0002-6914-8316")),
+           role = c("aut"), comment=c(ORCID = "0000-0002-6914-8316")),
     person("Alex M", "Chubaty", email = "achubaty@for-cast.ca",
-           role = c("aut"), comment = c(ORCID = "0000-0001-7146-8135")),
-    person("Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources Canada",
+           role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7146-8135")),
+    person("His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources Canada",
            role = "cph")
     )
 Depends:
@@ -47,11 +47,11 @@ Suggests:
 Remotes:
     ropensci/tiler,
     gearslaboratory/gdalUtils,
-    PredictiveEcology/pemisc@development,
-    PredictiveEcology/reproducible@development,
+    PredictiveEcology/pemisc@dev-stable,
+    PredictiveEcology/reproducible@dev-stable,
     cran/rgdal,
     cran/rgeos,
-    PredictiveEcology/SpaDES.tools@development
+    PredictiveEcology/SpaDES.tools@dev-stable
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
