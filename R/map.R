@@ -19,8 +19,7 @@ utils::globalVariables(c(
 #'  the object name.
 #'
 #' @param overwrite Logical. If `TRUE` and this `layerName` exists in
-#'  the `map`, then it will replace the existing object. Default is
-#'  `getOption("map.overwrite")`
+#'  the `map`, then it will replace the existing object. Default is `getOption("map.overwrite")`.
 #'
 #' @param columnNameForLabels A character string indicating which column to use for labels.
 #'  This is currently only used if the object is a [sp::SpatialPolygonsDataFrame-class].
@@ -164,7 +163,7 @@ mapAdd <- function(obj, map, layerName,
   UseMethod("mapAdd", obj)
 }
 
-#' @param ... Additonal arguments passed to:
+#' @param ... Additional arguments passed to:
 #'            [reproducible::postProcess()],
 #'            [reproducible::projectInputs()],
 #'            [reproducible::fixErrors()],

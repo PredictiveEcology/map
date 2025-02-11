@@ -33,10 +33,9 @@ If provided, then the present \code{obj} or options passed to
 the object name.}
 
 \item{overwrite}{Logical. If \code{TRUE} and this \code{layerName} exists in
-the \code{map}, then it will replace the existing object. Default is
-\code{getOption("map.overwrite")}}
+the \code{map}, then it will replace the existing object. Default is \code{getOption("map.overwrite")}.}
 
-\item{...}{Additonal arguments passed to:
+\item{...}{Additional arguments passed to:
 \code{\link[reproducible:postProcess]{reproducible::postProcess()}},
 \code{\link[reproducible:deprecated]{reproducible::projectInputs()}},
 \code{\link[reproducible:deprecated]{reproducible::fixErrors()}},
