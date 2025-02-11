@@ -1,5 +1,6 @@
 # map (development version)
 
+* drop support for R 4.1 due to changes in dependency packages;
 * improved documentation
 
 # map v1.1.0
