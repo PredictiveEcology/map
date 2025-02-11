@@ -76,29 +76,26 @@ set to \code{max(studyArea(map)) + 1}.
 }
 }
 \examples{
-library(sf)
-library(terra)
-library(reproducible)
-
-\dontshow{
-cwd <- getwd()
-setwd(tempdir())
-}
+withr::local_tempdir("example_mapAdd_") |>
+  withr::local_dir()
 
 StudyArea <- list(cbind(
   x = c(-122.98, -116.1, -99.2, -106, -122.98),
   y = c(59.9, 65.73, 63.58, 54.79, 59.9)
 )) |>
-  st_polygon() |>
-  st_sfc() |>
-  st_sf(geometry = _, ID = 1L, shinyLabel = "zone2", crs = "epsg:4326")
+  sf::st_polygon() |>
+  sf::st_sfc() |>
+  sf::st_sf(geometry = _, ID = 1L, shinyLabel = "zone2", crs = "epsg:4326")
 
 ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area",
              poly = TRUE, analysisGroup2 = "Small Study Area")
 
 if (require("SpaDES.tools", quietly = TRUE)) {
-  options(map.useParallel = FALSE)
-  smallStudyArea <- randomPolygon(studyArea(ml), 1e5)
+  withr::local_options(list(
+    map.tilePath = withr::local_tempdir("tiles_"),
+    map.useParallel = FALSE
+  ))
+  smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml), 1e5)
   smallStudyArea$ID <- 1L
   smallStudyArea$shinyLabel <- "zone2"
 
@@ -107,11 +104,13 @@ if (require("SpaDES.tools", quietly = TRUE)) {
                poly = TRUE,
                layerName = "Smaller Study Area") # adds a second studyArea within 1st
 
-  rasTemplate <- rast(ext(studyArea(ml)), res = 0.001)
-  tsf <- randomPolygons(rasTemplate, numTypes = 8)*30
-  vtm <- randomPolygons(tsf, numTypes = 4)
-  levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
-                            Factor = c("black spruce", "white spruce", "aspen", "fir"))
+  rasTemplate <- terra::rast(terra::ext(studyArea(ml)), resolution = 0.001)
+  tsf <- SpaDES.tools::randomPolygons(rasTemplate, numTypes = 8)*30
+  vtm <- SpaDES.tools::randomPolygons(tsf, numTypes = 4)
+  levels(vtm) <- data.frame(
+    ID = sort(unique(vtm[])),
+    Factor = c("black spruce", "white spruce", "aspen", "fir")
+  )
 
   ml <- mapAdd(tsf, ml, layerName = "tsf1",
                filename2 = "tsf1.tif", # to postProcess
@@ -174,8 +173,10 @@ if (require("SpaDES.tools", quietly = TRUE)) {
   # rasTemplate <- rast(ext(studyArea(ml)), res = 0.001)
   # tsf2 <- randomPolygons(rasTemplate, numTypes = 8)*30
   # vtm2 <- randomPolygons(tsf2, numTypes = 4)
-  # levels(vtm2) <- data.frame(ID = sort(unique(vtm2[])),
-  #                            Factor = c("black spruce", "white spruce", "aspen", "fir"))
+  # levels(vtm2) <- data.frame(
+  #   ID = sort(unique(vtm2[])),
+  #   Factor = c("black spruce", "white spruce", "aspen", "fir")
+  # )
 
   # ml <- mapAdd(tsf2, ml, filename2 = "tsf2.tif", layerName = "tsf2",
   #              tsf = "tsf2.tif",
@@ -191,9 +192,7 @@ if (require("SpaDES.tools", quietly = TRUE)) {
   #                             postHocAnalyses = "all")
 }
 
-\dontshow{
 ## cleanup
-setwd(cwd)
-unlink(tempdir(), recursive = TRUE)
-}
+withr::deferred_run()
+
 }

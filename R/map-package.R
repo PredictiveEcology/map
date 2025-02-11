@@ -23,5 +23,6 @@
 #' @importFrom tiler tile
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output getS3method
+#' @importFrom withr deferred_run local_dir local_options local_tempdir
 ## usethis namespace: end
 NULL

@@ -1,6 +1,7 @@
 # map (development version)
 
 * drop support for R 4.1 due to changes in dependency packages;
+* move `withr` from Suggests to Imports, as it's used in examples;
 * improved documentation
 
 # map v1.1.0

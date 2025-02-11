@@ -6,14 +6,10 @@ test_that("mapAdd doesn't work", {
   ## TODO: `LargePatches` and `LeadingVegTypeByAgeClass` were moved to `LandWebUtils`,
   ##  which is a reverse dependency of this package, so it can't be used here.
 
-  withr::local_package("sf")
   withr::local_package("terra")
-  withr::local_package("reproducible")
-  withr::local_package("SpaDES.tools")
 
-  tmpdir <- file.path(tempdir(), reproducible:::rndstr(1, 6)) |>
-    checkPath(create = TRUE)
-  withr::local_dir(tmpdir)
+  withr::local_tempdir("test_map_") |>
+    withr::local_dir()
 
   coords <- matrix(c(-122.98, -116.1,
                      -99.2, -106,
@@ -21,12 +17,12 @@ test_that("mapAdd doesn't work", {
                      65.73, 63.58,
                      54.79, 59.9), ncol = 2)
 
-  center <- st_multipoint(coords) |>
-    st_centroid() |>
+  center <- sf::st_multipoint(coords) |>
+    sf::st_centroid() |>
     as.matrix()
 
-  studyArea <- randomPolygon(center, area = 1e5) |>
-    st_as_sf(crs = "epsg:4326")
+  studyArea <- SpaDES.tools::randomPolygon(center, area = 1e5) |>
+    sf::st_as_sf(crs = "epsg:4326")
   studyArea[["ID"]] <- 1L
   studyArea[["shinyLabel"]] = "zone2"
   studyArea <- sf::as_Spatial(studyArea)
@@ -35,20 +31,20 @@ test_that("mapAdd doesn't work", {
                poly = TRUE, analysisGroup2 = "Small Study Area")
 
   ## add second study area within the first
-  smallStudyArea <- randomPolygon(center, area = 1e4) |>
-    st_as_sf(crs = "epsg:4326")
+  smallStudyArea <- SpaDES.tools::randomPolygon(center, area = 1e4) |>
+    sf::st_as_sf(crs = "epsg:4326")
   smallStudyArea[["ID"]] <- 1L
   smallStudyArea[["shinyLabel"]] = "zone1"
-  smallStudyArea <- as_Spatial(smallStudyArea)
+  smallStudyArea <- sf::as_Spatial(smallStudyArea)
 
   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
                analysisGroup2 = "Smaller Study Area",
                poly = TRUE,
                layerName = "Smaller Study Area")
 
-  rasTemplate <- rast(ext(studyArea(ml)), resolution = 1e-5, crs = "epsg:4326")
-  tsf <- randomPolygons(rasTemplate, numTypes = 8) * 30
-  vtm <- randomPolygons(tsf, numTypes = 4)
+  rasTemplate <- terra::rast(terra::ext(studyArea(ml)), resolution = 1e-5, crs = "epsg:4326")
+  tsf <- SpaDES.tools::randomPolygons(rasTemplate, numTypes = 8) * 30
+  vtm <- SpaDES.tools::randomPolygons(tsf, numTypes = 4)
   vtm <- terra::as.factor(vtm)
   levels(vtm) <- data.frame(ID = sort(unique(vtm[])),
                             VALUE = c("black spruce", "white spruce", "aspen", "fir"))
@@ -64,7 +60,9 @@ test_that("mapAdd doesn't work", {
   ageClasses <- c("Young", "Immature", "Mature", "Old")
   ageClassCutOffs <- c(0, 40, 80, 120)
 
+  ## -----------------------------------------------------------------------------------------------
   skip("need LandWebUtils")
+  skip_if_not_installed("sp")
   ## TODO: `LargePatches` and `LeadingVegTypeByAgeClass` were moved to `LandWebUtils`,
   ##  which is a reverse dependency of this package, so it can't be used here.
 
@@ -83,10 +81,10 @@ test_that("mapAdd doesn't work", {
                        ageClassCutOffs = ageClassCutOffs)
 
   # Add a second polygon, trigger
-  smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
-  smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
-                                              data = data.frame(ID = 1, shinyLabel = "zone1"),
-                                              match.ID = FALSE)
+  smallStudyArea2 <- SpaDES.tools::randomPolygon(studyArea(ml), 1e5)
+  smallStudyArea2 <- sp::SpatialPolygonsDataFrame(smallStudyArea2,
+                                                  data = data.frame(ID = 1, shinyLabel = "zone1"),
+                                                  match.ID = FALSE)
   # add a new layer -- this will trigger analyses because there are already analyese in the map
   #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
   #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
@@ -96,10 +94,10 @@ test_that("mapAdd doesn't work", {
                layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
 
   # Add a *different* second polygon, via overwrite. This should trigger new analyses
-  smallStudyArea2 <- randomPolygon(studyArea(ml), 1e5)
-  smallStudyArea2 <- SpatialPolygonsDataFrame(smallStudyArea2,
-                                              data = data.frame(ID = 1, shinyLabel = "zone1"),
-                                              match.ID = FALSE)
+  smallStudyArea2 <- SpaDES.tools::randomPolygon(studyArea(ml), 1e5)
+  smallStudyArea2 <- sp::SpatialPolygonsDataFrame(smallStudyArea2,
+                                                  data = data.frame(ID = 1, shinyLabel = "zone1"),
+                                                  match.ID = FALSE)
   # add a new layer -- this will trigger analyses because there are already analyese in the map
   #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
   #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
@@ -109,13 +107,13 @@ test_that("mapAdd doesn't work", {
                layerName = "Smaller Study Area 2") # adds a second studyArea within 1st
 
   # Add a 2nd pair of rasters
-  rasTemplate <- raster(extent(studyArea(ml)), res = 0.001)
-  tsf2 <- randomPolygons(rasTemplate, numTypes = 8) * 30
-  crs(tsf2) <- crs(ml)
-  vtm2 <- randomPolygons(tsf2, numTypes = 4)
+  rasTemplate <- raster::raster(raster::extent(studyArea(ml)), res = 0.001)
+  tsf2 <- SpaDES.tools::randomPolygons(rasTemplate, numTypes = 8) * 30
+  raster::crs(tsf2) <- raster::crs(ml)
+  vtm2 <- SpaDES.tools::randomPolygons(tsf2, numTypes = 4)
   levels(vtm2) <- data.frame(ID = sort(unique(vtm2[])),
                              Factor = c("black spruce", "white spruce", "aspen", "fir"))
-  crs(vtm2) <- crs(ml)
+  raster::crs(vtm2) <- raster::crs(ml)
   ml <- mapAdd(tsf2, ml, filename2 = "tsf2.tif", layerName = "tsf2",
                tsf = "tsf2.tif",
                analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
