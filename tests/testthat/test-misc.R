@@ -14,6 +14,8 @@ test_that(".rasterToMemory handles Raster and SpatRaster objects", {
 })
 
 test_that("addColumnNameForLabels handles multiple object classes", {
+  skip_if_not_installed("SpaDES.tools")
+
   p <- SpaDES.tools::randomPolygons() |>
     terra::as.polygons()
 

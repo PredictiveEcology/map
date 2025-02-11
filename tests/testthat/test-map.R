@@ -1,6 +1,7 @@
 test_that("mapAdd doesn't work", {
   skip_on_cran()
   skip_on_ci()
+  skip_if_not_installed("SpaDES.tools")
 
   ## TODO: `LargePatches` and `LeadingVegTypeByAgeClass` were moved to `LandWebUtils`,
   ##  which is a reverse dependency of this package, so it can't be used here.
