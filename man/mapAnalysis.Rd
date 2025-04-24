@@ -24,8 +24,8 @@ inputs in the map object. See details.}
 combination or part thereof (e.g., the name entered into the row under
 \code{analysisGroup2} column of the \code{map@metadata} or a \code{functionName}.}
 
-\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one calculation to do
-at any stage, it will create and use a parallel cluster via \code{\link[=makeOptimalCluster]{makeOptimalCluster()}}.
+\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one calculation to do at
+any stage, it will create and use a parallel cluster via \code{\link[pemisc:makeOptimalCluster]{pemisc::makeOptimalCluster()}}.
 If running analyses in parallel, it may be useful to pass a function (via \code{.clInit})
 to be run on each of the nodes immediately upon cluster creation (e.g., to set options).}
 

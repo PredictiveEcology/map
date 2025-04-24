@@ -62,8 +62,8 @@ be placed into the maps slot.}
 
 \item{useCache}{Logical. If \code{TRUE}, internal calls to \code{\link[reproducible:Cache]{reproducible::Cache()}} will be used.}
 
-\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one calculation to do
-at any stage, it will create and use a parallel cluster via \code{\link[=makeOptimalCluster]{makeOptimalCluster()}}.
+\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one calculation to do at
+any stage, it will create and use a parallel cluster via \code{\link[pemisc:makeOptimalCluster]{pemisc::makeOptimalCluster()}}.
 If running analyses in parallel, it may be useful to pass a function (via \code{.clInit})
 to be run on each of the nodes immediately upon cluster creation (e.g., to set options).}
 }

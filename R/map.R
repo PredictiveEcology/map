@@ -177,8 +177,8 @@ mapAdd <- function(obj, map, layerName,
 #'
 #' @param useCache Logical. If `TRUE`, internal calls to [reproducible::Cache()] will be used.
 #'
-#' @param useParallel Logical. If `TRUE`, then if there is more than one calculation to do
-#'        at any stage, it will create and use a parallel cluster via [makeOptimalCluster()].
+#' @param useParallel Logical. If `TRUE`, then if there is more than one calculation to do at
+#'        any stage, it will create and use a parallel cluster via [pemisc::makeOptimalCluster()].
 #'        If running analyses in parallel, it may be useful to pass a function (via `.clInit`)
 #'        to be run on each of the nodes immediately upon cluster creation (e.g., to set options).
 #'
