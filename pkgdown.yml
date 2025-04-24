@@ -1,9 +1,8 @@
-pandoc: 2.14.2
-pkgdown: 2.0.6
+pandoc: 3.1.11
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles: {}
-last_built: 2022-10-08T00:31Z
+last_built: 2025-04-24T04:06Z
 urls:
   reference: http://map.predictiveecology.org/reference
   article: http://map.predictiveecology.org/articles
-
