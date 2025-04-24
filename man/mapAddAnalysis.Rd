@@ -19,7 +19,7 @@ mapAddAnalysis(
 \item{useParallel}{Logical indicating whether to use multiple threads.
 Defaults to \code{getOption("map.useParallel", FALSE)}.}
 
-\item{...}{Additional arguments TODO: description needed}
+\item{...}{Additional arguments passed to \code{functionName}.}
 }
 \description{
 TODO: description needed

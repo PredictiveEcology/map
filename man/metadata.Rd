@@ -2,19 +2,27 @@
 % Please edit documentation in R/map.R
 \name{metadata}
 \alias{metadata}
-\alias{metadata.Raster}
 \alias{metadata.map}
-\title{Extract the metadata obj}
+\alias{metadata.Map}
+\alias{metadata.Raster}
+\alias{metadata.SpatRaster}
+\title{Extract metadata}
 \usage{
-metadata(x)
+metadata(x, ...)
 
-\method{metadata}{Raster}(x)
+\method{metadata}{map}(x, ...)
 
-\method{metadata}{map}(x)
+\method{metadata}{Map}(x, ...)
+
+\method{metadata}{Raster}(x, ...)
+
+\method{metadata}{SpatRaster}(x, ...)
 }
 \arguments{
-\item{x}{TODO: description needed}
+\item{x}{A \code{map}, \code{Raster}, or \code{SpatRaster} object}
+
+\item{...}{Additional arguments passed to other methods (not used)}
 }
 \description{
-Methods for specific classes exist.
+Extract metadata
 }

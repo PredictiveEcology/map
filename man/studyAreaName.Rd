@@ -6,23 +6,24 @@
 \alias{studyAreaName.data.table}
 \title{Map class methods}
 \usage{
-studyAreaName(x, layer)
+studyAreaName(x, layer, ...)
 
-\method{studyAreaName}{map}(x, layer = 1)
+\method{studyAreaName}{map}(x, layer = 1, ...)
 
-\method{studyAreaName}{data.table}(x, layer = 1)
+\method{studyAreaName}{data.table}(x, layer = 1, ...)
 }
 \arguments{
 \item{x}{TODO: document this}
 
 \item{layer}{TODO: document this}
+
+\item{...}{Additional arguments passed to other methods (not used)}
 }
 \description{
 Tools for getting objects and metadata in and out of a \code{map} class.
 }
 \seealso{
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
@@ -30,7 +31,6 @@ Other mapMethods:
 \code{\link{studyArea}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
@@ -38,7 +38,6 @@ Other mapMethods:
 \code{\link{studyArea}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},

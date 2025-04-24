@@ -2,16 +2,24 @@
 % Please edit documentation in R/GIS.R
 \name{areaAndPolyValue}
 \alias{areaAndPolyValue}
-\title{\code{areaAndPolyValue}}
+\alias{areaAndPolyValue.Raster}
+\alias{areaAndPolyValue.SpatRaster}
+\title{Determine the area of each zone in a raster}
 \usage{
-areaAndPolyValue(ras)
+areaAndPolyValue(ras, ...)
+
+\method{areaAndPolyValue}{Raster}(ras, ...)
+
+\method{areaAndPolyValue}{SpatRaster}(ras, ...)
 }
 \arguments{
-\item{ras}{A \verb{Raster*} object}
+\item{ras}{A \code{Raster} or \code{SpatRaster} object}
+
+\item{...}{Additional arguments (not used)}
 }
 \value{
 list containing: \code{sizeInHa}, the area; and \code{polyID}, the polygon ID.
 }
 \description{
-Determine the area of each zone in a raster. TODO: improve description
+Polygonize a raster and calculate the area of each polygon.
 }

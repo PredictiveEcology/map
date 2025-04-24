@@ -13,9 +13,9 @@ mapAnalysis(
 )
 }
 \arguments{
-\item{map}{Optional map object. If not provided, then one will be
-created. If provided, then the present \code{object} or options passed to
-\code{prepInputs} e.g., \code{url}, will be appended to this \code{map}.}
+\item{map}{Optional map object. If not provided, then one will be created.
+If provided, then the present \code{obj} or options passed to
+\code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} (e.g., \code{url}), will be appended to this \code{map}.}
 
 \item{functionName}{A function name that will be run on combinations of
 inputs in the map object. See details.}
@@ -24,19 +24,23 @@ inputs in the map object. See details.}
 combination or part thereof (e.g., the name entered into the row under
 \code{analysisGroup2} column of the \code{map@metadata} or a \code{functionName}.}
 
-\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one
-calculation to do at any stage, it will create and use a parallel
-cluster via \code{makeOptimalCluster}}
+\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one calculation to do at
+any stage, it will create and use a parallel cluster via \code{\link[pemisc:makeOptimalCluster]{pemisc::makeOptimalCluster()}}.
+If running analyses in parallel, it may be useful to pass a function (via \code{.clInit})
+to be run on each of the nodes immediately upon cluster creation (e.g., to set options).}
 
-\item{...}{Additonal arguments passed to \code{\link[reproducible:postProcess]{reproducible::postProcess()}},
-\code{\link[reproducible:projectInputs]{reproducible::projectInputs()}},
-\code{\link[reproducible:fixErrors]{reproducible::fixErrors()}}, and
-\code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
+\item{...}{Additional arguments passed to:
+\code{\link[reproducible:postProcess]{reproducible::postProcess()}},
+\code{\link[reproducible:deprecated]{reproducible::projectInputs()}},
+\code{\link[reproducible:deprecated]{reproducible::fixErrors()}},
+and \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
+}
+\value{
+TODO
 }
 \description{
-This is the workhorse function that runs any analyses described in
-\code{map@analyses}. It uses hashing, and will not rerun any analysis that
-already ran on identical inputs.
+This is the workhorse function that runs any analyses described in \code{map@analyses}.
+It uses hashing, and will not rerun any analysis that already ran on identical inputs.
 }
 \details{
 This function will do a sequence of things.
@@ -48,7 +52,7 @@ these \code{analysisGroups} will be omitted for that particular function.
 For efficiency, the function will then assess if any of these has already been run.
 For those that have not been run, it will then run the
 \code{functionName} on arguments that it finds in the \code{metadata} slot of
-the map obj, as well as any arguments passed in here in the \code{...}.
+the map object, as well as any arguments passed in here in the \code{...}.
 In general, the arguments being passed in here should be fixed across all
 analyses, while any that vary by analysis should be entered into the metadata
 table at the time of adding the layer to the map, via \code{mapAdd}.

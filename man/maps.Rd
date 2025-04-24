@@ -8,90 +8,155 @@
 \alias{sf}
 \alias{sf.map}
 \alias{spatialPolygons}
+\alias{spatialPolygons.map}
 \alias{spatialPoints}
+\alias{spatialPoints.map}
+\alias{spatRasters}
+\alias{spatRasters.map}
+\alias{spatVectors}
+\alias{spatVectors.map}
 \alias{maps}
-\title{Extract rasters in the \code{map} object}
+\title{Extract objects of specific classes from a \code{map} object}
 \usage{
-rasters(map)
+rasters(map, ...)
 
-\method{rasters}{map}(map)
+\method{rasters}{map}(map, ...)
 
-sp(map)
+sp(map, ...)
 
-\method{sp}{map}(map)
+\method{sp}{map}(map, ...)
 
-sf(map)
+sf(map, ...)
 
-\method{sf}{map}(map)
+\method{sf}{map}(map, ...)
 
-spatialPolygons(map)
+spatialPolygons(map, ...)
 
-spatialPoints(map)
+\method{spatialPolygons}{map}(map, ...)
+
+spatialPoints(map, ...)
+
+\method{spatialPoints}{map}(map, ...)
+
+spatRasters(map, ...)
+
+\method{spatRasters}{map}(map, ...)
+
+spatVectors(map, ...)
+
+\method{spatVectors}{map}(map, ...)
 
 maps(map, class = NULL, layerName = NULL)
 }
 \arguments{
-\item{map}{A \code{map} class obj}
+\item{map}{A \code{map} object}
 
-\item{class}{If supplied, this will be the class of objects returned. Default
-is \code{NULL} which is "all", meaning all objects in the \code{map}
-object.}
+\item{...}{Additional arguments passed to other methods (not used)}
 
-\item{layerName}{TODO: description needed}
+\item{class}{If supplied, this will be the class of objects returned.
+Default is \code{NULL} which is "all", meaning all objects in the \code{map} object.}
+
+\item{layerName}{character string giving the name(s) of layer(s) to extract.}
 }
 \value{
-A list of maps (i.e., sp, raster, or sf objects) of class \code{class}
+A list of geospatial objects of class \code{class}
 }
 \description{
+\itemize{
+\item \code{rasters()} extracts \code{RasterLayer} objects;
+\item \code{sf()} extracts \code{sf} objects;
+\item \code{sp()} extracts \code{Spatial} objects;
+\item \code{spatialPolygons()} extracts \code{SpatialPolygons} objects;
+\item \code{spatialPoints()} extracts \code{SpatialPoints} objects;
+\item \code{spatRasters()} extracts \code{SpatRaster} objects;
+\item \code{spatVectors()} extracts \code{SpatVector} objects;
+}
+
 This will extract all objects in or pointed to within the \code{map}.
 }
 \seealso{
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
-\code{\link{studyAreaName}()},
-\code{\link{studyArea}()}
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
-\code{\link{studyAreaName}()},
-\code{\link{studyArea}()}
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
-\code{\link{studyAreaName}()},
-\code{\link{studyArea}()}
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
-\code{\link{studyAreaName}()},
-\code{\link{studyArea}()}
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
-\code{\link{studyAreaName}()},
-\code{\link{studyArea}()}
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
-\code{\link{studyAreaName}()},
-\code{\link{studyArea}()}
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
+
+Other mapMethods: 
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
+
+Other mapMethods: 
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
+
+Other mapMethods: 
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
+
+Other mapMethods: 
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
+
+Other mapMethods: 
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
+
+Other mapMethods: 
+\code{\link{crs,map-method}},
+\code{\link{mapRm}()},
+\code{\link{rasterToMatch,map-method}},
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
 }
 \concept{mapMethods}

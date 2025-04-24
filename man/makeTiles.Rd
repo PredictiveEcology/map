@@ -9,12 +9,12 @@ makeTiles(tilePath, obj, overwrite = FALSE, ...)
 \arguments{
 \item{tilePath}{A director to write tiles}
 
-\item{obj}{A raster objects with or without file-backing}
+\item{obj}{A raster object with or without file-backing}
 
 \item{overwrite}{Logical. If \code{FALSE}, and the director exists,
 then it will not overwrite any files.}
 
-\item{...}{Passed to \code{reproducible::projectInputs} e.g., \code{useGDAL}}
+\item{...}{Arguments passed to \code{\link[reproducible:deprecated]{reproducible::projectInputs()}} (e.g., \code{useGDAL}).}
 }
 \description{
 Make tiles (pyramids) using \code{gdal2tiles}

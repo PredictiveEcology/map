@@ -14,23 +14,24 @@ mapAddPostHocAnalysis(
 )
 }
 \arguments{
-\item{map}{Optional map object. If not provided, then one will be
-created. If provided, then the present \code{object} or options passed to
-\code{prepInputs} e.g., \code{url}, will be appended to this \code{map}.}
+\item{map}{Optional map object. If not provided, then one will be created.
+If provided, then the present \code{obj} or options passed to
+\code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} (e.g., \code{url}), will be appended to this \code{map}.}
 
 \item{functionName}{A function that is designed for post hoc analysis of
-map class objects, e.g., \code{rbindlistAG}}
+map class objects, e.g., \code{rbindlistAG}.}
 
-\item{postHocAnalysisGroups}{Character string with one
-\code{analysisGroups} i.e., \code{"analysisGroup1"} or \code{"analysisGroup2"}}
+\item{postHocAnalysisGroups}{Character string with one \code{analysisGroups},
+i.e., \code{"analysisGroup1"} or \code{"analysisGroup2"}.}
 
 \item{postHocAnalyses}{Character vector with \code{"all"},
-(which will do all analysisGroups) the default,
+(which will do all \code{analysisGroups}; default),
 or 1 or more of the the \code{functionName}s that are in the analyses slot.}
 
-\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one
-calculation to do at any stage, it will create and use a parallel
-cluster via \code{makeOptimalCluster}}
+\item{useParallel}{Logical. If \code{TRUE}, then if there is more than one calculation to do at
+any stage, it will create and use a parallel cluster via \code{\link[pemisc:makeOptimalCluster]{pemisc::makeOptimalCluster()}}.
+If running analyses in parallel, it may be useful to pass a function (via \code{.clInit})
+to be run on each of the nodes immediately upon cluster creation (e.g., to set options).}
 
 \item{...}{Optional arguments to pass into \code{functionName}}
 }

@@ -2,12 +2,12 @@
 % Please edit documentation in R/map.R
 \name{mapRm}
 \alias{mapRm}
-\alias{mapRm.default}
+\alias{mapRm.map}
 \title{Remove objects from a \code{map}}
 \usage{
 mapRm(map, layer, ask = TRUE, ...)
 
-\method{mapRm}{default}(map = NULL, layer = NULL, ask = TRUE, ...)
+\method{mapRm}{map}(map, layer = NULL, ask = TRUE, ...)
 }
 \arguments{
 \item{map}{TODO: document this}
@@ -22,30 +22,31 @@ mapRm(map, layer, ask = TRUE, ...)
 Remove objects from a \code{map}
 }
 \examples{
-if (require("SpaDES.tools")) {
-  library(sp)
-  longLatCRS <- CRS(paste("+init=epsg:4326 +proj=longlat +datum=WGS84",
-                          "+no_defs +ellps=WGS84 +towgs84=0,0,0"))
-  p <- randomPolygon(SpatialPoints(cbind(-120, 60), proj4string = longLatCRS), area = 1e5)
+if (require("SpaDES.tools", quietly = TRUE)) {
+  p <- terra::vect(cbind(-120, 60), crs = "epsg:4326") |>
+    SpaDES.tools::randomPolygon(area = 1e5) |>
+    sf::st_as_sf() |>
+    sf::as_Spatial()
   m <- mapAdd(p, layerName = "p")
-  mapRm(m, "p")
+  m
+
+  m <- mapRm(m, "p")
+  m
 }
 }
 \seealso{
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{rasterToMatch,map-method}},
 \code{\link{rasters}()},
-\code{\link{studyAreaName}()},
-\code{\link{studyArea}()}
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{rasterToMatch,map-method}},
 \code{\link{rasters}()},
-\code{\link{studyAreaName}()},
-\code{\link{studyArea}()}
+\code{\link{studyArea}()},
+\code{\link{studyAreaName}()}
 }
 \concept{mapMethods}

@@ -35,7 +35,6 @@ then this will extract the last one added.
 }
 \seealso{
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
@@ -43,7 +42,6 @@ Other mapMethods:
 \code{\link{studyAreaName}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
@@ -51,7 +49,6 @@ Other mapMethods:
 \code{\link{studyAreaName}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},
@@ -59,7 +56,6 @@ Other mapMethods:
 \code{\link{studyAreaName}()}
 
 Other mapMethods: 
-\code{\link{area,map-method}},
 \code{\link{crs,map-method}},
 \code{\link{mapRm}()},
 \code{\link{rasterToMatch,map-method}},

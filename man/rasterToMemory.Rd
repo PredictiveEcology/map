@@ -2,14 +2,20 @@
 % Please edit documentation in R/GIS.R
 \name{.rasterToMemory}
 \alias{.rasterToMemory}
+\alias{.rasterToMemory.Raster}
+\alias{.rasterToMemory.SpatRaster}
 \title{\code{.rasterToMemory}}
 \usage{
 .rasterToMemory(x, ...)
+
+\method{.rasterToMemory}{Raster}(x, ...)
+
+\method{.rasterToMemory}{SpatRaster}(x, ...)
 }
 \arguments{
-\item{x}{A \verb{Raster*} object}
+\item{x}{A \code{Raster} or \code{SpatRaster} object}
 
-\item{...}{Additional arguments passed to \code{raster}}
+\item{...}{Additional arguments passed to raster read function}
 }
 \description{
 \code{.rasterToMemory}

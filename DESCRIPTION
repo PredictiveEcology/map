@@ -1,70 +1,71 @@
 Package: map
 Type: Package
 Title: Defines a meta class of geographical objects, the 'map' class, and associated tools
-Description: The map class is a collection of map objects ('sp', 'raster', 'sf'), with a 
-    number of metadata additions to enable powerful methods, e.g., 
-    for leaflet, reproducible GIS etc.
+Description: The 'map' class is a collection of geospatial objects
+   (e.g., from the 'sp', 'raster', 'sf', and 'terra' packages),
+    with a number of metadata additions to enable powerful methods,
+    e.g., for leaflet, reproducible GIS etc.
 URL: 
-    http://map.predictiveecology.org,
+    https://map.predictiveecology.org,
     https://github.com/PredictiveEcology/map
-Date: 2022-10-07
-Version: 0.0.4
+Date: 2025-04-23
+Version: 1.1.0.9004
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
-           role = c("aut", "cre"), comment=c(ORCID = "0000-0002-6914-8316")),
+           role = c("aut"), comment=c(ORCID = "0000-0002-6914-8316")),
     person("Alex M", "Chubaty", email = "achubaty@for-cast.ca",
-           role = c("aut"), comment = c(ORCID = "0000-0001-7146-8135")),
-    person("Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources Canada",
+           role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7146-8135")),
+    person("His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources Canada",
            role = "cph")
     )
 Depends:
-    R (>= 4.0)
+    R (>= 4.3)
 Imports:
     backports,
     data.table (>= 1.10.4),
-    fastdigest,
-    fasterize,
+    digest,
     methods,
-    pemisc (>= 0.0.4.9003),
+    parallelly,
+    pemisc (>= 0.0.4.9008),
     quickPlot,
-    reproducible (>= 1.2.1),
     raster (>= 2.8.4),
-    rgeos,
+    reproducible (>= 2.0.8.9001),
     sf,
-    sp,
     stats,
-    tiler (>= 0.2.6),
-    utils
+    terra,
+    tiler (>= 0.3.0),
+    utils,
+    withr
 Suggests:
     covr,
-    gdalUtils,
-    knitr,
-    rgdal,
-    rmarkdown,
-    SpaDES.tools,
-    testthat
+    sp,
+    SpaDES.tools (>= 2.0.4.9002),
+    testthat (>= 3.0.0),
+    usethis
 Remotes:
     ropensci/tiler,
-    gearslaboratory/gdalUtils,
     PredictiveEcology/pemisc@development,
+    PredictiveEcology/quickPlot@development,
+    PredictiveEcology/reproducible@development,
     cran/rgdal,
     cran/rgeos,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
-VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/map/issues
 ByteCompile: yes
 Collate: 
     'GIS.R'
     'buildMetadata.R'
     'makeTiles.R'
+    'map-Defunct.R'
     'map-analysis.R'
     'map-class.R'
     'map-package.R'
     'map.R'
     'rbindlistAG.R'
     'zzz.R'
-RoxygenNote: 7.2.1
+RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
+Config/testthat/edition: 3

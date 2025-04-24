@@ -1,0 +1,30 @@
+[general]
+creator=R package 'raster'
+created=2019-09-12 08:48:01
+[georeference]
+nrows=793
+ncols=967
+xmin=-1438500
+ymin=7309000
+xmax=-1196750
+ymax=7507250
+projection=+proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs
+[data]
+datatype=INT1U
+byteorder=little
+nbands=1
+bandorder=BIL
+categorical=TRUE
+ratnames=ID:VALUE:colors
+rattypes=integer:factor:character
+ratvalues=1:2:3:4:5:6:Abie_sp:Mixed:Pice_gla:Pice_mar:Pinu_sp:Popu_sp:#7FC97F:#BF5B17:#FDD98D:#87A6A6:#CB1788:#CAB1C4
+colortable=#7FC97F:#BF5B17:#FDD98D:#87A6A6:#CB1788:#CAB1C4
+minvalue=1
+maxvalue=6
+nodatavalue=NA
+[legend]
+legendtype=
+values=
+color=
+[description]
+layername=layer

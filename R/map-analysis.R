@@ -2,17 +2,8 @@ utils::globalVariables(c("envir"))
 
 #' Generic analysis for map objects
 #'
-#' This is the workhorse function that runs any analyses described in
-#' `map@@analyses`. It uses hashing, and will not rerun any analysis that
-#' already ran on identical inputs.
-#'
-#' @inheritParams mapAdd
-#'
-#' @param functionName A function name that will be run on combinations of
-#'   inputs in the map object. See details.
-#' @param purgeAnalyses A character string indicating which analysis group
-#'   combination or part thereof (e.g., the name entered into the row under
-#'   `analysisGroup2` column of the `map@@metadata` or a `functionName`.
+#' This is the workhorse function that runs any analyses described in `map@analyses`.
+#' It uses hashing, and will not rerun any analysis that already ran on identical inputs.
 #'
 #' @details
 #' This function will do a sequence of things.
@@ -24,19 +15,28 @@ utils::globalVariables(c("envir"))
 #' For efficiency, the function will then assess if any of these has already been run.
 #' For those that have not been run, it will then run the
 #' `functionName` on arguments that it finds in the `metadata` slot of
-#' the map obj, as well as any arguments passed in here in the `...`.
+#' the map object, as well as any arguments passed in here in the `...`.
 #' In general, the arguments being passed in here should be fixed across all
 #' analyses, while any that vary by analysis should be entered into the metadata
 #' table at the time of adding the layer to the map, via `mapAdd`.
 #'
-#' @importFrom data.table setDT
-#' @importFrom stats na.omit
-#' @importFrom parallel stopCluster
-#' @importFrom pemisc makeOptimalCluster Map2
+#' @inheritParams mapAdd
+#'
+#' @param functionName A function name that will be run on combinations of
+#'   inputs in the map object. See details.
+#' @param purgeAnalyses A character string indicating which analysis group
+#'   combination or part thereof (e.g., the name entered into the row under
+#'   `analysisGroup2` column of the `map@@metadata` or a `functionName`.
+#'
+#' @return TODO
+#'
 mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
                         useParallel = getOption("map.useParallel", FALSE), ...) {
   m <- map@metadata
   dots <- list(...)
+  .outfile <- dots$outfile
+  .clInit <- dots$.clInit
+  dots$.clInit <- NULL
 
   if (is.null(functionName)) {
     stop("Each analysis must have a functionName")
@@ -74,7 +74,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
     args[keepArgs]
   })
 
-  AGsByFunName <- lapply(functionName, function(funName) { # nolint
+  AGsByFunName <- lapply(functionName, function(funName) {
     names(args1[[funName]])
   })
 
@@ -103,8 +103,7 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
     names(funNames) <- funNames
     # Get the fixed arguments
     otherFormalsInFunction <- lapply(funNames, function(funName) {
-      otherFormalsInFunction <- formalArgs(funName)[formalArgs(funName) %in%
-                                                      colnames(map@analyses)]
+      otherFormalsInFunction <- formalArgs(funName)[formalArgs(funName) %in% colnames(map@analyses)]
       if (length(otherFormalsInFunction)) {
         names(otherFormalsInFunction) <- otherFormalsInFunction
 
@@ -118,21 +117,22 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
 
     cl <- makeOptimalCluster(useParallel,
                              maxNumClusters = min(NROW(combosToDoDT), getOption("map.maxNumCores")),
-                             outfile = dots$outfile)
+                             outfile = .outfile)
+    if (!is.null(cl) && !is.null(.clInit)) {
+      parallel::clusterExport(cl, c(".clInit"), envir = environment())
+      parallel::clusterEvalQ(cl, .clInit())
+    }
     on.exit(try(stopCluster(cl), silent = TRUE))
 
     combosToDoList <- split(combosToDoDT, combosToDoDT$all)
     out3 <- Map2(cl = cl,
                  combo = combosToDoList, function(combo) {
                    funName <- combo$functionName
-                   args1 <- getFormalsFromMetadata(metadata = map@metadata,
+                   args1 <- getFormalsFromMetadata(metadata = m,
                                                    combo = combo, AGs = AGs, funName = funName)
                    args <- unlist(unname(args1), recursive = FALSE)
                    message("  Calculating ", funName, " for ", combo$all)
-                   fnOut <- do.call(Cache,
-                                    args = append(list(get(funName)),
-                                                  append(args,
-                                                         otherFormalsInFunction[[funName]])))
+                   fnOut <- Cache(do.call, get(funName), append(args, otherFormalsInFunction[[funName]]))
                    fnOut
     })
 
@@ -144,7 +144,10 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
   } else {
     message("  ", paste(functionName, collapse = ", "), " already run on all layers")
   }
-  map
+
+  tryCatch({ stopCluster(cl); rm(cl) }, error = function(x) invisible())
+
+  return(map)
 }
 
 #' Add an analysis to a `map` object
@@ -155,20 +158,22 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
 #' @param functionName The name of the analysis function to add
 #' @param useParallel Logical indicating whether to use multiple threads.
 #'                    Defaults to `getOption("map.useParallel", FALSE)`.
-#' @param ... Additional arguments TODO: description needed
+#' @param ... Additional arguments passed to `functionName`.
 #'
 #' @export
-#' @importFrom data.table data.table
-#' @importFrom fastdigest fastdigest
 mapAddAnalysis <- function(map, functionName,
                            useParallel = getOption("map.useParallel", FALSE), ...) {
   dots <- list(...)
+  .clInit <- dots$.clInit
+  dots$.clInit <- NULL
+
   b <- data.table(functionName = functionName, t(dots))
   prevEntry <- map@analyses$functionName == functionName
   purgeAnalyses <- NULL # Set default as NULL
-  newDigest <- fastdigest::fastdigest(
+  newDigest <- digest::digest(
     c(.robustDigest(get(b[, functionName])),
-      .robustDigest(b[, !"functionName"]))
+      .robustDigest(b[, !"functionName"])),
+    algo = "spooky"
   )
   set(b, NULL, "argHash", newDigest)
   doRbindlist <- TRUE
@@ -188,7 +193,8 @@ mapAddAnalysis <- function(map, functionName,
   if (doRbindlist)
     map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
 
-  map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
+  map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel,
+                        outfile = dots$outfile, .clInit = .clInit)
 
   map
 }
@@ -199,23 +205,18 @@ mapAddAnalysis <- function(map, functionName,
 #' @inheritParams mapAdd
 #'
 #' @param functionName A function that is designed for post hoc analysis of
-#'   map class objects, e.g., `rbindlistAG`
+#'                     map class objects, e.g., `rbindlistAG`.
 #'
-#' @param postHocAnalysisGroups Character string with one
-#'   `analysisGroups` i.e., `"analysisGroup1"` or `"analysisGroup2"`
+#' @param postHocAnalysisGroups Character string with one `analysisGroups`,
+#'                              i.e., `"analysisGroup1"` or `"analysisGroup2"`.
 #'
 #' @param postHocAnalyses Character vector with `"all"`,
-#'   (which will do all analysisGroups) the default,
-#'   or 1 or more of the the `functionName`s that are in the analyses slot.
+#'                        (which will do all `analysisGroups`; default),
+#'                        or 1 or more of the the `functionName`s that are in the analyses slot.
 #'
 #' @param ... Optional arguments to pass into `functionName`
 #'
-#'
-#' @aliases mapAddPostHocAnalysis
 #' @export
-#' @importFrom fastdigest fastdigest
-#' @importFrom data.table data.table rbindlist set
-#' @importFrom reproducible .robustDigest
 #' @rdname postHoc
 mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NULL,
                                   postHocAnalyses = "all",
@@ -233,9 +234,10 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
   }
   prevEntry <- map@analyses$functionName == functionName
   purgeAnalyses <- NULL # Set default as NULL
-  newDigest <- fastdigest::fastdigest(
+  newDigest <- digest::digest(
     c(.robustDigest(get(b[, functionName])),
-      .robustDigest(b[, !"functionName"]))
+      .robustDigest(b[, !"functionName"])),
+    algo = "spooky"
   )
   set(b, NULL, "argHash", newDigest)
   doRbindlist <- TRUE
@@ -259,10 +261,24 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
   map
 }
 
-## TODO: needs documentation
-#' @importFrom reproducible compareNA
+#' `runMapAnalyses`
+#'
+#' TODO: description needed
+#'
+#' @param map TODO
+#' @param purgeAnalyses  TODO
+#' @param useParallel  TODO
+#' @param ... TODO
+#'
+#' @return TODO
+#'
 runMapAnalyses <- function(map, purgeAnalyses = NULL,
-                           useParallel = getOption("map.useParallel", FALSE)) {
+                           useParallel = getOption("map.useParallel", FALSE), ...) {
+  dots <- list(...)
+  .outfile <- dots$outfile
+  .clInit <- dots$.clInit
+  dots$.clInit <- NULL
+
   isPostHoc <- if (is.null(map@analyses$postHoc)) {
     rep(FALSE, NROW(map@analyses))
   } else {
@@ -272,7 +288,8 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
   # First run all primary analyses
   if (NROW(map@analyses[!isPostHoc])) {
     funName <- map@analyses$functionName[!isPostHoc]
-    map <- mapAnalysis(map, funName, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
+    map <- mapAnalysis(map, funName, purgeAnalyses = purgeAnalyses, useParallel = useParallel,
+                       outfile = .outfile, .clInit = .clInit)
   }
 
   # run postHoc analyses
