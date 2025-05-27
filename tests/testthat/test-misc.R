@@ -65,19 +65,19 @@ test_that("gdal_polygonizer rewrite works as previously", {
   p <- gdal_polygonizeR(r)
   p.old <- map:::.gdal_polygonizeR(raster(r)) |> terra::vect()
 
-  expect_true(all.equal(p, p.old))  ## use terra::all.equal
+  expect_true(all.equal(p, p.old)) ## use terra::all.equal
 
   ## raster
   f <- system.file("external/vegTypeMap.grd", package = "map")
   r <- raster::raster(f)
   p <- gdal_polygonizeR(r)
   p.old <- map:::.gdal_polygonizeR(r) |> terra::vect()
-  expect_true(all.equal(p, p.old))  ## use terra::all.equal
+  expect_true(all.equal(p, p.old)) ## use terra::all.equal
 
   ## terra
   f <- system.file("external/vegTypeMap.grd", package = "map")
   r <- terra::rast(f)
   p <- gdal_polygonizeR(r)
   p.old <- map:::.gdal_polygonizeR(r) |> terra::vect()
-  expect_true(all.equal(p, p.old))  ## use terra::all.equal
+  expect_true(all.equal(p, p.old)) ## use terra::all.equal
 })

@@ -15,8 +15,9 @@
 #' @rdname map-utilities
 rbindlistAG <- function(map, functionName, analysisGroups) {
   lpNames <- names(map@analysesData[[functionName]])
-  if (length(analysisGroups) > 1)
+  if (length(analysisGroups) > 1) {
     stop("rbindlistAG is not tested for more than 1 analysisGroups")
+  }
   names(analysisGroups) <- analysisGroups
   polys <- lapply(analysisGroups, function(ag) {
     map@metadata$layerName[!is.na(map@metadata[[ag]])]

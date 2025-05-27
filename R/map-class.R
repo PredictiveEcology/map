@@ -25,7 +25,7 @@ setClass(
   contains = "environment",
   slots = list(
     metadata = "data.table",
-    #.xData = "environment",
+    # .xData = "environment",
     CRS = "crs",
     paths = "list",
     analyses = "data.table",
@@ -33,27 +33,29 @@ setClass(
   )
 )
 
-setMethod("initialize", "map",
-          function(.Object, ...) {
-            .Object <- callNextMethod()
-            .Object@metadata <- data.table(
-              layerName = character(),
-              layerType = character(),
-              columnNameForLabels = character(),
-              leaflet = asPath(character()),
-              studyArea = numeric(),
-              rasterToMatch = logical()
-            )
-            .Object@CRS <- sf::st_crs()
-            .Object@paths <- list(
-              dataPath = getOption("map.dataPath", file.path(getwd(), "data")),
-              tilePath = getOption("map.tilePath", file.path(getwd(), "tiles"))
-              ## TODO : scratch/raster/terra path?
-            )
-            .Object@analyses <- data.table::data.table(
-              functionName = character()
-            )
-            .Object@analysesData <- list()
+setMethod(
+  "initialize", "map",
+  function(.Object, ...) {
+    .Object <- callNextMethod()
+    .Object@metadata <- data.table(
+      layerName = character(),
+      layerType = character(),
+      columnNameForLabels = character(),
+      leaflet = asPath(character()),
+      studyArea = numeric(),
+      rasterToMatch = logical()
+    )
+    .Object@CRS <- sf::st_crs()
+    .Object@paths <- list(
+      dataPath = getOption("map.dataPath", file.path(getwd(), "data")),
+      tilePath = getOption("map.tilePath", file.path(getwd(), "tiles"))
+      ## TODO : scratch/raster/terra path?
+    )
+    .Object@analyses <- data.table::data.table(
+      functionName = character()
+    )
+    .Object@analysesData <- list()
 
-            return(.Object)
-})
+    return(.Object)
+  }
+)

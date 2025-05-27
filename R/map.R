@@ -49,8 +49,10 @@ utils::globalVariables(c(
 #'   sf::st_sfc() |>
 #'   sf::st_sf(geometry = _, ID = 1L, shinyLabel = "zone2", crs = "epsg:4326")
 #'
-#' ml <- mapAdd(StudyArea, isStudyArea = TRUE, layerName = "Small Study Area",
-#'              poly = TRUE, analysisGroup2 = "Small Study Area")
+#' ml <- mapAdd(StudyArea,
+#'   isStudyArea = TRUE, layerName = "Small Study Area",
+#'   poly = TRUE, analysisGroup2 = "Small Study Area"
+#' )
 #'
 #' if (require("SpaDES.tools", quietly = TRUE)) {
 #'   withr::local_options(list(
@@ -61,30 +63,36 @@ utils::globalVariables(c(
 #'   smallStudyArea$ID <- 1L
 #'   smallStudyArea$shinyLabel <- "zone2"
 #'
-#'   ml <- mapAdd(smallStudyArea, ml, isStudyArea = TRUE, filename2 = NULL,
-#'                analysisGroup2 = "Smaller Study Area",
-#'                poly = TRUE,
-#'                layerName = "Smaller Study Area") # adds a second studyArea within 1st
+#'   ml <- mapAdd(smallStudyArea, ml,
+#'     isStudyArea = TRUE, filename2 = NULL,
+#'     analysisGroup2 = "Smaller Study Area",
+#'     poly = TRUE,
+#'     layerName = "Smaller Study Area"
+#'   ) # adds a second studyArea within 1st
 #'
 #'   rasTemplate <- terra::rast(terra::ext(studyArea(ml)), resolution = 0.001)
-#'   tsf <- SpaDES.tools::randomPolygons(rasTemplate, numTypes = 8)*30
+#'   tsf <- SpaDES.tools::randomPolygons(rasTemplate, numTypes = 8) * 30
 #'   vtm <- SpaDES.tools::randomPolygons(tsf, numTypes = 4)
 #'   levels(vtm) <- data.frame(
 #'     ID = sort(unique(vtm[])),
 #'     Factor = c("black spruce", "white spruce", "aspen", "fir")
 #'   )
 #'
-#'   ml <- mapAdd(tsf, ml, layerName = "tsf1",
-#'                filename2 = "tsf1.tif", # to postProcess
-#'                # to map object
-#'                tsf = "tsf1.tif", # to column in map@metadata
-#'                analysisGroup1 = "tsf1_vtm1",  # this is the label for analysisGroup1
-#'                leaflet = TRUE, # to column in map@metadata; used for visualizing in leaflet
-#'                overwrite = TRUE)
-#'   ml <- mapAdd(vtm, ml, filename2 = "vtm1.grd",
-#'                layerName = "vtm1",
-#'                vtm = "vtm1.grd",
-#'                analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE)
+#'   ml <- mapAdd(tsf, ml,
+#'     layerName = "tsf1",
+#'     filename2 = "tsf1.tif", # to postProcess
+#'     # to map object
+#'     tsf = "tsf1.tif", # to column in map@metadata
+#'     analysisGroup1 = "tsf1_vtm1", # this is the label for analysisGroup1
+#'     leaflet = TRUE, # to column in map@metadata; used for visualizing in leaflet
+#'     overwrite = TRUE
+#'   )
+#'   ml <- mapAdd(vtm, ml,
+#'     filename2 = "vtm1.grd",
+#'     layerName = "vtm1",
+#'     vtm = "vtm1.grd",
+#'     analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE
+#'   )
 #'
 #'   ## these map analyses are in `LandWebUtils` package, which is reverse dependency of this one
 #'   ageClasses <- c("Young", "Immature", "Mature", "Old")
@@ -197,11 +205,13 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
   map@metadata <- .enforceColumnTypes(map@metadata) ## update previously-created map objects
 
-  if (is.null(layerName))
+  if (is.null(layerName)) {
     stop("layerName is required and cannot be NULL")
+  }
 
-  if (is.logical(leaflet))
+  if (is.logical(leaflet)) {
     leaflet <- asPath(ifelse(leaflet, getwd(), NA_character_))
+  }
 
   ## Some of the arguments will need to be passed into Cache
   ## Get obj, if missing, via prepInputs url, or targetFile
@@ -216,21 +226,33 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     }
     maxNumClus <- min(maxNumClus, getOption("map.maxNumCores"))
 
-    message("  Running prepInputs for:\n",
-            paste(capture.output(data.table(file = layerName)), collapse = "\n"))
-    cl <- makeOptimalCluster(maxNumClusters = maxNumClus,
-                             useParallel = useParallel,
-                             outfile = .outfile)
+    message(
+      "  Running prepInputs for:\n",
+      paste(capture.output(data.table(file = layerName)), collapse = "\n")
+    )
+    cl <- makeOptimalCluster(
+      maxNumClusters = maxNumClus,
+      useParallel = useParallel,
+      outfile = .outfile
+    )
     if (!is.null(cl) && !is.null(.clInit)) {
       parallel::clusterExport(cl, c(".clInit"), envir = environment())
       parallel::clusterEvalQ(cl, .clInit())
     }
     on.exit(try(stopCluster(cl), silent = TRUE))
 
-    obj <- MapOrDoCall(prepInputs, multiple = args1$argsMulti, cl = cl,
-                       single = args1$argsSingle, useCache = useCache)
+    obj <- MapOrDoCall(prepInputs,
+      multiple = args1$argsMulti, cl = cl,
+      single = args1$argsSingle, useCache = useCache
+    )
 
-    tryCatch({ stopCluster(cl); rm(cl) }, error = function(x) invisible())
+    tryCatch(
+      {
+        stopCluster(cl)
+        rm(cl)
+      },
+      error = function(x) invisible()
+    )
     if (is(obj, "list")) { ## NOTE: is.list returns TRUE for data.frames ... BAD
       names(obj) <- layerName
     } else if (is(obj, "sf")) { ## NOTE: Aug 2022 workaround #7 by forcing use of sp objects
@@ -312,18 +334,28 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       maxNumClus <- min(maxNumClus, getOption("map.maxNumCores"))
 
       message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
-      cl <- makeOptimalCluster(maxNumClusters = maxNumClus,
-                               useParallel = useParallel,
-                               outfile = .outfile)
+      cl <- makeOptimalCluster(
+        maxNumClusters = maxNumClus,
+        useParallel = useParallel,
+        outfile = .outfile
+      )
       if (!is.null(cl) && !is.null(.clInit)) {
         parallel::clusterExport(cl, c(".clInit"), envir = environment())
         parallel::clusterEvalQ(cl, .clInit())
       }
       on.exit(try(stopCluster(cl), silent = TRUE))
 
-      obj <- MapOrDoCall(postProcess, multiple = args1$argsMulti, cl = cl,
-                         single = args1$argsSingle, useCache = useCache)
-      tryCatch({ stopCluster(cl); rm(cl) }, error = function(x) invisible())
+      obj <- MapOrDoCall(postProcess,
+        multiple = args1$argsMulti, cl = cl,
+        single = args1$argsSingle, useCache = useCache
+      )
+      tryCatch(
+        {
+          stopCluster(cl)
+          rm(cl)
+        },
+        error = function(x) invisible()
+      )
     }
   }
 
@@ -334,19 +366,25 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     ln <- layerName
     purge <- isFALSE(map@metadata[(layerName %in% ln), objectHash] == objHash)
     if (isTRUE(purge)) {
-      if (any(startsWith(colnames(map@metadata), "analysisGroup")))
+      if (any(startsWith(colnames(map@metadata), "analysisGroup"))) {
         purgeAnalyses <- map@metadata[layerName %in% ln, get(colnames(map@metadata)[
-          startsWith(colnames(map@metadata), "analysisGroup")])]
+          startsWith(colnames(map@metadata), "analysisGroup")
+        ])]
+      }
     }
     map@metadata <- map@metadata[!(layerName %in% ln)]
   }
 
   ## Add "shinyLabel" column if it is a SpatialPolygonsDataFrame
-  args1 <- identifyVectorArgs(fn = addColumnNameForLabels,
-                              c(x = "obj", columnNameForLabels = "columnNameForLabels"),
-                              environment(), dots = dots)
-  obj <- MapOrDoCall(addColumnNameForLabels, multiple = args1$argsMulti,
-                     single = args1$argsSingle, useCache = FALSE, cl = NULL)
+  args1 <- identifyVectorArgs(
+    fn = addColumnNameForLabels,
+    c(x = "obj", columnNameForLabels = "columnNameForLabels"),
+    environment(), dots = dots
+  )
+  obj <- MapOrDoCall(addColumnNameForLabels,
+    multiple = args1$argsMulti,
+    single = args1$argsSingle, useCache = FALSE, cl = NULL
+  )
 
   ## Assign obj to map@.xData
   if (is.null(envir)) {
@@ -369,8 +407,10 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       objTmp <- if (is(obj, "list")) obj else list(obj)
       a[layerName] <- objTmp
       list2env(a, envir = envir)
-      message("obj named ", paste(layerName, collapse = ", "), " does not exist in envir provided",
-              ". Adding it to map obj")
+      message(
+        "obj named ", paste(layerName, collapse = ", "), " does not exist in envir provided",
+        ". Adding it to map obj"
+      )
     }
   }
 
@@ -385,8 +425,10 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   if (length(args1$argsMulti) == 0) {
     dts <- do.call(buildMetadata, moreArgs)
   } else {
-    dtsList <- do.call(Map, args = append(args1$argsMulti,
-                                          list(f = buildMetadata, MoreArgs = moreArgs)))
+    dtsList <- do.call(Map, args = append(
+      args1$argsMulti,
+      list(f = buildMetadata, MoreArgs = moreArgs)
+    ))
     dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE) ## TODO: fails here provMB postprocess
   }
 
@@ -408,9 +450,11 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       }
     }
 
-    cl <- makeOptimalCluster(useParallel = useParallel, MBper = MBper,
-                             maxNumClusters = min(length(obj), getOption("map.maxNumCores")),
-                             outfile = .outfile)
+    cl <- makeOptimalCluster(
+      useParallel = useParallel, MBper = MBper,
+      maxNumClusters = min(length(obj), getOption("map.maxNumCores")),
+      outfile = .outfile
+    )
     if (!is.null(cl) && !is.null(.clInit)) {
       parallel::clusterExport(cl, c(".clInit"), envir = environment())
       parallel::clusterEvalQ(cl, .clInit())
@@ -419,10 +463,18 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
 
     tilePath <- dts[["leafletTiles"]]
     args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
-    out <- MapOrDoCall(makeTiles, multiple = args1$argsMulti,
-                       single = args1$argsSingle, useCache = FALSE, cl = cl)
+    out <- MapOrDoCall(makeTiles,
+      multiple = args1$argsMulti,
+      single = args1$argsSingle, useCache = FALSE, cl = cl
+    )
     ## if the rasters are identical, then there may be errors
-    tryCatch({ stopCluster(cl); rm(cl) }, error = function(x) invisible())
+    tryCatch(
+      {
+        stopCluster(cl)
+        rm(cl)
+      },
+      error = function(x) invisible()
+    )
   }
 
   ## set CRS
@@ -516,20 +568,27 @@ mapRm <- function(map, layer, ask = TRUE, ...) {
 #' @family mapMethods
 #' @rdname mapRm
 mapRm.map <- function(map, layer = NULL, ask = TRUE, ...) {
-  if (is.character(layer))
+  if (is.character(layer)) {
     layer <- map@metadata[, which(layerName %in% layer)]
+  }
 
   layerName <- unique(map@metadata[layer, layerName])
-  if (length(layer) > 1)
-    stop("There are more than obj in map with that layer name, '", layerName, "'.",
-         " Please indicate layer by row number in map@metadata.")
+  if (length(layer) > 1) {
+    stop(
+      "There are more than obj in map with that layer name, '", layerName, "'.",
+      " Please indicate layer by row number in map@metadata."
+    )
+  }
 
   rm(list = layerName, envir = map@metadata[layer, envir][[1]])
   map@metadata <- map@metadata[-layer, ]
 
-  if (NROW(map@analyses))
-    message("Layer ", layerName, " has been removed, but not any analysis that ",
-            "was previously run using this layer.")
+  if (NROW(map@analyses)) {
+    message(
+      "Layer ", layerName, " has been removed, but not any analysis that ",
+      "was previously run using this layer."
+    )
+  }
 
   map
 }
@@ -549,13 +608,15 @@ if (!isGeneric("crs")) {
 #' @importMethodsFrom raster crs
 #' @rdname crs
 setMethod("crs",
-          signature = "map",
-          function(x, ...) {
-            if (!is.null(x@CRS))
-              x@CRS
-            else
-              NA_character_
-})
+  signature = "map",
+  function(x, ...) {
+    if (!is.null(x@CRS)) {
+      x@CRS
+    } else {
+      NA_character_
+    }
+  }
+)
 
 #' Map class methods
 #'
@@ -626,28 +687,30 @@ setGeneric("studyArea", function(map, layer = NA, sorted = FALSE) {
 #' @family mapMethods
 #' @rdname studyArea
 setMethod("studyArea", "ANY",
-          definition = function(map, layer = NA, sorted = FALSE) {
-            NULL
-})
+  definition = function(map, layer = NA, sorted = FALSE) {
+    NULL
+  }
+)
 
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
 setMethod("studyArea", "map",
-          definition = function(map, layer = NA, sorted = FALSE) {
-            if (isTRUE(sorted)) {
-              studyAreas <- map@metadata[!is.na(map@metadata$studyArea), ]
-              mapSorted <- studyAreas[order(area, decreasing = FALSE), ][, studyArea := as.numeric(.I)] # nolint
-              san <- studyAreaName(mapSorted, layer = layer)
-            } else {
-              san <- studyAreaName(map, layer = layer)
-            }
-            if (length(san) > 0) {
-              get(san, map@metadata[layerName == san]$envir[[1]])
-            } else {
-              NULL
-            }
-})
+  definition = function(map, layer = NA, sorted = FALSE) {
+    if (isTRUE(sorted)) {
+      studyAreas <- map@metadata[!is.na(map@metadata$studyArea), ]
+      mapSorted <- studyAreas[order(area, decreasing = FALSE), ][, studyArea := as.numeric(.I)] # nolint
+      san <- studyAreaName(mapSorted, layer = layer)
+    } else {
+      san <- studyAreaName(map, layer = layer)
+    }
+    if (length(san) > 0) {
+      get(san, map@metadata[layerName == san]$envir[[1]])
+    } else {
+      NULL
+    }
+  }
+)
 
 #' @param value The value to assign to the object.
 #'
@@ -660,19 +723,22 @@ setGeneric("studyArea<-", function(map, layer = NA, value) {
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-setReplaceMethod("studyArea", signature = "map",
-                 definition = function(map, layer = NA, value) {
-                   ln <- studyAreaName(map, layer = layer)
-                   map[[ln]] <- value
-                   map
-})
+setReplaceMethod("studyArea",
+  signature = "map",
+  definition = function(map, layer = NA, value) {
+    ln <- studyAreaName(map, layer = layer)
+    map[[ln]] <- value
+    map
+  }
+)
 
 if (!isGeneric("rasterToMatch")) {
   setGeneric(
     "rasterToMatch",
     function(x, ...) {
       standardGeneric("rasterToMatch")
-  })
+    }
+  )
 }
 
 #' Extract the `rasterToMatch`(s) from a `map` object
@@ -689,19 +755,21 @@ if (!isGeneric("rasterToMatch")) {
 #' @family mapMethods
 #' @rdname rasterToMatch
 #' @importMethodsFrom pemisc rasterToMatch
-setMethod("rasterToMatch", signature = "map",
-          definition = function(x, layer = 1) {
-            rtms <- x@metadata$rasterToMatch
-            if (sum(rtms, na.rm = TRUE)) {
-              if (isTRUE(is.na(layer))) {
-                layer <- max(x@metadata$rasterToMatch, na.rm = TRUE)
-              }
-              if (!layer %in% rtms) layer <- min(rtms, na.rm = TRUE)
-              get(x@metadata[rasterToMatch == layer, ]$layerName, x@.xData)
-            } else {
-              NULL
-            }
-})
+setMethod("rasterToMatch",
+  signature = "map",
+  definition = function(x, layer = 1) {
+    rtms <- x@metadata$rasterToMatch
+    if (sum(rtms, na.rm = TRUE)) {
+      if (isTRUE(is.na(layer))) {
+        layer <- max(x@metadata$rasterToMatch, na.rm = TRUE)
+      }
+      if (!layer %in% rtms) layer <- min(rtms, na.rm = TRUE)
+      get(x@metadata[rasterToMatch == layer, ]$layerName, x@.xData)
+    } else {
+      NULL
+    }
+  }
+)
 
 ################################################################################
 #' Extract objects of specific classes from a `map` object
@@ -852,9 +920,11 @@ maps <- function(map, class = NULL, layerName = NULL) {
   names(x) <- x
   envirs <- meta$envir
   names(envirs) <- x
-  out <- Map(envir = envirs, x = x,
-             function(envir, x)
-               get(x, envir = envir, inherits = FALSE)
+  out <- Map(
+    envir = envirs, x = x,
+    function(envir, x) {
+      get(x, envir = envir, inherits = FALSE)
+    }
   )
   if (!is.null(class)) {
     classOnly <- unlist(lapply(out, is, class2 = class))
@@ -885,7 +955,8 @@ setMethod(
   signature = "map",
   definition = function(object) {
     show(object@metadata)
-})
+  }
+)
 
 .formalsReproducible <- c(
   formalArgs(reproducible::preProcess),
