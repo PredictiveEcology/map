@@ -57,7 +57,7 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
   }
 
   p <- terra::as.polygons(x) |>
-    terra::disagg()  ## to get POLYGONS from MULTIPOLYGONS
+    terra::disagg() ## to get POLYGONS from MULTIPOLYGONS
   names(p) <- "DN" ## for backwards compatibility
 
   terra::writeVector(p, outshape, filetype = gdalformat)

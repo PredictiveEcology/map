@@ -36,14 +36,14 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
       sf::st_area() |>
       sum()
     studyAreaNumber <- 1 + NROW(metadata[compareNA(studyArea, TRUE) |
-                                           (is.numeric(studyArea) & studyArea > 0)])
+      (is.numeric(studyArea) & studyArea > 0)])
     set(b, NULL, "studyArea", studyAreaNumber)
     set(b, NULL, "area", area)
   }
 
   if (isTRUE(isRasterToMatch)) {
     rasterToMatchNumber <- 1 + NROW(metadata[compareNA(rasterToMatch, TRUE) |
-                                               (is.numeric(rasterToMatch) & rasterToMatch > 0)])
+      (is.numeric(rasterToMatch) & rasterToMatch > 0)])
     set(b, NULL, "rasterToMatch", rasterToMatchNumber)
   }
 
@@ -94,19 +94,20 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
   columnsToAdd <- dots
 
   ## Add columns by reference to "b"
-  Map(cta = columnsToAdd, nta = names(columnsToAdd),
-      function(cta, nta) {
-        ## a data.table can't handle all types of objects.
-        ## need to wrap in a list to stick it there.
-        ## try first without a list wrapper, then try once with a list.
-        needToSet <- TRUE
-        tries <- 0
-        while (isTRUE(needToSet) && tries < 2) {
-          needToSet <- tryCatch(set(b, NULL, nta, cta), silent = TRUE, error = function(x) TRUE)
-          tries <- tries + 1
-          cta <- list(cta)
-        }
+  Map(
+    cta = columnsToAdd, nta = names(columnsToAdd),
+    function(cta, nta) {
+      ## a data.table can't handle all types of objects.
+      ## need to wrap in a list to stick it there.
+      ## try first without a list wrapper, then try once with a list.
+      needToSet <- TRUE
+      tries <- 0
+      while (isTRUE(needToSet) && tries < 2) {
+        needToSet <- tryCatch(set(b, NULL, nta, cta), silent = TRUE, error = function(x) TRUE)
+        tries <- tries + 1
+        cta <- list(cta)
       }
+    }
   )
 
   b <- .enforceColumnTypes(b)
@@ -124,27 +125,34 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
 #'
 .enforceColumnTypes <- function(metadata) {
   ## NOTE (2019-11-08): targetCRS needs to be character, not CRS/crs due to change in data.table
-  if (!is.null(metadata[["targetCRS"]]) && !is(metadata[["targetCRS"]], "character"))
+  if (!is.null(metadata[["targetCRS"]]) && !is(metadata[["targetCRS"]], "character")) {
     metadata[["targetCRS"]] <- as.character(metadata[["targetCRS"]])
+  }
 
   ## TODO: manual workarounds to deal with column typing for LandWeb
-  if (!is.null(metadata[["destinationPath"]]) && !is(metadata[["destinationPath"]], "Path"))
+  if (!is.null(metadata[["destinationPath"]]) && !is(metadata[["destinationPath"]], "Path")) {
     set(metadata, NULL, "destinationPath", asPath(metadata[["destinationPath"]]))
+  }
 
-  if (!is.null(metadata[["leaflet"]]) && !is(metadata[["leaflet"]], "Path"))
+  if (!is.null(metadata[["leaflet"]]) && !is(metadata[["leaflet"]], "Path")) {
     set(metadata, NULL, "leaflet", asPath(metadata[["leaflet"]]))
+  }
 
-  if (!is.null(metadata[["leafletTiles"]]) && !is(metadata[["leafletTiles"]], "Path"))
+  if (!is.null(metadata[["leafletTiles"]]) && !is(metadata[["leafletTiles"]], "Path")) {
     set(metadata, NULL, "leafletTiles", asPath(metadata[["leafletTiles"]]))
+  }
 
-  if (!is.null(metadata[["targetFile"]]) && !is(metadata[["targetFile"]], "Path"))
+  if (!is.null(metadata[["targetFile"]]) && !is(metadata[["targetFile"]], "Path")) {
     set(metadata, NULL, "targetFile", asPath(metadata[["targetFile"]]))
+  }
 
-  if (!is.null(metadata[["tsf"]]) && !is(metadata[["tsf"]], "Path"))
+  if (!is.null(metadata[["tsf"]]) && !is(metadata[["tsf"]], "Path")) {
     set(metadata, NULL, "tsf", asPath(metadata[["tsf"]]))
+  }
 
-  if (!is.null(metadata[["vtm"]]) && !is(metadata[["vtm"]], "Path"))
+  if (!is.null(metadata[["vtm"]]) && !is(metadata[["vtm"]], "Path")) {
     set(metadata, NULL, "vtm", asPath(metadata[["vtm"]]))
+  }
 
   return(metadata)
 }
