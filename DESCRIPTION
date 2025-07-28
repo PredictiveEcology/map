@@ -8,7 +8,7 @@ Description: The 'map' class is a collection of geospatial objects
 URL: 
     https://predictiveecology.github.io/map/,
     https://github.com/PredictiveEcology/map
-Date: 2025-04-23
+Date: 2025-07-28
 Version: 1.1.1
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",

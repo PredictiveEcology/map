@@ -1,5 +1,6 @@
 utils::globalVariables(c(
-  ".", ":=", "..pathCols1", "..pathCols2", ".I", ".N", ".SD", "envir", "layerName", "objectHash"
+  ".", ":=", "..pathCols1", "..pathCols2", ".I", ".N", ".SD",
+  "envir", "layerName", "objectHash"
 ))
 
 #' Append a spatial object to map
