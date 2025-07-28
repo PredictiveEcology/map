@@ -47,8 +47,6 @@ Remotes:
     PredictiveEcology/pemisc@development,
     PredictiveEcology/quickPlot@development,
     PredictiveEcology/reproducible@development,
-    cran/rgdal,
-    cran/rgeos,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
 Language: en-CA
