@@ -75,6 +75,8 @@ test_that("mapAdd doesn't work", {
     c("Small Study Area", "Small Study Area", "tsf1", "vtm1") %in% metadata(ml)[["layerName"]]
   ))
 
+  withr::deferred_run() ## cleanup here because rest of tests are skipped
+
   ## -----------------------------------------------------------------------------------------------
   skip("need LandWebUtils")
   skip_if_not_installed("sp")
@@ -162,4 +164,7 @@ test_that("mapAdd doesn't work", {
     postHocAnalysisGroups = "analysisGroup2",
     postHocAnalyses = "all"
   )
+
+  ## cleanup
+  withr::deferred_run()
 })

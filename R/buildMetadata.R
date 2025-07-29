@@ -60,7 +60,6 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
   }
   set(b, NULL, "objectHash", objHash)
 
-  leaflet <- leaflet %||% FALSE
   if (isFALSE(leaflet)) {
     set(b, NULL, "leafletTiles", asPath(NA_character_))
   } else {

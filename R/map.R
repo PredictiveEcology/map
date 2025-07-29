@@ -39,8 +39,8 @@ utils::globalVariables(c(
 #' @rdname mapAdd
 #'
 #' @examples
-#' withr::local_tempdir("example_mapAdd_") |>
-#'   withr::local_dir()
+#' ex_dir <- withr::local_tempdir("example_mapAdd_")
+#' withr::local_dir(ex_dir)
 #'
 #' StudyArea <- list(cbind(
 #'   x = c(-122.98, -116.1, -99.2, -106, -122.98),
@@ -60,7 +60,7 @@ utils::globalVariables(c(
 #'
 #' if (require("SpaDES.tools", quietly = TRUE)) {
 #'   withr::local_options(list(
-#'     map.tilePath = withr::local_tempdir("tiles_"),
+#'     map.tilePath = file.path(ex_dir, "tiles"),
 #'     map.useParallel = FALSE
 #'   ))
 #'
@@ -112,8 +112,8 @@ utils::globalVariables(c(
 #'   )
 #'
 #'   ## these map analyses are in `LandWebUtils` package, which is reverse dependency of this one
-#'   ageClasses <- c("Young", "Immature", "Mature", "Old")
-#'   ageClassCutOffs <- c(0, 40, 80, 120)
+#'   # ageClasses <- c("Young", "Immature", "Mature", "Old")
+#'   # ageClassCutOffs <- c(0, 40, 80, 120)
 #'
 #'   ## add an analysis -- this will trigger analyses because there are already objects in the map
 #'   ##    This will trigger 2 analyses:
@@ -177,10 +177,10 @@ utils::globalVariables(c(
 #'   # ml <- mapAddPostHocAnalysis(map = ml, functionName = "rbindlistAG",
 #'   #                             postHocAnalysisGroups = "analysisGroup2",
 #'   #                             postHocAnalyses = "all")
-#' }
 #'
-#' ## cleanup
-#' withr::deferred_run()
+#'   ## cleanup
+#'   withr::deferred_run()
+#' }
 #'
 mapAdd <- function(obj, map, layerName,
                    overwrite = getOption("map.overwrite", FALSE), ...) {
@@ -226,6 +226,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     stop("layerName is required and cannot be NULL")
   }
 
+  leaflet <- leaflet %||% FALSE
   if (is.logical(leaflet)) {
     leaflet <- asPath(ifelse(leaflet, getwd(), NA_character_))
   }
