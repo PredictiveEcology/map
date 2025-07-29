@@ -1,13 +1,13 @@
 .onLoad <- function(libname, pkgname) {
   opts <- options()
   opts.map <- list( # nolint
-    map.dataPath = file.path("data"),
+    map.dataPath = "data",
     map.maxNumCores = min(
       getOption("Ncpus"),
       parallelly::availableCores(constraints = "connections")
     ),
     map.overwrite = FALSE,
-    map.tilePath = file.path("tiles"),
+    map.tilePath = "tiles",
     map.tileRetry = 3L,
     map.useParallel = !identical("windows", .Platform$OS.type)
   )

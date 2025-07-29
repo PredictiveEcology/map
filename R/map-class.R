@@ -38,21 +38,21 @@ setMethod(
   function(.Object, ...) {
     .Object <- callNextMethod()
     .Object@metadata <- data.table(
-      layerName = character(),
-      layerType = character(),
-      columnNameForLabels = character(),
-      leaflet = asPath(character()),
-      studyArea = numeric(),
-      rasterToMatch = logical()
+      layerName = character(0),
+      layerType = character(0),
+      columnNameForLabels = character(0),
+      leaflet = asPath(character(0)),
+      studyArea = numeric(0),
+      rasterToMatch = logical(0)
     )
     .Object@CRS <- sf::st_crs()
     .Object@paths <- list(
-      dataPath = getOption("map.dataPath", file.path(getwd(), "data")),
-      tilePath = getOption("map.tilePath", file.path(getwd(), "tiles"))
+      dataPath = getOption("map.dataPath", "data"),
+      tilePath = getOption("map.tilePath", "tiles")
       ## TODO : scratch/raster/terra path?
     )
     .Object@analyses <- data.table::data.table(
-      functionName = character()
+      functionName = character(0)
     )
     .Object@analysesData <- list()
 
