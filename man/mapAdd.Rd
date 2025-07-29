@@ -50,7 +50,7 @@ For \code{RasterLayer} object, this will trigger a call to \code{gdal2tiles}, ma
 If path is not specified, it will be the current path.
 The tile base file path will be \code{paste0(layerName, "_", rndstr(1, 6))}.}
 
-\item{isStudyArea}{Logical. If \code{TRUE}, this will be assigned the label "StudyArea",
+\item{isStudyArea}{Logical. If \code{TRUE}, this will be assigned the label "\verb{StudyArea"},
 and will be passed into \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} for any future layers added.}
 
 \item{isRasterToMatch}{Logical indicating whether the object to be added should be considered

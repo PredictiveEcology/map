@@ -31,7 +31,7 @@ utils::globalVariables(c(
 #'  If path is not specified, it will be the current path.
 #'  The tile base file path will be `paste0(layerName, "_", rndstr(1, 6))`.
 #'
-#' @param isStudyArea Logical. If `TRUE`, this will be assigned the label "StudyArea",
+#' @param isStudyArea Logical. If `TRUE`, this will be assigned the label "`StudyArea"`,
 #'   and will be passed into [reproducible::prepInputs()] for any future layers added.
 #'
 #' @export
@@ -680,7 +680,7 @@ studyAreaName.data.table <- function(x, layer = 1, ...) {
   }
 }
 
-#' Extract the studyArea(s) from a `map`
+#' Extract the study area(s) from a `map`
 #'
 #' If `layer` is not provided and there is more than one `studyArea`,
 #' then this will extract the last one added.

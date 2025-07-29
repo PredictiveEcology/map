@@ -3,7 +3,7 @@
 #' @inheritParams mapAdd
 #'
 #' @param analysisGroups A character (length 1 currently), indicating which
-#'   analysis group (e.g., "analysisGroup1") should be used to `rbindlist`.
+#'   analysis group (e.g., `"analysisGroup1"`) should be used to `rbindlist`.
 #'   Can also specify `"all"` which will `rbindlist` all outputs.
 #' @param functionName TODO: description needed
 #'

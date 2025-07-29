@@ -6,7 +6,7 @@
 \alias{studyArea,map-method}
 \alias{studyArea<-}
 \alias{studyArea<-,map-method}
-\title{Extract the studyArea(s) from a \code{map}}
+\title{Extract the study area(s) from a \code{map}}
 \usage{
 studyArea(map, layer = NA, sorted = FALSE)
 
