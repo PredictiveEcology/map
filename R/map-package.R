@@ -3,7 +3,6 @@
 
 ## usethis namespace: start
 #' @import methods
-#' @importFrom backports import
 #' @importFrom data.table copy data.table rbindlist set setDT
 #' @importFrom digest digest
 #' @importFrom parallel stopCluster

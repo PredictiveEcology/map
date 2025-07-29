@@ -1,5 +1,6 @@
 # map 1.1.2
 
+* remove dependency `backports`, as `isFALSE()` available in all supported R versions;
 * `makeTiles()` now checks for python and GDAL support, i.e., for Windows, which requires 'OSGeos4W' (#19);
 * new option `map.tileRetry` with default value `3L`, specifying the number of attempts to make tiles (#19);
 

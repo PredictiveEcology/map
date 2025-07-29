@@ -13,7 +13,4 @@
   )
   toset <- !(names(opts.map) %in% names(opts))
   if (any(toset)) options(opts.map[toset])
-
-  ## import functions using backports:
-  backports::import(pkgname, "isFALSE")
 }
