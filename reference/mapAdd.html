@@ -171,8 +171,10 @@ to be run on each of the nodes immediately upon cluster creation (e.g., to set o
 <span class="r-in"><span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html" class="external-link">st_sfc</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span>geometry <span class="op">=</span> <span class="va">_</span>, ID <span class="op">=</span> <span class="fl">1L</span>, shinyLabel <span class="op">=</span> <span class="st">"zone2"</span>, crs <span class="op">=</span> <span class="st">"epsg:4326"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">ml</span> <span class="op">&lt;-</span> <span class="fu">mapAdd</span><span class="op">(</span><span class="va">StudyArea</span>, isStudyArea <span class="op">=</span> <span class="cn">TRUE</span>, layerName <span class="op">=</span> <span class="st">"Small Study Area"</span>,</span></span>
-<span class="r-in"><span>             poly <span class="op">=</span> <span class="cn">TRUE</span>, analysisGroup2 <span class="op">=</span> <span class="st">"Small Study Area"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ml</span> <span class="op">&lt;-</span> <span class="fu">mapAdd</span><span class="op">(</span><span class="va">StudyArea</span>,</span></span>
+<span class="r-in"><span>  isStudyArea <span class="op">=</span> <span class="cn">TRUE</span>, layerName <span class="op">=</span> <span class="st">"Small Study Area"</span>,</span></span>
+<span class="r-in"><span>  poly <span class="op">=</span> <span class="cn">TRUE</span>, analysisGroup2 <span class="op">=</span> <span class="st">"Small Study Area"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">No cachePath supplied and getOption('reproducible.cachePath') is inside a temporary directory;</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">  this will not persist across R sessions.</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Saved! Cache file: 0d982086001839a2.rds; fn: </span><span style="color: #BB0000;">fixErrors</span></span>
@@ -188,30 +190,36 @@ to be run on each of the nodes immediately upon cluster creation (e.g., to set o
 <span class="r-in"><span>  <span class="va">smallStudyArea</span><span class="op">$</span><span class="va">ID</span> <span class="op">&lt;-</span> <span class="fl">1L</span></span></span>
 <span class="r-in"><span>  <span class="va">smallStudyArea</span><span class="op">$</span><span class="va">shinyLabel</span> <span class="op">&lt;-</span> <span class="st">"zone2"</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="va">ml</span> <span class="op">&lt;-</span> <span class="fu">mapAdd</span><span class="op">(</span><span class="va">smallStudyArea</span>, <span class="va">ml</span>, isStudyArea <span class="op">=</span> <span class="cn">TRUE</span>, filename2 <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
-<span class="r-in"><span>               analysisGroup2 <span class="op">=</span> <span class="st">"Smaller Study Area"</span>,</span></span>
-<span class="r-in"><span>               poly <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>               layerName <span class="op">=</span> <span class="st">"Smaller Study Area"</span><span class="op">)</span> <span class="co"># adds a second studyArea within 1st</span></span></span>
+<span class="r-in"><span>  <span class="va">ml</span> <span class="op">&lt;-</span> <span class="fu">mapAdd</span><span class="op">(</span><span class="va">smallStudyArea</span>, <span class="va">ml</span>,</span></span>
+<span class="r-in"><span>    isStudyArea <span class="op">=</span> <span class="cn">TRUE</span>, filename2 <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
+<span class="r-in"><span>    analysisGroup2 <span class="op">=</span> <span class="st">"Smaller Study Area"</span>,</span></span>
+<span class="r-in"><span>    poly <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    layerName <span class="op">=</span> <span class="st">"Smaller Study Area"</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span> <span class="co"># adds a second studyArea within 1st</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">rasTemplate</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/ext.html" class="external-link">ext</a></span><span class="op">(</span><span class="fu"><a href="studyArea.html">studyArea</a></span><span class="op">(</span><span class="va">ml</span><span class="op">)</span><span class="op">)</span>, resolution <span class="op">=</span> <span class="fl">0.001</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">tsf</span> <span class="op">&lt;-</span> <span class="fu">SpaDES.tools</span><span class="fu">::</span><span class="fu"><a href="https://spades-tools.predictiveecology.org/reference/randomPolygons.html" class="external-link">randomPolygons</a></span><span class="op">(</span><span class="va">rasTemplate</span>, numTypes <span class="op">=</span> <span class="fl">8</span><span class="op">)</span><span class="op">*</span><span class="fl">30</span></span></span>
+<span class="r-in"><span>  <span class="va">tsf</span> <span class="op">&lt;-</span> <span class="fu">SpaDES.tools</span><span class="fu">::</span><span class="fu"><a href="https://spades-tools.predictiveecology.org/reference/randomPolygons.html" class="external-link">randomPolygons</a></span><span class="op">(</span><span class="va">rasTemplate</span>, numTypes <span class="op">=</span> <span class="fl">8</span><span class="op">)</span> <span class="op">*</span> <span class="fl">30</span></span></span>
 <span class="r-in"><span>  <span class="va">vtm</span> <span class="op">&lt;-</span> <span class="fu">SpaDES.tools</span><span class="fu">::</span><span class="fu"><a href="https://spades-tools.predictiveecology.org/reference/randomPolygons.html" class="external-link">randomPolygons</a></span><span class="op">(</span><span class="va">tsf</span>, numTypes <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">vtm</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">vtm</span><span class="op">[</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    Factor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black spruce"</span>, <span class="st">"white spruce"</span>, <span class="st">"aspen"</span>, <span class="st">"fir"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="va">ml</span> <span class="op">&lt;-</span> <span class="fu">mapAdd</span><span class="op">(</span><span class="va">tsf</span>, <span class="va">ml</span>, layerName <span class="op">=</span> <span class="st">"tsf1"</span>,</span></span>
-<span class="r-in"><span>               filename2 <span class="op">=</span> <span class="st">"tsf1.tif"</span>, <span class="co"># to postProcess</span></span></span>
-<span class="r-in"><span>               <span class="co"># to map object</span></span></span>
-<span class="r-in"><span>               tsf <span class="op">=</span> <span class="st">"tsf1.tif"</span>, <span class="co"># to column in map@metadata</span></span></span>
-<span class="r-in"><span>               analysisGroup1 <span class="op">=</span> <span class="st">"tsf1_vtm1"</span>,  <span class="co"># this is the label for analysisGroup1</span></span></span>
-<span class="r-in"><span>               leaflet <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># to column in map@metadata; used for visualizing in leaflet</span></span></span>
-<span class="r-in"><span>               overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">ml</span> <span class="op">&lt;-</span> <span class="fu">mapAdd</span><span class="op">(</span><span class="va">vtm</span>, <span class="va">ml</span>, filename2 <span class="op">=</span> <span class="st">"vtm1.grd"</span>,</span></span>
-<span class="r-in"><span>               layerName <span class="op">=</span> <span class="st">"vtm1"</span>,</span></span>
-<span class="r-in"><span>               vtm <span class="op">=</span> <span class="st">"vtm1.grd"</span>,</span></span>
-<span class="r-in"><span>               analysisGroup1 <span class="op">=</span> <span class="st">"tsf1_vtm1"</span>, leaflet <span class="op">=</span> <span class="cn">TRUE</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">ml</span> <span class="op">&lt;-</span> <span class="fu">mapAdd</span><span class="op">(</span><span class="va">tsf</span>, <span class="va">ml</span>,</span></span>
+<span class="r-in"><span>    layerName <span class="op">=</span> <span class="st">"tsf1"</span>,</span></span>
+<span class="r-in"><span>    filename2 <span class="op">=</span> <span class="st">"tsf1.tif"</span>, <span class="co"># to postProcess</span></span></span>
+<span class="r-in"><span>    <span class="co"># to map object</span></span></span>
+<span class="r-in"><span>    tsf <span class="op">=</span> <span class="st">"tsf1.tif"</span>, <span class="co"># to column in map@metadata</span></span></span>
+<span class="r-in"><span>    analysisGroup1 <span class="op">=</span> <span class="st">"tsf1_vtm1"</span>, <span class="co"># this is the label for analysisGroup1</span></span></span>
+<span class="r-in"><span>    leaflet <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># to column in map@metadata; used for visualizing in leaflet</span></span></span>
+<span class="r-in"><span>    overwrite <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">ml</span> <span class="op">&lt;-</span> <span class="fu">mapAdd</span><span class="op">(</span><span class="va">vtm</span>, <span class="va">ml</span>,</span></span>
+<span class="r-in"><span>    filename2 <span class="op">=</span> <span class="st">"vtm1.grd"</span>,</span></span>
+<span class="r-in"><span>    layerName <span class="op">=</span> <span class="st">"vtm1"</span>,</span></span>
+<span class="r-in"><span>    vtm <span class="op">=</span> <span class="st">"vtm1.grd"</span>,</span></span>
+<span class="r-in"><span>    analysisGroup1 <span class="op">=</span> <span class="st">"tsf1_vtm1"</span>, leaflet <span class="op">=</span> <span class="cn">TRUE</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co">## these map analyses are in `LandWebUtils` package, which is reverse dependency of this one</span></span></span>
 <span class="r-in"><span>  <span class="va">ageClasses</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Young"</span>, <span class="st">"Immature"</span>, <span class="st">"Mature"</span>, <span class="st">"Old"</span><span class="op">)</span></span></span>
@@ -285,14 +293,14 @@ to be run on each of the nodes immediately upon cluster creation (e.g., to set o
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Fixing, cropping, reprojecting, masking: Smaller Study Area</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">No cachePath supplied and getOption('reproducible.cachePath') is inside a temporary directory;</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">  this will not persist across R sessions.</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Saved! Cache file: 16cd2af24d570ea1.rds; fn: </span><span style="color: #BB0000;">fn</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Saved! Cache file: da532589514770b9.rds; fn: </span><span style="color: #BB0000;">fn</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> map already has a studyArea; adding another one as study area 2</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Fixing, cropping, reprojecting, masking: tsf1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">No cachePath supplied and getOption('reproducible.cachePath') is inside a temporary directory;</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">  this will not persist across R sessions.</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Saving large object (fn: </span><span style="color: #BB0000;">fn</span><span style="color: #0000BB;"> , cacheId: 36f20795e62cd35f ) to Cache : 11.7 Mb</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Saving large object (fn: </span><span style="color: #BB0000;">fn</span><span style="color: #0000BB;"> , cacheId: 5cce71f0329b273f ) to Cache : 11.4 Mb</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;"> Done!</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Saved! Cache file: 36f20795e62cd35f.rds; fn: </span><span style="color: #BB0000;">fn</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Saved! Cache file: 5cce71f0329b273f.rds; fn: </span><span style="color: #BB0000;">fn</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Creating tiles - reprojecting to epsg:4326 (leaflet projection)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>                    writing to disk</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
@@ -303,9 +311,9 @@ to be run on each of the nodes immediately upon cluster creation (e.g., to set o
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Fixing, cropping, reprojecting, masking: vtm1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">No cachePath supplied and getOption('reproducible.cachePath') is inside a temporary directory;</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">  this will not persist across R sessions.</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Saving large object (fn: </span><span style="color: #BB0000;">fn</span><span style="color: #0000BB;"> , cacheId: 7a8ef1ba050388db ) to Cache : 11.7 Mb</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Saving large object (fn: </span><span style="color: #BB0000;">fn</span><span style="color: #0000BB;"> , cacheId: 6c45665455c43ff6 ) to Cache : 11.4 Mb</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;"> Done!</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Saved! Cache file: 7a8ef1ba050388db.rds; fn: </span><span style="color: #BB0000;">fn</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">Saved! Cache file: 6c45665455c43ff6.rds; fn: </span><span style="color: #BB0000;">fn</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Creating tiles - reprojecting to epsg:4326 (leaflet projection)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>                    writing to disk</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
