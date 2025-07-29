@@ -19,8 +19,7 @@
 #' @importFrom stats na.omit
 #' @importFrom terra as.polygons ext disagg is.factor levels rast same.crs setValues
 #' @importFrom terra values vect writeRaster writeVector
-#' @importFrom terra vect
-#' @importFrom tiler tile
+#' @importFrom tiler tile tiler_options
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output getS3method
 #' @importFrom withr deferred_run local_dir local_options local_tempdir

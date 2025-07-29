@@ -1,3 +1,8 @@
+# map 1.1.2
+
+- `makeTiles()` now checks for python and GDAL support, i.e., for Windows, which requires 'OSGeos4W' (#19);
+- new option `map.tileRetry` with default value `3L`, specifying the number of attempts to make tiles (#19);
+
 # map 1.1.1
 
 * drop support for R 4.1 and 4.2 due to changes in dependency packages;

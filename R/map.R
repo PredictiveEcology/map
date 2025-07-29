@@ -63,6 +63,10 @@ utils::globalVariables(c(
 #'     map.tilePath = withr::local_tempdir("tiles_"),
 #'     map.useParallel = FALSE
 #'   ))
+#'
+#'   ## need python + gdal to generate leaflet tiles
+#'   doLeaflet <- canMakeTiles()
+#'
 #'   smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml), 1e5)
 #'   smallStudyArea$ID <- 1L
 #'   smallStudyArea$shinyLabel <- "zone2"
@@ -93,7 +97,7 @@ utils::globalVariables(c(
 #'     ## to map object
 #'     tsf = "tsf1.tif", ## to column in map@metadata
 #'     analysisGroup1 = "tsf1_vtm1", ## this is the label for analysisGroup1
-#'     leaflet = TRUE, ## to column in map@metadata; used for visualizing in leaflet
+#'     leaflet = doLeaflet, ## to column in map@metadata; used for visualizing in leaflet
 #'     overwrite = TRUE
 #'   )
 #'   ml <- mapAdd(
@@ -103,7 +107,7 @@ utils::globalVariables(c(
 #'     layerName = "vtm1",
 #'     vtm = "vtm1.grd",
 #'     analysisGroup1 = "tsf1_vtm1",
-#'     leaflet = TRUE,
+#'     leaflet = doLeaflet,
 #'     overwrite = TRUE
 #'   )
 #'
@@ -163,10 +167,10 @@ utils::globalVariables(c(
 #'
 #'   # ml <- mapAdd(tsf2, ml, filename2 = "tsf2.tif", layerName = "tsf2",
 #'   #              tsf = "tsf2.tif",
-#'   #              analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+#'   #              analysisGroup1 = "tsf2_vtm2", leaflet = doLeaflet, overwrite = TRUE)
 #'   # ml <- mapAdd(vtm2, ml, filename2 = "vtm2.grd", layerName = "vtm2",
 #'   #              vtm = "vtm2.grd",
-#'   #              analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+#'   #              analysisGroup1 = "tsf2_vtm2", leaflet = doLeaflet, overwrite = TRUE)
 #'
 #'   ## post hoc analysis of data
 #'   ##  use or create a specialized function that can handle the analysesData slot

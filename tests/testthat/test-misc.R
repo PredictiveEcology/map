@@ -57,6 +57,7 @@ test_that("addColumnNameForLabels handles multiple object classes", {
 
 test_that("gdal_polygonizer rewrite works as previously", {
   skip_on_cran()
+  skip_if_not(nzchar(Sys.which("gdal_polygonize.py")))
 
   ## dummy example
   r <- terra::rast(ncols = 20, nrows = 20)

@@ -87,9 +87,12 @@ StudyArea <- list(cbind(
   sf::st_sfc() |>
   sf::st_sf(geometry = _, ID = 1L, shinyLabel = "zone2", crs = "epsg:4326")
 
-ml <- mapAdd(StudyArea,
-  isStudyArea = TRUE, layerName = "Small Study Area",
-  poly = TRUE, analysisGroup2 = "Small Study Area"
+ml <- mapAdd(
+  StudyArea,
+  isStudyArea = TRUE,
+  layerName = "Small Study Area",
+  poly = TRUE,
+  analysisGroup2 = "Small Study Area"
 )
 
 if (require("SpaDES.tools", quietly = TRUE)) {
@@ -97,16 +100,23 @@ if (require("SpaDES.tools", quietly = TRUE)) {
     map.tilePath = withr::local_tempdir("tiles_"),
     map.useParallel = FALSE
   ))
+
+  ## need python + gdal to generate leaflet tiles
+  doLeaflet <- canMakeTiles()
+
   smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml), 1e5)
   smallStudyArea$ID <- 1L
   smallStudyArea$shinyLabel <- "zone2"
 
-  ml <- mapAdd(smallStudyArea, ml,
-    isStudyArea = TRUE, filename2 = NULL,
+  ml <- mapAdd(
+    smallStudyArea,
+    ml,
+    isStudyArea = TRUE,
+    filename2 = NULL,
     analysisGroup2 = "Smaller Study Area",
     poly = TRUE,
     layerName = "Smaller Study Area"
-  ) # adds a second studyArea within 1st
+  ) ## adds a second studyArea within 1st
 
   rasTemplate <- terra::rast(terra::ext(studyArea(ml)), resolution = 0.001)
   tsf <- SpaDES.tools::randomPolygons(rasTemplate, numTypes = 8) * 30
@@ -116,20 +126,26 @@ if (require("SpaDES.tools", quietly = TRUE)) {
     Factor = c("black spruce", "white spruce", "aspen", "fir")
   )
 
-  ml <- mapAdd(tsf, ml,
+  ml <- mapAdd(
+    tsf,
+    ml,
     layerName = "tsf1",
-    filename2 = "tsf1.tif", # to postProcess
-    # to map object
-    tsf = "tsf1.tif", # to column in map@metadata
-    analysisGroup1 = "tsf1_vtm1", # this is the label for analysisGroup1
-    leaflet = TRUE, # to column in map@metadata; used for visualizing in leaflet
+    filename2 = "tsf1.tif", ## to postProcess
+    ## to map object
+    tsf = "tsf1.tif", ## to column in map@metadata
+    analysisGroup1 = "tsf1_vtm1", ## this is the label for analysisGroup1
+    leaflet = doLeaflet, ## to column in map@metadata; used for visualizing in leaflet
     overwrite = TRUE
   )
-  ml <- mapAdd(vtm, ml,
+  ml <- mapAdd(
+    vtm,
+    ml,
     filename2 = "vtm1.grd",
     layerName = "vtm1",
     vtm = "vtm1.grd",
-    analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE
+    analysisGroup1 = "tsf1_vtm1",
+    leaflet = doLeaflet,
+    overwrite = TRUE
   )
 
   ## these map analyses are in `LandWebUtils` package, which is reverse dependency of this one
@@ -156,7 +172,7 @@ if (require("SpaDES.tools", quietly = TRUE)) {
   # smallStudyArea2$ID <- 1L
   # smallStudyArea2$shinyLabel <- "zone2"
 
-  ## add a new layer -- this will trigger analyses because there are already analyese in the map
+  ## add a new layer -- this will trigger analyses because there are already analyses in the map
   ##    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
   ##    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
   # ml <- mapAdd(smallStudyArea2, ml, isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
@@ -188,10 +204,10 @@ if (require("SpaDES.tools", quietly = TRUE)) {
 
   # ml <- mapAdd(tsf2, ml, filename2 = "tsf2.tif", layerName = "tsf2",
   #              tsf = "tsf2.tif",
-  #              analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+  #              analysisGroup1 = "tsf2_vtm2", leaflet = doLeaflet, overwrite = TRUE)
   # ml <- mapAdd(vtm2, ml, filename2 = "vtm2.grd", layerName = "vtm2",
   #              vtm = "vtm2.grd",
-  #              analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+  #              analysisGroup1 = "tsf2_vtm2", leaflet = doLeaflet, overwrite = TRUE)
 
   ## post hoc analysis of data
   ##  use or create a specialized function that can handle the analysesData slot
