@@ -36,9 +36,6 @@ jobs:
           extra-packages: |
             any::pkgdown
             local::.
-            fastshp=?ignore
-            PredictiveEcology/reproducible@development
-            PredictiveEcology/SpaDES.tools@development
           needs: website
 
       - name: Build site

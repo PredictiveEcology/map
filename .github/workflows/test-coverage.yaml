@@ -33,9 +33,6 @@ jobs:
         with:
           extra-packages: |
             any::covr
-            fastshp=?ignore
-            PredictiveEcology/reproducible@development
-            PredictiveEcology/SpaDES.tools@development
 
       - name: Test coverage
         run: covr::codecov()
