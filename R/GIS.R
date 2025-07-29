@@ -135,7 +135,8 @@ fasterize2 <- function(emptyRaster, polygonToFasterize, field) {
 
   ras <- terra::rast(emptyRaster)
   if (terra::ext(polygonToFasterize) > terra::ext(ras)) {
-    polygonToFasterize <- reproducible::Cache(cropInputs, polygonToFasterize, rasterToMatch = ras)
+    polygonToFasterize <- reproducible::cropInputs(polygonToFasterize, rasterToMatch = ras) |>
+      reproducible::Cache()
   }
   thePoly <- reproducible::projectInputs(polygonToFasterize, targetCRS = raster::crs(ras))
   if (!is(thePoly, "SpatVector")) {
@@ -146,9 +147,11 @@ fasterize2 <- function(emptyRaster, polygonToFasterize, field) {
     thePoly[[field]][[1]] <- factor(thePoly[[field]][[1]])
   }
   aa2 <- terra::rasterize(thePoly, ras, field = field)
-  # levels(aa2) <- data.frame(ID = seq_along(thePoly[[field]][[1]]),
-  #                           category = as.character(thePoly[[field]][[1]]),
-  #                           as.data.frame(thePoly))
+  # levels(aa2) <- data.frame(
+  #   ID = seq_along(thePoly[[field]][[1]]),
+  #   category = as.character(thePoly[[field]][[1]]),
+  #   as.data.frame(thePoly)
+  # )
 
   if (isTRUE(asRaster)) {
     return(raster::raster(aa2))

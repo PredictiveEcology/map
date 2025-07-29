@@ -6,7 +6,7 @@
 \alias{map-package}
 \title{map: Defines a meta class of geographical objects, the 'map' class, and associated tools}
 \description{
-The 'map' class is a collection of geospatial objects (e.g., from the 'sp', 'raster', 'sf', and 'terra' packages), with a number of metadata additions to enable powerful methods, e.g., for leaflet, reproducible GIS etc.
+The 'map' class is a collection of geospatial objects (e.g., from the 'sp', 'raster', 'sf', and 'terra' packages), with a number of metadata additions to enable powerful methods, e.g., for 'leaflet', reproducible GIS etc.
 }
 \seealso{
 Useful links:

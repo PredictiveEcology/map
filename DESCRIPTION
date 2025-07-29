@@ -4,7 +4,7 @@ Title: Defines a meta class of geographical objects, the 'map' class, and associ
 Description: The 'map' class is a collection of geospatial objects
    (e.g., from the 'sp', 'raster', 'sf', and 'terra' packages),
     with a number of metadata additions to enable powerful methods,
-    e.g., for leaflet, reproducible GIS etc.
+    e.g., for 'leaflet', reproducible GIS etc.
 URL: 
     https://predictiveecology.github.io/map/,
     https://github.com/PredictiveEcology/map
