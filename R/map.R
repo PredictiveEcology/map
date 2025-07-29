@@ -226,7 +226,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     stop("layerName is required and cannot be NULL")
   }
 
-  leaflet <- leaflet %||% FALSE
+  leaflet <- ifelse(!is.null(leaflet), leaflet, FALSE) ## leaflet %||% FALSE
   if (is.logical(leaflet)) {
     leaflet <- asPath(ifelse(leaflet, getwd(), NA_character_))
   }
