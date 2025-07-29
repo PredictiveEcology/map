@@ -15,19 +15,19 @@ name: R-CMD-check
 
 jobs:
   R-CMD-check:
-    if: "!contains(github.event.commits[0].message, '[skip-ci]')"
     runs-on: ${{ matrix.config.os }}
 
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }}, nosuggests ${{ matrix.config.nosuggests }})
 
     strategy:
       fail-fast: false
       matrix:
         config:
-          - {os: macOS-latest,   nosuggests: false, r: 'release'}
-          - {os: windows-latest, nosuggests: false, r: 'devel'}
-          - {os: windows-latest, nosuggests: false, r: 'release'}
-          - {os: windows-latest, nosuggests: false, r: 'oldrel'}
+          - {os: macOS-latest,    nosuggests: false, r: 'release'}
+          - {os: windows-latest,  nosuggests: false, r: 'devel'}
+          - {os: windows-latest,  nosuggests: false, r: 'release'}
+          - {os: windows-latest,  nosuggests: false, r: 'oldrel-1'}
+          - {os: windows-latest,  nosuggests: false, r: 'oldrel-2'}
           - {os: ubuntu-latest,   nosuggests: false, r: 'devel'}
           - {os: ubuntu-latest,   nosuggests: false, r: 'release'}
           - {os: ubuntu-latest,   nosuggests: true,  r: 'release'}
@@ -56,9 +56,6 @@ jobs:
         with:
           extra-packages: |
             any::rcmdcheck
-            fastshp=?ignore
-            PredictiveEcology/reproducible@development
-            PredictiveEcology/SpaDES.tools@development
 
       - uses: r-lib/actions/check-r-package@v2
         with:
