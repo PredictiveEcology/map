@@ -64,9 +64,6 @@ utils::globalVariables(c(
 #'     map.useParallel = FALSE
 #'   ))
 #'
-#'   ## need python + gdal to generate leaflet tiles
-#'   doLeaflet <- canMakeTiles()
-#'
 #'   smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml), 1e5)
 #'   smallStudyArea$ID <- 1L
 #'   smallStudyArea$shinyLabel <- "zone2"
@@ -88,6 +85,9 @@ utils::globalVariables(c(
 #'     ID = sort(unique(vtm[])),
 #'     Factor = c("black spruce", "white spruce", "aspen", "fir")
 #'   )
+#'
+#'   ## need python + gdal to generate leaflet tiles
+#'   doLeaflet <- canMakeTiles()
 #'
 #'   ml <- mapAdd(
 #'     tsf,
