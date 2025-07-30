@@ -79,6 +79,11 @@ set to \code{max(studyArea(map)) + 1}.
 ex_dir <- withr::local_tempdir("example_mapAdd_")
 withr::local_dir(ex_dir)
 
+withr::local_options(list(
+  map.tilePath = file.path(ex_dir, "tiles"),
+  map.useParallel = FALSE
+))
+
 StudyArea <- list(cbind(
   x = c(-122.98, -116.1, -99.2, -106, -122.98),
   y = c(59.9, 65.73, 63.58, 54.79, 59.9)
@@ -96,11 +101,6 @@ ml <- mapAdd(
 )
 
 if (require("SpaDES.tools", quietly = TRUE)) {
-  withr::local_options(list(
-    map.tilePath = file.path(ex_dir, "tiles"),
-    map.useParallel = FALSE
-  ))
-
   smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml), 1e5)
   smallStudyArea$ID <- 1L
   smallStudyArea$shinyLabel <- "zone2"
@@ -215,8 +215,9 @@ if (require("SpaDES.tools", quietly = TRUE)) {
   #                             postHocAnalysisGroups = "analysisGroup2",
   #                             postHocAnalyses = "all")
 
-  ## cleanup
-  withr::deferred_run()
 }
+
+## cleanup
+withr::deferred_run()
 
 }
