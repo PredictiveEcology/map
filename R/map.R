@@ -6,8 +6,7 @@ utils::globalVariables(c(
 #' Append a spatial object to map
 #'
 #' If `isStudyArea = TRUE`, then several things will be triggered:
-#' 1. This layer will be added to metadata with `studyArea`
-#'   set to `max(studyArea(map)) + 1`.
+#' 1. This layer will be added to metadata with `studyArea` set to `max(studyArea(map)) + 1`.
 #' 2. update CRS slot to be the CRS of the study area.
 #'
 #' @param obj    Optional spatial object, currently `RasterLayer`, `SpatialPolygons`.

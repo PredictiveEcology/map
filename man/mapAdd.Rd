@@ -70,8 +70,7 @@ to be run on each of the nodes immediately upon cluster creation (e.g., to set o
 \description{
 If \code{isStudyArea = TRUE}, then several things will be triggered:
 \enumerate{
-\item This layer will be added to metadata with \code{studyArea}
-set to \code{max(studyArea(map)) + 1}.
+\item This layer will be added to metadata with \code{studyArea} set to \code{max(studyArea(map)) + 1}.
 \item update CRS slot to be the CRS of the study area.
 }
 }

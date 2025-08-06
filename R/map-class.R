@@ -16,7 +16,7 @@
 #'
 #' @slot analyses    A `data.table` or `data.frame` of the types of analyses to perform.
 #'
-#' @slot analysesData A `data.table` or `data.frame` of the results of the analyses.
+#' @slot analysesData A list of `data.table` or `data.frame` of the results of the analyses.
 #'
 #' @exportClass map
 #' @rdname map-class
