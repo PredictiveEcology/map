@@ -1,3 +1,7 @@
+# map (development version)
+
+* miscellaneous package cleanup and restructuring;
+
 # map 1.1.2
 
 * remove dependency `backports`, as `isFALSE()` available in all supported R versions;

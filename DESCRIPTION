@@ -1,23 +1,24 @@
-Package: map
 Type: Package
-Title: Defines a meta class of geographical objects, the 'map' class, and associated tools
-Description: The 'map' class is a collection of geospatial objects
-   (e.g., from the 'sp', 'raster', 'sf', and 'terra' packages),
-    with a number of metadata additions to enable powerful methods,
-    e.g., for 'leaflet', reproducible GIS etc.
-URL: 
-    https://predictiveecology.github.io/map/,
-    https://github.com/PredictiveEcology/map
+Package: map
+Title: Defines a meta class of geographical objects, the 'map' class, and
+    associated tools
+Version: 1.1.2.9001
 Date: 2025-09-25
-Version: 1.1.2.9000
 Authors@R: c(
-    person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
-           role = c("aut"), comment=c(ORCID = "0000-0002-6914-8316")),
-    person("Alex M", "Chubaty", email = "achubaty@for-cast.ca",
-           role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7146-8135")),
-    person("His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources Canada",
-           role = "cph")
-    )
+    person("Eliot J B", "McIntire", , "eliot.mcintire@nrcan-rncan.gc.ca", role = "aut",
+           comment = c(ORCID = "0000-0002-6914-8316")),
+    person("Alex M", "Chubaty", , "achubaty@for-cast.ca", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-7146-8135")),
+    person("His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources Canada", role = "cph")
+  )
+Description: The 'map' class is a collection of geospatial objects (e.g.,
+    from the 'sp', 'raster', 'sf', and 'terra' packages), with a number of
+    metadata additions to enable powerful methods, e.g., for 'leaflet',
+    reproducible GIS etc.
+License: GPL-3
+URL: https://predictiveecology.github.io/map/,
+    https://github.com/PredictiveEcology/map
+BugReports: https://github.com/PredictiveEcology/map/issues
 Depends:
     R (>= 4.3)
 Imports:
@@ -42,27 +43,25 @@ Suggests:
     testthat (>= 3.0.0),
     usethis
 Remotes:
-    ropensci/tiler,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/quickPlot@development,
     PredictiveEcology/reproducible@development,
-    PredictiveEcology/SpaDES.tools@development
+    PredictiveEcology/SpaDES.tools@development,
+    ropensci/tiler
+ByteCompile: yes
+Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-CA
-License: GPL-3
-BugReports: https://github.com/PredictiveEcology/map/issues
-ByteCompile: yes
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
 Collate: 
     'GIS.R'
-    'buildMetadata.R'
     'makeTiles.R'
     'map-Defunct.R'
     'map-analysis.R'
     'map-class.R'
     'map-package.R'
     'map.R'
+    'metadata.R'
     'rbindlistAG.R'
     'zzz.R'
-RoxygenNote: 7.3.2
-Roxygen: list(markdown = TRUE)
-Config/testthat/edition: 3

@@ -17,9 +17,9 @@ utils::globalVariables(c(
 #' 1. This layer will be added to metadata with `studyArea` set to `max(studyArea(map)) + 1`.
 #' 2. update CRS slot to be the CRS of the study area.
 #'
-#' @param obj    Optional spatial object, currently `RasterLayer`, `SpatialPolygons`.
+#' @param obj Optional spatial object, currently `RasterLayer`, `SpatialPolygons`.
 #'
-#' @param map       Optional map object. If not provided, then one will be created.
+#' @param map Optional map object. If not provided, then one will be created.
 #'  If provided, then the present `obj` or options passed to
 #'  [reproducible::prepInputs()] (e.g., `url`), will be appended to this `map`.
 #'

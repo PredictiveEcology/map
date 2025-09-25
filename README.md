@@ -6,7 +6,7 @@
 [![R build status](https://github.com/PredictiveEcology/map/workflows/R-CMD-check/badge.svg)](https://github.com/PredictiveEcology/map/actions)
 <!-- badges: end -->
 
-Defines a meta class of geographical objects, the `map` class, which is a collection of map objects (`sp`, `raster`, `sf`), with a number of metadata additions to enable powerful methods, *e.g.*, for `leaflet`, reproducible GIS etc.
+Defines a meta class of geographical objects, the `map` class, which is a collection of geospatial objects (`sf`, `terra`), with a number of metadata additions to enable powerful methods for reproducible GIS.
 
 ## Installation
 
