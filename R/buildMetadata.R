@@ -26,8 +26,18 @@
 #' @param ... Additional arguments.
 #'
 #' @rdname buildMetadata
-buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj,
-                          columnNameForLabels, objHash, leaflet, envir, ...) {
+buildMetadata <- function(
+  metadata,
+  isStudyArea,
+  isRasterToMatch,
+  layerName,
+  obj,
+  columnNameForLabels,
+  objHash,
+  leaflet,
+  envir,
+  ...
+) {
   b <- copy(.singleMetadataNAEntry)
   dots <- list(...)
 
@@ -35,15 +45,21 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
     area <- (if (is(obj, "sf")) obj else sf::st_as_sf(obj)) |>
       sf::st_area() |>
       sum()
-    studyAreaNumber <- 1 + NROW(metadata[compareNA(studyArea, TRUE) |
-      (is.numeric(studyArea) & studyArea > 0)])
+    studyAreaNumber <- 1 +
+      NROW(metadata[
+        compareNA(studyArea, TRUE) |
+          (is.numeric(studyArea) & studyArea > 0)
+      ])
     set(b, NULL, "studyArea", studyAreaNumber)
     set(b, NULL, "area", area)
   }
 
   if (isTRUE(isRasterToMatch)) {
-    rasterToMatchNumber <- 1 + NROW(metadata[compareNA(rasterToMatch, TRUE) |
-      (is.numeric(rasterToMatch) & rasterToMatch > 0)])
+    rasterToMatchNumber <- 1 +
+      NROW(metadata[
+        compareNA(rasterToMatch, TRUE) |
+          (is.numeric(rasterToMatch) & rasterToMatch > 0)
+      ])
     set(b, NULL, "rasterToMatch", rasterToMatchNumber)
   }
 
@@ -95,7 +111,8 @@ buildMetadata <- function(metadata, isStudyArea, isRasterToMatch, layerName, obj
 
   ## Add columns by reference to "b"
   Map(
-    cta = columnsToAdd, nta = names(columnsToAdd),
+    cta = columnsToAdd,
+    nta = names(columnsToAdd),
     function(cta, nta) {
       ## a data.table can't handle all types of objects.
       ## need to wrap in a list to stick it there.

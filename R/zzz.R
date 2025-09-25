@@ -1,6 +1,6 @@
 .onLoad <- function(libname, pkgname) {
   opts <- options()
-  opts.map <- list( # nolint
+  opts.map <- list(
     map.dataPath = "data",
     map.maxNumCores = min(
       getOption("Ncpus"),

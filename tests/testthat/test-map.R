@@ -29,9 +29,12 @@ test_that("mapAdd doesn't work", {
   studyArea[["shinyLabel"]] <- "zone2"
   studyArea <- sf::as_Spatial(studyArea)
 
-  ml <- mapAdd(studyArea,
-    isStudyArea = TRUE, layerName = "Small Study Area",
-    poly = TRUE, analysisGroup2 = "Small Study Area"
+  ml <- mapAdd(
+    studyArea,
+    isStudyArea = TRUE,
+    layerName = "Small Study Area",
+    poly = TRUE,
+    analysisGroup2 = "Small Study Area"
   )
 
   ## add second study area within the first
@@ -41,8 +44,11 @@ test_that("mapAdd doesn't work", {
   smallStudyArea[["shinyLabel"]] <- "zone1"
   smallStudyArea <- sf::as_Spatial(smallStudyArea)
 
-  ml <- mapAdd(smallStudyArea, ml,
-    isStudyArea = TRUE, filename2 = NULL,
+  ml <- mapAdd(
+    smallStudyArea,
+    ml,
+    isStudyArea = TRUE,
+    filename2 = NULL,
     analysisGroup2 = "Smaller Study Area",
     poly = TRUE,
     layerName = "Smaller Study Area"
@@ -60,15 +66,25 @@ test_that("mapAdd doesn't work", {
   ## need python + gdal to generate leaflet tiles
   doLeaflet <- canMakeTiles()
 
-  ml <- mapAdd(tsf, ml,
-    filename2 = "tsf1.tif", layerName = "tsf1",
+  ml <- mapAdd(
+    tsf,
+    ml,
+    filename2 = "tsf1.tif",
+    layerName = "tsf1",
     tsf = "tsf1.tif",
-    analysisGroup1 = "tsf1_vtm1", leaflet = doLeaflet, overwrite = TRUE
+    analysisGroup1 = "tsf1_vtm1",
+    leaflet = doLeaflet,
+    overwrite = TRUE
   )
-  ml <- mapAdd(vtm, ml,
-    filename2 = "vtm1.grd", layerName = "vtm1",
+  ml <- mapAdd(
+    vtm,
+    ml,
+    filename2 = "vtm1.grd",
+    layerName = "vtm1",
     vtm = "vtm1.grd",
-    analysisGroup1 = "tsf1_vtm1", leaflet = doLeaflet, overwrite = TRUE
+    analysisGroup1 = "tsf1_vtm1",
+    leaflet = doLeaflet,
+    overwrite = TRUE
   )
 
   expect_true(all(
@@ -90,31 +106,41 @@ test_that("mapAdd doesn't work", {
   #    This will trigger 2 analyses ... LeadingVegTypeByAgeClass on each raster x polygon combo
   #    (only 1 currently)
   #    so there is 1 raster group, 2 polygon groups, 1 analyses - Total 2, 2 run now
-  ml <- mapAddAnalysis(ml,
+  ml <- mapAddAnalysis(
+    ml,
     functionName = "LeadingVegTypeByAgeClass",
-    ageClasses = ageClasses, ageClassCutOffs = ageClassCutOffs
+    ageClasses = ageClasses,
+    ageClassCutOffs = ageClassCutOffs
   )
   # add an analysis -- this will trigger analyses because there are already objects in the map
   #    This will trigger 2 more analyses ... largePatches on each raster x polygon combo
   #    (only 1 currently)
   #    so there is 1 raster group, 2 polygon groups, 2 analyses - Total 4, only 2 run now
-  ml <- mapAddAnalysis(ml,
-    functionName = "LargePatches", ageClasses = ageClasses,
-    id = "1", labelColumn = "shinyLabel",
+  ml <- mapAddAnalysis(
+    ml,
+    functionName = "LargePatches",
+    ageClasses = ageClasses,
+    id = "1",
+    labelColumn = "shinyLabel",
     ageClassCutOffs = ageClassCutOffs
   )
 
   # Add a second polygon, trigger
   smallStudyArea2 <- SpaDES.tools::randomPolygon(studyArea(ml), 1e5)
-  smallStudyArea2 <- sp::SpatialPolygonsDataFrame(smallStudyArea2,
+  smallStudyArea2 <- sp::SpatialPolygonsDataFrame(
+    smallStudyArea2,
     data = data.frame(ID = 1, shinyLabel = "zone1"),
     match.ID = FALSE
   )
   # add a new layer -- this will trigger analyses because there are already analyese in the map
   #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
   #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
-  ml <- mapAdd(smallStudyArea2, ml,
-    isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
+  ml <- mapAdd(
+    smallStudyArea2,
+    ml,
+    isStudyArea = FALSE,
+    filename2 = NULL,
+    overwrite = TRUE,
     analysisGroup2 = "Smaller Study Area 2",
     poly = TRUE,
     layerName = "Smaller Study Area 2"
@@ -122,15 +148,20 @@ test_that("mapAdd doesn't work", {
 
   # Add a *different* second polygon, via overwrite. This should trigger new analyses
   smallStudyArea2 <- SpaDES.tools::randomPolygon(studyArea(ml), 1e5)
-  smallStudyArea2 <- sp::SpatialPolygonsDataFrame(smallStudyArea2,
+  smallStudyArea2 <- sp::SpatialPolygonsDataFrame(
+    smallStudyArea2,
     data = data.frame(ID = 1, shinyLabel = "zone1"),
     match.ID = FALSE
   )
   # add a new layer -- this will trigger analyses because there are already analyese in the map
   #    This will trigger 2 more analyses ... largePatches on each *new* raster x polygon combo
   #    (now there are 2) -- so there is 1 raster group, 3 polygon groups, 2 analyses - Total 6
-  ml <- mapAdd(smallStudyArea2, ml,
-    isStudyArea = FALSE, filename2 = NULL, overwrite = TRUE,
+  ml <- mapAdd(
+    smallStudyArea2,
+    ml,
+    isStudyArea = FALSE,
+    filename2 = NULL,
+    overwrite = TRUE,
     analysisGroup2 = "Smaller Study Area 2",
     poly = TRUE,
     layerName = "Smaller Study Area 2"
@@ -146,21 +177,32 @@ test_that("mapAdd doesn't work", {
     Factor = c("black spruce", "white spruce", "aspen", "fir")
   )
   raster::crs(vtm2) <- raster::crs(ml)
-  ml <- mapAdd(tsf2, ml,
-    filename2 = "tsf2.tif", layerName = "tsf2",
+  ml <- mapAdd(
+    tsf2,
+    ml,
+    filename2 = "tsf2.tif",
+    layerName = "tsf2",
     tsf = "tsf2.tif",
-    analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE
+    analysisGroup1 = "tsf2_vtm2",
+    leaflet = TRUE,
+    overwrite = TRUE
   )
-  ml <- mapAdd(vtm2, ml,
-    filename2 = "vtm2.grd", layerName = "vtm2",
+  ml <- mapAdd(
+    vtm2,
+    ml,
+    filename2 = "vtm2.grd",
+    layerName = "vtm2",
     vtm = "vtm2.grd",
-    analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE
+    analysisGroup1 = "tsf2_vtm2",
+    leaflet = TRUE,
+    overwrite = TRUE
   )
 
   # post hoc analysis of data
   #  use or create a specialized function that can handle the analysesData slot
   ml <- mapAddPostHocAnalysis(
-    map = ml, functionName = "rbindlistAG",
+    map = ml,
+    functionName = "rbindlistAG",
     postHocAnalysisGroups = "analysisGroup2",
     postHocAnalyses = "all"
   )

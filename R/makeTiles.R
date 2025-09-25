@@ -70,7 +70,9 @@ makeTiles <- function(tilePath = getOption("map.tilePath", "tiles"), obj, overwr
               tiles = tilePath,
               zoom = "1-10",
               crs = as(sf::st_crs("epsg:4326"), "CRS"),
-              resume = TRUE, viewer = FALSE, georef = TRUE
+              resume = TRUE,
+              viewer = FALSE,
+              georef = TRUE
             )
           },
           silent = TRUE

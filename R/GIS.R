@@ -44,8 +44,14 @@ areaAndPolyValue.SpatRaster <- function(ras, ...) {
 #'
 #' @return if `readpoly = TRUE` (default), a `SpatVector` object; otherwise, `NULL`.
 #'
-gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", # nolint
-                             pypath = NULL, readpoly = TRUE, quiet = TRUE) {
+gdal_polygonizeR <- function(
+  x,
+  outshape = NULL,
+  gdalformat = "ESRI Shapefile",
+  pypath = NULL,
+  readpoly = TRUE,
+  quiet = TRUE
+) {
   if (is.null(outshape)) {
     outshape <- tempfile(fileext = ".shp")
   }
@@ -135,10 +141,16 @@ fasterize2 <- function(emptyRaster, polygonToFasterize, field) {
 
   ras <- terra::rast(emptyRaster)
   if (terra::ext(polygonToFasterize) > terra::ext(ras)) {
-    polygonToFasterize <- reproducible::cropInputs(polygonToFasterize, rasterToMatch = ras) |>
+    polygonToFasterize <- reproducible::cropInputs(
+      polygonToFasterize,
+      rasterToMatch = ras
+    ) |>
       reproducible::Cache()
   }
-  thePoly <- reproducible::projectInputs(polygonToFasterize, targetCRS = raster::crs(ras))
+  thePoly <- reproducible::projectInputs(
+    polygonToFasterize,
+    targetCRS = raster::crs(ras)
+  )
   if (!is(thePoly, "SpatVector")) {
     thePoly <- terra::vect(thePoly)
   }

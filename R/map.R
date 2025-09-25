@@ -1,6 +1,14 @@
 utils::globalVariables(c(
-  ".", ":=", "..pathCols1", "..pathCols2", ".I", ".N", ".SD",
-  "envir", "layerName", "objectHash"
+  ".",
+  ":=",
+  "..pathCols1",
+  "..pathCols2",
+  ".I",
+  ".N",
+  ".SD",
+  "envir",
+  "layerName",
+  "objectHash"
 ))
 
 #' Append a spatial object to map
@@ -182,8 +190,13 @@ utils::globalVariables(c(
 #' ## cleanup
 #' withr::deferred_run()
 #'
-mapAdd <- function(obj, map, layerName,
-                   overwrite = getOption("map.overwrite", FALSE), ...) {
+mapAdd <- function(
+  obj,
+  map,
+  layerName,
+  overwrite = getOption("map.overwrite", FALSE),
+  ...
+) {
   UseMethod("mapAdd", obj)
 }
 
@@ -209,12 +222,20 @@ mapAdd <- function(obj, map, layerName,
 #'
 #' @export
 #' @rdname mapAdd
-mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
-                           overwrite = getOption("map.overwrite"),
-                           columnNameForLabels = 1, leaflet = FALSE, isStudyArea = FALSE,
-                           isRasterToMatch = FALSE, envir = NULL,
-                           useCache = getOption("reproducible.useCache", TRUE),
-                           useParallel = getOption("map.useParallel", FALSE), ...) {
+mapAdd.default <- function(
+  obj = NULL,
+  map = new("map"),
+  layerName = NULL,
+  overwrite = getOption("map.overwrite"),
+  columnNameForLabels = 1,
+  leaflet = FALSE,
+  isStudyArea = FALSE,
+  isRasterToMatch = FALSE,
+  envir = NULL,
+  useCache = getOption("reproducible.useCache", TRUE),
+  useParallel = getOption("map.useParallel", FALSE),
+  ...
+) {
   dots <- list(...)
   .outfile <- dots$outfile
   .clInit <- dots$.clInit
@@ -236,7 +257,12 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   if (is.null(obj)) {
     ## with no obj, we get it first, then pass to mapAdd
     ## don't run postProcess because that will happen in next mapAdd when obj is in hand
-    args1 <- identifyVectorArgs(fn = list(Cache, preProcess), ls(), environment(), dots)
+    args1 <- identifyVectorArgs(
+      fn = list(Cache, preProcess),
+      ls(),
+      environment(),
+      dots
+    )
     maxNumClus <- if (length(args1$argsMulti)) {
       max(unlist(lapply(args1$argsMulti, NROW)), na.rm = TRUE)
     } else {
@@ -259,9 +285,12 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     }
     on.exit(try(stopCluster(cl), silent = TRUE))
 
-    obj <- MapOrDoCall(prepInputs,
-      multiple = args1$argsMulti, cl = cl,
-      single = args1$argsSingle, useCache = useCache
+    obj <- MapOrDoCall(
+      prepInputs,
+      multiple = args1$argsMulti,
+      cl = cl,
+      single = args1$argsSingle,
+      useCache = useCache
     )
 
     tryCatch(
@@ -271,9 +300,11 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       },
       error = function(x) invisible()
     )
-    if (is(obj, "list")) { ## NOTE: is.list returns TRUE for data.frames ... BAD
+    if (is(obj, "list")) {
+      ## NOTE: is.list returns TRUE for data.frames ... BAD
       names(obj) <- layerName
-    } else if (is(obj, "sf")) { ## NOTE: Aug 2022 workaround #7 by forcing use of sp objects
+    } else if (is(obj, "sf")) {
+      ## NOTE: Aug 2022 workaround #7 by forcing use of sp objects
       obj <- as_Spatial(st_zm(obj))
     }
   }
@@ -295,25 +326,36 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     theList <- append(list(x = obj), argsFixErrors)
     obj <- Cache(do.call, fixErrors, theList)
     if (isFALSE(isStudyArea)) {
-      message("There is no studyArea in map; consider adding one with 'isStudyArea = TRUE'")
+      message(
+        "There is no studyArea in map; consider adding one with 'isStudyArea = TRUE'"
+      )
     }
     if (is.na(crs(map))) {
-      if (is.null(dots$targetCRS)) { # OK ... user did not pass in targetCRS
+      if (is.null(dots$targetCRS)) {
+        # OK ... user did not pass in targetCRS
         message("No crs already in map, so no reprojection")
       } else {
-        argsProjectInputs <- getLocalArgsFor(list(Cache, projectInputs), dots = dots)
+        argsProjectInputs <- getLocalArgsFor(
+          list(Cache, projectInputs),
+          dots = dots
+        )
         obj <- Cache(do.call, projectInputs, append(x = obj, argsProjectInputs))
       }
     } else {
       dots[["targetCRS"]] <- crs(map)
       args <- dots
-      args <- append(args, mget(ls()[ls() %in% formalArgs(projectInputs)], inherits = FALSE))
+      args <- append(
+        args,
+        mget(ls()[ls() %in% formalArgs(projectInputs)], inherits = FALSE)
+      )
 
       obj <- do.call(projectInputs, append(list(obj), args))
     }
   } else {
     if (is.na(crs(map))) {
-      message("There is no CRS already in map; using the studyArea CRS and adding that to map")
+      message(
+        "There is no CRS already in map; using the studyArea CRS and adding that to map"
+      )
     } else {
       dots <- list(...)
       .outfile <- dots$outfile
@@ -351,7 +393,10 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       }
       maxNumClus <- min(maxNumClus, getOption("map.maxNumCores"))
 
-      message("  Fixing, cropping, reprojecting, masking: ", paste(layerName, collapse = ", "))
+      message(
+        "  Fixing, cropping, reprojecting, masking: ",
+        paste(layerName, collapse = ", ")
+      )
       cl <- makeOptimalCluster(
         maxNumClusters = maxNumClus,
         useParallel = useParallel,
@@ -363,9 +408,12 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       }
       on.exit(try(stopCluster(cl), silent = TRUE))
 
-      obj <- MapOrDoCall(postProcess,
-        multiple = args1$argsMulti, cl = cl,
-        single = args1$argsSingle, useCache = useCache
+      obj <- MapOrDoCall(
+        postProcess,
+        multiple = args1$argsMulti,
+        cl = cl,
+        single = args1$argsSingle,
+        useCache = useCache
       )
       tryCatch(
         {
@@ -385,9 +433,12 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     purge <- isFALSE(map@metadata[(layerName %in% ln), objectHash] == objHash)
     if (isTRUE(purge)) {
       if (any(startsWith(colnames(map@metadata), "analysisGroup"))) {
-        purgeAnalyses <- map@metadata[layerName %in% ln, get(colnames(map@metadata)[
-          startsWith(colnames(map@metadata), "analysisGroup")
-        ])]
+        purgeAnalyses <- map@metadata[
+          layerName %in% ln,
+          get(colnames(map@metadata)[
+            startsWith(colnames(map@metadata), "analysisGroup")
+          ])
+        ]
       }
     }
     map@metadata <- map@metadata[!(layerName %in% ln)]
@@ -397,11 +448,15 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   args1 <- identifyVectorArgs(
     fn = addColumnNameForLabels,
     c(x = "obj", columnNameForLabels = "columnNameForLabels"),
-    environment(), dots = dots
+    environment(),
+    dots = dots
   )
-  obj <- MapOrDoCall(addColumnNameForLabels,
+  obj <- MapOrDoCall(
+    addColumnNameForLabels,
     multiple = args1$argsMulti,
-    single = args1$argsSingle, useCache = FALSE, cl = NULL
+    single = args1$argsSingle,
+    useCache = FALSE,
+    cl = NULL
   )
 
   ## Assign obj to map@.xData
@@ -426,14 +481,21 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       a[layerName] <- objTmp
       list2env(a, envir = envir)
       message(
-        "obj named ", paste(layerName, collapse = ", "), " does not exist in envir provided",
+        "obj named ",
+        paste(layerName, collapse = ", "),
+        " does not exist in envir provided",
         ". Adding it to map obj"
       )
     }
   }
 
   ## Metadata -- build new entries in data.table -- vectorized
-  args1 <- identifyVectorArgs(fn = list(buildMetadata, prepInputs), ls(), environment(), dots = dots) # nolint
+  args1 <- identifyVectorArgs(
+    fn = list(buildMetadata, prepInputs),
+    ls(),
+    environment(),
+    dots = dots
+  )
   if (length(dots)) {
     howLong <- unlist(lapply(dots, length))
     args1$argsSingle[names(dots)[howLong <= 1]] <- dots[howLong <= 1]
@@ -443,17 +505,20 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   if (length(args1$argsMulti) == 0) {
     dts <- do.call(buildMetadata, moreArgs)
   } else {
-    dtsList <- do.call(Map, args = append(
-      args1$argsMulti,
-      list(f = buildMetadata, MoreArgs = moreArgs)
-    ))
+    dtsList <- do.call(
+      Map,
+      args = append(
+        args1$argsMulti,
+        list(f = buildMetadata, MoreArgs = moreArgs)
+      )
+    )
     dts <- rbindlist(dtsList, use.names = TRUE, fill = TRUE) ## TODO: fails here provMB postprocess
   }
 
   ## make tiles, if it is leaflet
   if (any(!is.na(leaflet)) && !is.null(dts[["leafletTiles"]])) {
     MBadjustment <- 4000 ## some approx, empirically derived number. Likely only good in some cases.
-    MBper <- if (is(obj, "RasterLayer")) { # nolint
+    MBper <- if (is(obj, "RasterLayer")) {
       ncell(obj) / MBadjustment
     } else if (tryCatch(is(obj[[1]], "RasterLayer"), error = function(x) FALSE)) {
       ncell(obj[[1]]) / MBadjustment
@@ -464,12 +529,16 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
       useParallel <- FALSE
     } else {
       if (missing(useParallel)) {
-        useParallel <- getOption("map.useParallel", !identical("windows", .Platform$OS.type))
+        useParallel <- getOption(
+          "map.useParallel",
+          !identical("windows", .Platform$OS.type)
+        )
       }
     }
 
     cl <- makeOptimalCluster(
-      useParallel = useParallel, MBper = MBper,
+      useParallel = useParallel,
+      MBper = MBper,
       maxNumClusters = min(length(obj), getOption("map.maxNumCores")),
       outfile = .outfile
     )
@@ -480,10 +549,18 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     on.exit(try(stopCluster(cl), silent = TRUE))
 
     tilePath <- dts[["leafletTiles"]]
-    args1 <- identifyVectorArgs(fn = makeTiles, ls(), environment(), dots = dots)
-    out <- MapOrDoCall(makeTiles,
+    args1 <- identifyVectorArgs(
+      fn = makeTiles,
+      ls(),
+      environment(),
+      dots = dots
+    )
+    out <- MapOrDoCall(
+      makeTiles,
       multiple = args1$argsMulti,
-      single = args1$argsSingle, useCache = FALSE, cl = cl
+      single = args1$argsSingle,
+      useCache = FALSE,
+      cl = cl
     )
     ## if the rasters are identical, then there may be errors
     tryCatch(
@@ -498,9 +575,14 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   ## set CRS
   if (isTRUE(isStudyArea)) {
     if ((!is.null(studyArea(map))) && isStudyArea) {
-      message("map already has a studyArea; adding another one as study area ", dts[["studyArea"]])
+      message(
+        "map already has a studyArea; adding another one as study area ",
+        dts[["studyArea"]]
+      )
     } else {
-      message("Setting map CRS to this layer because it is the (first) studyArea inserted")
+      message(
+        "Setting map CRS to this layer because it is the (first) studyArea inserted"
+      )
       map@CRS <- raster::crs(obj) |> sf::st_crs()
     }
   }
@@ -517,37 +599,69 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
   pathCols2 <- names(which(sapply(map@metadata, is, class2 = "Path")))
 
   classes1 <- lapply(dts[, ..pathCols1], class)
-  allClasses1Identical <- all(vapply(seq_along(classes1[-1]), function(i) {
-    identical(classes1[[i]], classes1[[i + 1]])
-  }, logical(1)))
+  allClasses1Identical <- all(vapply(
+    seq_along(classes1[-1]),
+    function(i) {
+      identical(classes1[[i]], classes1[[i + 1]])
+    },
+    logical(1)
+  ))
   if (isFALSE(allClasses1Identical)) {
-    warning("Some columns in dts corresponding to Paths do not have identical class.")
+    warning(
+      "Some columns in dts corresponding to Paths do not have identical class."
+    )
   }
   class1 <- classes1[[1]]
 
   classes2 <- lapply(map@metadata[, ..pathCols2], class)
-  allClasses2Identical <- all(vapply(seq_along(classes2[-1]), function(i) {
-    identical(classes2[[i]], classes2[[i + 1]])
-  }, logical(1)))
+  allClasses2Identical <- all(vapply(
+    seq_along(classes2[-1]),
+    function(i) {
+      identical(classes2[[i]], classes2[[i + 1]])
+    },
+    logical(1)
+  ))
   if (isFALSE(allClasses2Identical)) {
-    warning("Some columns in map@metadata corresponding to Paths do not have identical class.")
+    warning(
+      "Some columns in map@metadata corresponding to Paths do not have identical class."
+    )
   }
   class2 <- classes2[[1]]
 
   if (!identical(class1, class2)) {
-    if (!is.null(dts[["destinationPath"]])) class(dts[["destinationPath"]]) <- class2
-    if (!is.null(dts[["filename2"]])) class(dts[["filename2"]]) <- class2
-    if (!is.null(dts[["leaflet"]])) class(dts[["leaflet"]]) <- class2
-    if (!is.null(dts[["leafletTiles"]])) class(dts[["leafletTiles"]]) <- class2
-    if (!is.null(dts[["targetFile"]])) class(dts[["targetFile"]]) <- class2
-    if (!is.null(dts[["tsf"]])) class(dts[["tsf"]]) <- class2
+    if (!is.null(dts[["destinationPath"]])) {
+      class(dts[["destinationPath"]]) <- class2
+    }
+    if (!is.null(dts[["filename2"]])) {
+      class(dts[["filename2"]]) <- class2
+    }
+    if (!is.null(dts[["leaflet"]])) {
+      class(dts[["leaflet"]]) <- class2
+    }
+    if (!is.null(dts[["leafletTiles"]])) {
+      class(dts[["leafletTiles"]]) <- class2
+    }
+    if (!is.null(dts[["targetFile"]])) {
+      class(dts[["targetFile"]]) <- class2
+    }
+    if (!is.null(dts[["tsf"]])) {
+      class(dts[["tsf"]]) <- class2
+    }
     if (!is.null(dts[["vtm"]])) class(dts[["vtm"]]) <- class2
   }
 
-  map@metadata <- rbindlist(list(map@metadata, dts), use.names = TRUE, fill = TRUE)
+  map@metadata <- rbindlist(
+    list(map@metadata, dts),
+    use.names = TRUE,
+    fill = TRUE
+  )
 
   ## run map analyses
-  map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
+  map <- runMapAnalyses(
+    map = map,
+    purgeAnalyses = purgeAnalyses,
+    useParallel = useParallel
+  )
 
   return(map)
 }
@@ -593,7 +707,9 @@ mapRm.map <- function(map, layer = NULL, ask = TRUE, ...) {
   layerName <- unique(map@metadata[layer, layerName])
   if (length(layer) > 1) {
     stop(
-      "There are more than obj in map with that layer name, '", layerName, "'.",
+      "There are more than obj in map with that layer name, '",
+      layerName,
+      "'.",
       " Please indicate layer by row number in map@metadata."
     )
   }
@@ -603,7 +719,9 @@ mapRm.map <- function(map, layer = NULL, ask = TRUE, ...) {
 
   if (NROW(map@analyses)) {
     message(
-      "Layer ", layerName, " has been removed, but not any analysis that ",
+      "Layer ",
+      layerName,
+      " has been removed, but not any analysis that ",
       "was previously run using this layer."
     )
   }
@@ -625,16 +743,13 @@ if (!isGeneric("crs")) {
 #' @family mapMethods
 #' @importMethodsFrom raster crs
 #' @rdname crs
-setMethod("crs",
-  signature = "map",
-  function(x, ...) {
-    if (!is.null(x@CRS)) {
-      x@CRS
-    } else {
-      NA_character_
-    }
+setMethod("crs", signature = "map", function(x, ...) {
+  if (!is.null(x@CRS)) {
+    x@CRS
+  } else {
+    NA_character_
   }
-)
+})
 
 #' Map class methods
 #'
@@ -704,7 +819,9 @@ setGeneric("studyArea", function(map, layer = NA, sorted = FALSE) {
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-setMethod("studyArea", "ANY",
+setMethod(
+  "studyArea",
+  "ANY",
   definition = function(map, layer = NA, sorted = FALSE) {
     NULL
   }
@@ -713,11 +830,15 @@ setMethod("studyArea", "ANY",
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-setMethod("studyArea", "map",
+setMethod(
+  "studyArea",
+  "map",
   definition = function(map, layer = NA, sorted = FALSE) {
     if (isTRUE(sorted)) {
       studyAreas <- map@metadata[!is.na(map@metadata$studyArea), ]
-      mapSorted <- studyAreas[order(area, decreasing = FALSE), ][, studyArea := as.numeric(.I)] # nolint
+      mapSorted <- studyAreas[order(area, decreasing = FALSE), ][,
+        studyArea := as.numeric(.I)
+      ]
       san <- studyAreaName(mapSorted, layer = layer)
     } else {
       san <- studyAreaName(map, layer = layer)
@@ -741,7 +862,8 @@ setGeneric("studyArea<-", function(map, layer = NA, value) {
 #' @export
 #' @family mapMethods
 #' @rdname studyArea
-setReplaceMethod("studyArea",
+setReplaceMethod(
+  "studyArea",
   signature = "map",
   definition = function(map, layer = NA, value) {
     ln <- studyAreaName(map, layer = layer)
@@ -773,7 +895,8 @@ if (!isGeneric("rasterToMatch")) {
 #' @family mapMethods
 #' @rdname rasterToMatch
 #' @importMethodsFrom pemisc rasterToMatch
-setMethod("rasterToMatch",
+setMethod(
+  "rasterToMatch",
   signature = "map",
   definition = function(x, layer = 1) {
     rtms <- x@metadata$rasterToMatch
@@ -781,7 +904,9 @@ setMethod("rasterToMatch",
       if (isTRUE(is.na(layer))) {
         layer <- max(x@metadata$rasterToMatch, na.rm = TRUE)
       }
-      if (!layer %in% rtms) layer <- min(rtms, na.rm = TRUE)
+      if (!layer %in% rtms) {
+        layer <- min(rtms, na.rm = TRUE)
+      }
       get(x@metadata[rasterToMatch == layer, ]$layerName, x@.xData)
     } else {
       NULL
@@ -939,7 +1064,8 @@ maps <- function(map, class = NULL, layerName = NULL) {
   envirs <- meta$envir
   names(envirs) <- x
   out <- Map(
-    envir = envirs, x = x,
+    envir = envirs,
+    x = x,
     function(envir, x) {
       get(x, envir = envir, inherits = FALSE)
     }
@@ -1067,7 +1193,11 @@ addColumnNameForLabels.sf <- function(x, columnNameForLabels, ...) {
 
 #' @export
 #' @rdname addColumnNameForLabels
-addColumnNameForLabels.SpatialPolygonsDataFrame <- function(x, columnNameForLabels, ...) {
+addColumnNameForLabels.SpatialPolygonsDataFrame <- function(
+  x,
+  columnNameForLabels,
+  ...
+) {
   if (ncol(x) > 0) {
     x[["shinyLabel"]] <- x[[columnNameForLabels]]
   }

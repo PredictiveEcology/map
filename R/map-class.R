@@ -34,7 +34,8 @@ setClass(
 )
 
 setMethod(
-  "initialize", "map",
+  "initialize",
+  "map",
   function(.Object, ...) {
     .Object <- callNextMethod()
     .Object@metadata <- data.table(

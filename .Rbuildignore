@@ -1,8 +1,9 @@
 ^\.httr-oauth$
-^\.lintr
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^_pkgdown\.yml$
 ^LICENSE$
 ^\.github$
 ^codecov\.yml$
+^[.]?air[.]toml$
+^\.vscode$

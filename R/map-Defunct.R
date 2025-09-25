@@ -1,7 +1,13 @@
 ## OLD versions of functions, kept to test re-implementations
 
-.gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", # nolint
-                              pypath = NULL, readpoly = TRUE, quiet = TRUE) {
+.gdal_polygonizeR <- function(
+  x,
+  outshape = NULL,
+  gdalformat = "ESRI Shapefile",
+  pypath = NULL,
+  readpoly = TRUE,
+  quiet = TRUE
+) {
   if (is.null(pypath)) {
     pypath <- Sys.which("gdal_polygonize.py")
     if (!nzchar(pypath)) {
@@ -35,12 +41,18 @@
   } else if (is.character(x)) {
     rastpath <- normalizePath(x)
   } else {
-    stop("x must be a file path (character string), Raster, or SpatRaster object.")
+    stop(
+      "x must be a file path (character string), Raster, or SpatRaster object."
+    )
   }
-  system2(tiler::tiler_options()[["python"]],
+  system2(
+    tiler::tiler_options()[["python"]],
     args = (sprintf(
       '"%1$s" "%2$s" -f "%3$s" "%4$s"',
-      pypath, rastpath, gdalformat, outshape
+      pypath,
+      rastpath,
+      gdalformat,
+      outshape
     ))
   )
   if (isTRUE(readpoly)) {

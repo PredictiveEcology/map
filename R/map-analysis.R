@@ -30,8 +30,13 @@ utils::globalVariables(c("envir"))
 #'
 #' @return TODO
 #'
-mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
-                        useParallel = getOption("map.useParallel", FALSE), ...) {
+mapAnalysis <- function(
+  map,
+  functionName = NULL,
+  purgeAnalyses = NULL,
+  useParallel = getOption("map.useParallel", FALSE),
+  ...
+) {
   m <- map@metadata
   dots <- list(...)
   .outfile <- dots$outfile
@@ -51,11 +56,13 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
       "i.e., which tsf is associated with which vtm"
     )
   }
-  AGs <- sort(unique(colnames(m)[startsWith(colnames(m), "analysisGroup")])) # nolint
+  AGs <- sort(unique(colnames(m)[startsWith(colnames(m), "analysisGroup")]))
   names(AGs) <- AGs
-  ags <- lapply(AGs, function(AG) sort(na.omit(unique(m[[AG]])))) # nolint
+  ags <- lapply(AGs, function(AG) sort(na.omit(unique(m[[AG]]))))
 
-  combosCompleted <- lapply(functionName, function(fn) map@analysesData[[fn]]$.Completed)
+  combosCompleted <- lapply(functionName, function(fn) {
+    map@analysesData[[fn]]$.Completed
+  })
 
   # Purge if purgeAnalyses is non-NULL
   if (!is.null(purgeAnalyses)) {
@@ -73,8 +80,10 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
   # This will be run again inside the combosToDo section below
   args1 <- lapply(functionName, function(funName) {
     args <- getFormalsFromMetadata(
-      metadata = m, combo = combosAll[1, ],
-      AGs = AGs, funName = funName
+      metadata = m,
+      combo = combosAll[1, ],
+      AGs = AGs,
+      funName = funName
     )
     keepArgs <- unlist(lapply(args, function(arg) length(arg) > 0))
     args[keepArgs]
@@ -102,19 +111,24 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
   })
 
   combosToDo <- Map(
-    ctd = combosToDo, fn = functionName,
+    ctd = combosToDo,
+    fn = functionName,
     function(ctd, fn) ctd[, functionName := fn]
   )
   combosToDoDT <- rbindlist(combosToDo)
   # clear out empty ones
-  combosToDo <- combosToDo[!unlist(lapply(combosToDo, function(ctd) NROW(ctd) == 0))]
+  combosToDo <- combosToDo[
+    !unlist(lapply(combosToDo, function(ctd) NROW(ctd) == 0))
+  ]
 
   if (NROW(combosToDoDT)) {
     funNames <- unique(combosToDoDT$functionName)
     names(funNames) <- funNames
     # Get the fixed arguments
     otherFormalsInFunction <- lapply(funNames, function(funName) {
-      otherFormalsInFunction <- formalArgs(funName)[formalArgs(funName) %in% colnames(map@analyses)]
+      otherFormalsInFunction <- formalArgs(funName)[
+        formalArgs(funName) %in% colnames(map@analyses)
+      ]
       if (length(otherFormalsInFunction)) {
         names(otherFormalsInFunction) <- otherFormalsInFunction
 
@@ -140,12 +154,22 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
     combosToDoList <- split(combosToDoDT, combosToDoDT$all)
     out3 <- Map2(
       cl = cl,
-      combo = combosToDoList, function(combo) {
+      combo = combosToDoList,
+      function(combo) {
         funName <- combo$functionName
-        args1 <- getFormalsFromMetadata(metadata = m, combo = combo, AGs = AGs, funName = funName)
+        args1 <- getFormalsFromMetadata(
+          metadata = m,
+          combo = combo,
+          AGs = AGs,
+          funName = funName
+        )
         args <- unlist(unname(args1), recursive = FALSE)
         message("  Calculating ", funName, " for ", combo$all)
-        fnOut <- Cache(do.call, get(funName), append(args, otherFormalsInFunction[[funName]]))
+        fnOut <- Cache(
+          do.call,
+          get(funName),
+          append(args, otherFormalsInFunction[[funName]])
+        )
         fnOut
       }
     )
@@ -153,10 +177,14 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
     for (funName in funNames) {
       fromFunName <- combosToDoDT$functionName == funName
       map@analysesData[[funName]][names(out3)[fromFunName]] <- out3[fromFunName]
-      map@analysesData[[funName]]$.Completed <- names(out3[fromFunName]) # nolint
+      map@analysesData[[funName]]$.Completed <- names(out3[fromFunName])
     }
   } else {
-    message("  ", paste(functionName, collapse = ", "), " already run on all layers")
+    message(
+      "  ",
+      paste(functionName, collapse = ", "),
+      " already run on all layers"
+    )
   }
 
   tryCatch(
@@ -181,8 +209,12 @@ mapAnalysis <- function(map, functionName = NULL, purgeAnalyses = NULL,
 #' @param ... Additional arguments passed to `functionName`.
 #'
 #' @export
-mapAddAnalysis <- function(map, functionName,
-                           useParallel = getOption("map.useParallel", FALSE), ...) {
+mapAddAnalysis <- function(
+  map,
+  functionName,
+  useParallel = getOption("map.useParallel", FALSE),
+  ...
+) {
   dots <- list(...)
   .clInit <- dots$.clInit
   dots$.clInit <- NULL
@@ -202,7 +234,9 @@ mapAddAnalysis <- function(map, functionName,
   if (sum(prevEntry)) {
     if (!isTRUE(newDigest %in% map@analyses[prevEntry, ]$argHash)) {
       message(
-        "An analysis called ", functionName, " already added to map obj; ",
+        "An analysis called ",
+        functionName,
+        " already added to map obj; ",
         " Overwriting it"
       )
       purgeAnalyses <- functionName
@@ -210,19 +244,28 @@ mapAddAnalysis <- function(map, functionName,
     } else {
       doRbindlist <- FALSE
       message(
-        "An analysis called ", functionName, " with identical function and ",
+        "An analysis called ",
+        functionName,
+        " with identical function and ",
         "arguments already added and run. Skipping reruns."
       )
     }
   }
 
   if (doRbindlist) {
-    map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
+    map@analyses <- rbindlist(
+      list(map@analyses, b),
+      fill = TRUE,
+      use.names = TRUE
+    )
   }
 
   map <- runMapAnalyses(
-    map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel,
-    outfile = dots$outfile, .clInit = .clInit
+    map = map,
+    purgeAnalyses = purgeAnalyses,
+    useParallel = useParallel,
+    outfile = dots$outfile,
+    .clInit = .clInit
   )
 
   map
@@ -247,10 +290,14 @@ mapAddAnalysis <- function(map, functionName,
 #'
 #' @export
 #' @rdname postHoc
-mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NULL,
-                                  postHocAnalyses = "all",
-                                  useParallel = getOption("map.useParallel", FALSE),
-                                  ...) {
+mapAddPostHocAnalysis <- function(
+  map,
+  functionName,
+  postHocAnalysisGroups = NULL,
+  postHocAnalyses = "all",
+  useParallel = getOption("map.useParallel", FALSE),
+  ...
+) {
   dots <- list(...)
 
   if (is.null(postHocAnalysisGroups)) {
@@ -260,8 +307,10 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
     )
   }
   b <- data.table(
-    functionName = functionName, postHocAnalysisGroups = postHocAnalysisGroups,
-    postHocAnalyses = postHocAnalyses, postHoc = TRUE
+    functionName = functionName,
+    postHocAnalysisGroups = postHocAnalysisGroups,
+    postHocAnalyses = postHocAnalyses,
+    postHoc = TRUE
   )
   if (length(dots)) {
     b <- data.table(b, t(dots))
@@ -280,7 +329,9 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
   if (sum(prevEntry)) {
     if (!isTRUE(newDigest %in% map@analyses[prevEntry, ]$argHash)) {
       message(
-        "An analysis called ", functionName, " already added to map obj; ",
+        "An analysis called ",
+        functionName,
+        " already added to map obj; ",
         " Overwriting it"
       )
       purgeAnalyses <- functionName
@@ -288,17 +339,27 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
     } else {
       doRbindlist <- FALSE
       message(
-        "An analysis called, ", functionName, " with identical function and ",
+        "An analysis called, ",
+        functionName,
+        " with identical function and ",
         "arguments already added and run. Skipping reruns."
       )
     }
   }
 
   if (doRbindlist) {
-    map@analyses <- rbindlist(list(map@analyses, b), fill = TRUE, use.names = TRUE)
+    map@analyses <- rbindlist(
+      list(map@analyses, b),
+      fill = TRUE,
+      use.names = TRUE
+    )
   }
 
-  map <- runMapAnalyses(map = map, purgeAnalyses = purgeAnalyses, useParallel = useParallel)
+  map <- runMapAnalyses(
+    map = map,
+    purgeAnalyses = purgeAnalyses,
+    useParallel = useParallel
+  )
   map
 }
 
@@ -313,8 +374,12 @@ mapAddPostHocAnalysis <- function(map, functionName, postHocAnalysisGroups = NUL
 #'
 #' @return TODO
 #'
-runMapAnalyses <- function(map, purgeAnalyses = NULL,
-                           useParallel = getOption("map.useParallel", FALSE), ...) {
+runMapAnalyses <- function(
+  map,
+  purgeAnalyses = NULL,
+  useParallel = getOption("map.useParallel", FALSE),
+  ...
+) {
   dots <- list(...)
   .outfile <- dots$outfile
   .clInit <- dots$.clInit
@@ -329,9 +394,13 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
   # First run all primary analyses
   if (NROW(map@analyses[!isPostHoc])) {
     funName <- map@analyses$functionName[!isPostHoc]
-    map <- mapAnalysis(map, funName,
-      purgeAnalyses = purgeAnalyses, useParallel = useParallel,
-      outfile = .outfile, .clInit = .clInit
+    map <- mapAnalysis(
+      map,
+      funName,
+      purgeAnalyses = purgeAnalyses,
+      useParallel = useParallel,
+      outfile = .outfile,
+      .clInit = .clInit
     )
   }
 
@@ -339,7 +408,8 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
   if (NROW(map@analyses[isPostHoc])) {
     out <- try(
       by(
-        map@analyses[isPostHoc], map@analyses$functionName[isPostHoc],
+        map@analyses[isPostHoc],
+        map@analyses$functionName[isPostHoc],
         function(x) {
           fn <- get(x$functionName)
           forms <- formalArgs(fn)
@@ -377,14 +447,17 @@ runMapAnalyses <- function(map, purgeAnalyses = NULL,
   map
 }
 
-getFormalsFromMetadata <- function(metadata, combo, AGs, funName) { # nolint
-  formalsInFunction <- formalArgs(funName)[formalArgs(funName) %in% colnames(metadata)]
+getFormalsFromMetadata <- function(metadata, combo, AGs, funName) {
+  formalsInFunction <- formalArgs(funName)[
+    formalArgs(funName) %in% colnames(metadata)
+  ]
   names(formalsInFunction) <- formalsInFunction
-  args <- lapply(AGs, function(AG) { # nolint
+  args <- lapply(AGs, function(AG) {
     args <- lapply(formalsInFunction, function(arg) {
       val <- na.omit(metadata[get(AG) == combo[[AG]], ][[arg]])
       if (isTRUE(val)) {
-        val <- get(metadata[get(AG) == combo[[AG]], layerName],
+        val <- get(
+          metadata[get(AG) == combo[[AG]], layerName],
           envir = metadata[get(AG) == combo[[AG]], envir][[1]]
         )
       }
@@ -403,10 +476,13 @@ getFormalsFromMetadata <- function(metadata, combo, AGs, funName) { # nolint
 expandAnalysisGroups <- function(ags) {
   combosAll <- NULL
   if (any(unlist(lapply(ags, function(x) length(x > 0))))) {
-    combosAll <- do.call(expand.grid, args = append(
-      list(stringsAsFactors = FALSE),
-      lapply(ags, function(x) x)
-    ))
+    combosAll <- do.call(
+      expand.grid,
+      args = append(
+        list(stringsAsFactors = FALSE),
+        lapply(ags, function(x) x)
+      )
+    )
     combosAll$all <- apply(combosAll, 1, paste, collapse = "._.")
   }
   combosAll
