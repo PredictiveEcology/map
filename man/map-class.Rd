@@ -24,6 +24,6 @@ where to find the object, i.e., via \code{get(layerName, envir = environment)}.}
 
 \item{\code{analyses}}{A \code{data.table} or \code{data.frame} of the types of analyses to perform.}
 
-\item{\code{analysesData}}{A \code{data.table} or \code{data.frame} of the results of the analyses.}
+\item{\code{analysesData}}{A list of \code{data.table} or \code{data.frame} of the results of the analyses.}
 }}
 

@@ -2,12 +2,20 @@
 % Please edit documentation in R/makeTiles.R
 \name{makeTiles}
 \alias{makeTiles}
-\title{Make tiles (pyramids) using \code{gdal2tiles}}
+\alias{canMakeTiles}
+\title{Make raster tiles (pyramids)}
 \usage{
-makeTiles(tilePath, obj, overwrite = FALSE, ...)
+makeTiles(
+  tilePath = getOption("map.tilePath", "tiles"),
+  obj,
+  overwrite = FALSE,
+  ...
+)
+
+canMakeTiles()
 }
 \arguments{
-\item{tilePath}{A director to write tiles}
+\item{tilePath}{A directory to write tiles}
 
 \item{obj}{A raster object with or without file-backing}
 
@@ -16,6 +24,17 @@ then it will not overwrite any files.}
 
 \item{...}{Arguments passed to \code{\link[reproducible:deprecated]{reproducible::projectInputs()}} (e.g., \code{useGDAL}).}
 }
+\value{
+\itemize{
+\item \code{makeTiles()} is invoked for it's side-effect of creating tiles in \code{tilePath};
+\item \code{canMakeTiles()} returns a logical indicating the availability of python and GDAL support;
+}
+}
 \description{
-Make tiles (pyramids) using \code{gdal2tiles}
+If python with GDAL support is available, uses \code{gdal2tiles} via \code{\link[tiler:tile]{tiler::tile()}}
+to create tiles for use with e.g. \code{leaflet}.
+}
+\note{
+Requires python with GDAL support (see \code{\link[tiler:tiler_options]{tiler::tiler_options()}}).
+Windows users should install 'OSGeo4W' (\url{https://trac.osgeo.org/osgeo4w/}).
 }

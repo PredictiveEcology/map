@@ -6,8 +6,7 @@ utils::globalVariables(c(
 #' Append a spatial object to map
 #'
 #' If `isStudyArea = TRUE`, then several things will be triggered:
-#' 1. This layer will be added to metadata with `studyArea`
-#'   set to `max(studyArea(map)) + 1`.
+#' 1. This layer will be added to metadata with `studyArea` set to `max(studyArea(map)) + 1`.
 #' 2. update CRS slot to be the CRS of the study area.
 #'
 #' @param obj    Optional spatial object, currently `RasterLayer`, `SpatialPolygons`.
@@ -31,7 +30,7 @@ utils::globalVariables(c(
 #'  If path is not specified, it will be the current path.
 #'  The tile base file path will be `paste0(layerName, "_", rndstr(1, 6))`.
 #'
-#' @param isStudyArea Logical. If `TRUE`, this will be assigned the label "StudyArea",
+#' @param isStudyArea Logical. If `TRUE`, this will be assigned the label "`StudyArea"`,
 #'   and will be passed into [reproducible::prepInputs()] for any future layers added.
 #'
 #' @export
@@ -39,8 +38,13 @@ utils::globalVariables(c(
 #' @rdname mapAdd
 #'
 #' @examples
-#' withr::local_tempdir("example_mapAdd_") |>
-#'   withr::local_dir()
+#' ex_dir <- withr::local_tempdir("example_mapAdd_")
+#' withr::local_dir(ex_dir)
+#'
+#' withr::local_options(list(
+#'   map.tilePath = file.path(ex_dir, "tiles"),
+#'   map.useParallel = FALSE
+#' ))
 #'
 #' StudyArea <- list(cbind(
 #'   x = c(-122.98, -116.1, -99.2, -106, -122.98),
@@ -59,10 +63,6 @@ utils::globalVariables(c(
 #' )
 #'
 #' if (require("SpaDES.tools", quietly = TRUE)) {
-#'   withr::local_options(list(
-#'     map.tilePath = withr::local_tempdir("tiles_"),
-#'     map.useParallel = FALSE
-#'   ))
 #'   smallStudyArea <- SpaDES.tools::randomPolygon(studyArea(ml), 1e5)
 #'   smallStudyArea$ID <- 1L
 #'   smallStudyArea$shinyLabel <- "zone2"
@@ -85,6 +85,9 @@ utils::globalVariables(c(
 #'     Factor = c("black spruce", "white spruce", "aspen", "fir")
 #'   )
 #'
+#'   ## need python + gdal to generate leaflet tiles
+#'   doLeaflet <- canMakeTiles()
+#'
 #'   ml <- mapAdd(
 #'     tsf,
 #'     ml,
@@ -93,7 +96,7 @@ utils::globalVariables(c(
 #'     ## to map object
 #'     tsf = "tsf1.tif", ## to column in map@metadata
 #'     analysisGroup1 = "tsf1_vtm1", ## this is the label for analysisGroup1
-#'     leaflet = TRUE, ## to column in map@metadata; used for visualizing in leaflet
+#'     leaflet = doLeaflet, ## to column in map@metadata; used for visualizing in leaflet
 #'     overwrite = TRUE
 #'   )
 #'   ml <- mapAdd(
@@ -103,13 +106,13 @@ utils::globalVariables(c(
 #'     layerName = "vtm1",
 #'     vtm = "vtm1.grd",
 #'     analysisGroup1 = "tsf1_vtm1",
-#'     leaflet = TRUE,
+#'     leaflet = doLeaflet,
 #'     overwrite = TRUE
 #'   )
 #'
 #'   ## these map analyses are in `LandWebUtils` package, which is reverse dependency of this one
-#'   ageClasses <- c("Young", "Immature", "Mature", "Old")
-#'   ageClassCutOffs <- c(0, 40, 80, 120)
+#'   # ageClasses <- c("Young", "Immature", "Mature", "Old")
+#'   # ageClassCutOffs <- c(0, 40, 80, 120)
 #'
 #'   ## add an analysis -- this will trigger analyses because there are already objects in the map
 #'   ##    This will trigger 2 analyses:
@@ -163,16 +166,17 @@ utils::globalVariables(c(
 #'
 #'   # ml <- mapAdd(tsf2, ml, filename2 = "tsf2.tif", layerName = "tsf2",
 #'   #              tsf = "tsf2.tif",
-#'   #              analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+#'   #              analysisGroup1 = "tsf2_vtm2", leaflet = doLeaflet, overwrite = TRUE)
 #'   # ml <- mapAdd(vtm2, ml, filename2 = "vtm2.grd", layerName = "vtm2",
 #'   #              vtm = "vtm2.grd",
-#'   #              analysisGroup1 = "tsf2_vtm2", leaflet = TRUE, overwrite = TRUE)
+#'   #              analysisGroup1 = "tsf2_vtm2", leaflet = doLeaflet, overwrite = TRUE)
 #'
 #'   ## post hoc analysis of data
 #'   ##  use or create a specialized function that can handle the analysesData slot
 #'   # ml <- mapAddPostHocAnalysis(map = ml, functionName = "rbindlistAG",
 #'   #                             postHocAnalysisGroups = "analysisGroup2",
 #'   #                             postHocAnalyses = "all")
+#'
 #' }
 #'
 #' ## cleanup
@@ -222,6 +226,7 @@ mapAdd.default <- function(obj = NULL, map = new("map"), layerName = NULL,
     stop("layerName is required and cannot be NULL")
   }
 
+  leaflet <- ifelse(!is.null(leaflet), leaflet, FALSE) ## leaflet %||% FALSE
   if (is.logical(leaflet)) {
     leaflet <- asPath(ifelse(leaflet, getwd(), NA_character_))
   }
@@ -676,7 +681,7 @@ studyAreaName.data.table <- function(x, layer = 1, ...) {
   }
 }
 
-#' Extract the studyArea(s) from a `map`
+#' Extract the study area(s) from a `map`
 #'
 #' If `layer` is not provided and there is more than one `studyArea`,
 #' then this will extract the last one added.

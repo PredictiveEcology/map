@@ -57,25 +57,34 @@ test_that("mapAdd doesn't work", {
     VALUE = c("black spruce", "white spruce", "aspen", "fir")
   )
 
+  ## need python + gdal to generate leaflet tiles
+  doLeaflet <- canMakeTiles()
+
   ml <- mapAdd(tsf, ml,
     filename2 = "tsf1.tif", layerName = "tsf1",
     tsf = "tsf1.tif",
-    analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE
+    analysisGroup1 = "tsf1_vtm1", leaflet = doLeaflet, overwrite = TRUE
   )
   ml <- mapAdd(vtm, ml,
     filename2 = "vtm1.grd", layerName = "vtm1",
     vtm = "vtm1.grd",
-    analysisGroup1 = "tsf1_vtm1", leaflet = TRUE, overwrite = TRUE
+    analysisGroup1 = "tsf1_vtm1", leaflet = doLeaflet, overwrite = TRUE
   )
 
-  ageClasses <- c("Young", "Immature", "Mature", "Old")
-  ageClassCutOffs <- c(0, 40, 80, 120)
+  expect_true(all(
+    c("Small Study Area", "Small Study Area", "tsf1", "vtm1") %in% metadata(ml)[["layerName"]]
+  ))
+
+  withr::deferred_run() ## cleanup here because rest of tests are skipped
 
   ## -----------------------------------------------------------------------------------------------
   skip("need LandWebUtils")
   skip_if_not_installed("sp")
   ## TODO: `LargePatches` and `LeadingVegTypeByAgeClass` were moved to `LandWebUtils`,
   ##  which is a reverse dependency of this package, so it can't be used here.
+
+  ageClasses <- c("Young", "Immature", "Mature", "Old")
+  ageClassCutOffs <- c(0, 40, 80, 120)
 
   # add an analysis -- this will trigger analyses because there are already objects in the map
   #    This will trigger 2 analyses ... LeadingVegTypeByAgeClass on each raster x polygon combo
@@ -155,4 +164,7 @@ test_that("mapAdd doesn't work", {
     postHocAnalysisGroups = "analysisGroup2",
     postHocAnalyses = "all"
   )
+
+  ## cleanup
+  withr::deferred_run()
 })

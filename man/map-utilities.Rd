@@ -15,7 +15,7 @@ If provided, then the present \code{obj} or options passed to
 \item{functionName}{TODO: description needed}
 
 \item{analysisGroups}{A character (length 1 currently), indicating which
-analysis group (e.g., "analysisGroup1") should be used to \code{rbindlist}.
+analysis group (e.g., \code{"analysisGroup1"}) should be used to \code{rbindlist}.
 Can also specify \code{"all"} which will \code{rbindlist} all outputs.}
 }
 \value{

@@ -7,7 +7,7 @@
 fasterize2(emptyRaster, polygonToFasterize, field)
 }
 \arguments{
-\item{emptyRaster}{An empty \code{RasterLayer} or\code{SpatRaster} to use as a template.}
+\item{emptyRaster}{An empty \code{RasterLayer} or \code{SpatRaster} to use as a template.}
 
 \item{polygonToFasterize}{an \code{sf} or \code{SpatVector} object, which will be cropped first
 if \code{extent(emptyRaster) < extent(polygonToFasterize)}.}

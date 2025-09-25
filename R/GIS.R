@@ -99,7 +99,7 @@ gdal_polygonizeR <- function(x, outshape = NULL, gdalformat = "ESRI Shapefile", 
 #'
 #' A simple wrapper around [terra::rasterize()].
 #'
-#' @param emptyRaster An empty `RasterLayer` or`SpatRaster` to use as a template.
+#' @param emptyRaster An empty `RasterLayer` or `SpatRaster` to use as a template.
 #'
 #' @param polygonToFasterize an `sf` or `SpatVector` object, which will be cropped first
 #'        if `extent(emptyRaster) < extent(polygonToFasterize)`.
