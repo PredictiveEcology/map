@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">map</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.2</span>
       </span>
     </div>
 
@@ -54,13 +54,21 @@
     </div>
 
     <div class="section level2">
+<h2 class="page-header" data-toc-text="1.1.2" id="map-112">map 1.1.2<a class="anchor" aria-label="anchor" href="#map-112"></a></h2>
+<ul><li>remove dependency <code>backports</code>, as <code><a href="https://rdrr.io/r/base/Logic.html" class="external-link">isFALSE()</a></code> available in all supported R versions;</li>
+<li>
+<code><a href="../reference/makeTiles.html">makeTiles()</a></code> now checks for python and GDAL support, i.e., for Windows, which requires ‘OSGeo4W’ (<a href="https://github.com/PredictiveEcology/map/issues/19" class="external-link">#19</a>);</li>
+<li>new option <code>map.tileRetry</code> with default value <code>3L</code>, specifying the number of attempts to make tiles (<a href="https://github.com/PredictiveEcology/map/issues/19" class="external-link">#19</a>);</li>
+<li>improved documentation, examples, and tests;</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="page-header" data-toc-text="1.1.1" id="map-111">map 1.1.1<a class="anchor" aria-label="anchor" href="#map-111"></a></h2>
 <ul><li>drop support for R 4.1 and 4.2 due to changes in dependency packages;</li>
 <li>move <code>withr</code> from Suggests to Imports, as it’s used in examples;</li>
 <li>improved documentation</li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.1.0" id="map-v110">map v1.1.0<a class="anchor" aria-label="anchor" href="#map-v110"></a></h2>
+<h2 class="page-header" data-toc-text="1.1.0" id="map-110">map 1.1.0<a class="anchor" aria-label="anchor" href="#map-110"></a></h2>
 <ul><li>drop support for R 4.0 due to changes in dependency packages;</li>
 <li>remove retiring dependency packages <code>sp</code>, <code>rgeos</code>, <code>rgdal</code> in favour of <code>terra</code> + <code>sf</code>;</li>
 <li>remove dependency package <code>gdalUtils</code> in favour of <code>sf</code> + <code>terra</code>;</li>
@@ -69,11 +77,11 @@
 <li>remove unused dependencies <code>knitr</code> and <code>rmarkdown</code>;</li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.0.3" id="map-v003">map v0.0.3<a class="anchor" aria-label="anchor" href="#map-v003"></a></h2>
+<h2 class="page-header" data-toc-text="0.0.3" id="map-003">map 0.0.3<a class="anchor" aria-label="anchor" href="#map-003"></a></h2>
 <ul><li>maximum number of threads for parallel operations limited by package option <code>map.maxNumCores</code>, which defaults to <code>min(getOption("Ncpus"), parallel::detectCores())</code>.</li>
 </ul></div>
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.0.1" id="map-v001">map v0.0.1<a class="anchor" aria-label="anchor" href="#map-v001"></a></h2>
+<h2 class="page-header" data-toc-text="0.0.1" id="map-001">map 0.0.1<a class="anchor" aria-label="anchor" href="#map-001"></a></h2>
 <ul><li>initial development version</li>
 </ul></div>
   </div>
