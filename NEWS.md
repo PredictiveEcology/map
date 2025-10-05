@@ -1,5 +1,6 @@
 # map (development version)
 
+* remove `quickPlot` dependency;
 * miscellaneous package cleanup and restructuring;
 
 # map 1.1.2

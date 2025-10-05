@@ -27,7 +27,6 @@ Imports:
     methods,
     parallelly,
     pemisc (>= 0.0.4.9008),
-    quickPlot,
     raster (>= 2.8.4),
     reproducible (>= 2.0.8.9001),
     sf,
@@ -44,7 +43,6 @@ Suggests:
     usethis
 Remotes:
     PredictiveEcology/pemisc@development,
-    PredictiveEcology/quickPlot@development,
     PredictiveEcology/reproducible@development,
     PredictiveEcology/SpaDES.tools@development,
     ropensci/tiler

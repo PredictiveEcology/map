@@ -8,7 +8,6 @@
 #' @importFrom parallel stopCluster
 #' @importFrom parallelly availableCores
 #' @importFrom pemisc getLocalArgsFor identifyVectorArgs makeOptimalCluster Map2 MapOrDoCall
-#' @importFrom quickPlot whereInStack
 #' @importFrom raster area compareCRS crs extent filename getValues metadata ncell
 #' @importFrom raster projectRaster raster rasterOptions setValues writeRaster
 #' @importFrom reproducible .requireNamespace .robustDigest
