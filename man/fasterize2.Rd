@@ -12,7 +12,7 @@ fasterize2(emptyRaster, polygonToFasterize, field)
 \item{polygonToFasterize}{an \code{sf} or \code{SpatVector} object, which will be cropped first
 if \code{extent(emptyRaster) < extent(polygonToFasterize)}.}
 
-\item{field}{character or numeric. If \code{field} is a character, it should a variable name in \code{x}. If \code{field} is numeric it typically is a single number or a vector of length \code{nrow(x)}. The values are recycled to \code{nrow(x)}}
+\item{field}{character or numeric. If \code{field} is a character, it should be a variable name in \code{x}. If \code{field} is numeric it typically is a single number or a vector of length \code{nrow(x)}. The values are recycled to \code{nrow(x)}}
 }
 \value{
 an object of the same class as \code{emptyRaster}

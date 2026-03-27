@@ -26,7 +26,7 @@ Imports:
     digest,
     methods,
     parallelly,
-    pemisc (>= 0.0.4.9008),
+    pemisc (>= 0.0.4.9016),
     raster (>= 2.8.4),
     reproducible (>= 2.0.8.9001),
     sf,
