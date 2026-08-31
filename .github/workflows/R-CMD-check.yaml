@@ -18,7 +18,13 @@ jobs:
   R-CMD-check:
     uses: PredictiveEcology/actions/.github/workflows/R-CMD-check.yaml@main
     with:
-      ## Legs beyond the org default 8. These still work and are
-      ## deliberate back-compat coverage, so they are preserved.
+      ## Legs beyond the org default 8, pinned to exact R versions rather
+      ## than oldrel-N. On ubuntu-latest the oldrel ladder is not monotone --
+      ## oldrel-4 and oldrel-5 both resolve to 4.1.3 and R 4.2 is unreachable
+      ## -- and it shifts every time R releases. 4.3 is this package's
+      ## declared floor (DESCRIPTION: R >= 4.3), so it is the version the
+      ## matrix should actually prove.
       extra-config: |
-        [{"config": {"os": "ubuntu-latest", "nosuggests": false, "r": "oldrel-2"}}, {"config": {"os": "windows-latest", "nosuggests": false, "r": "oldrel-2"}}]
+        [{"config": {"os": "ubuntu-latest", "nosuggests": false, "r": "4.4"}},
+         {"config": {"os": "windows-latest", "nosuggests": false, "r": "4.4"}},
+         {"config": {"os": "ubuntu-latest", "nosuggests": false, "r": "4.3"}}]
