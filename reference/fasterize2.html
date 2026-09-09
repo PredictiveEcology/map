@@ -23,7 +23,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">map</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.2.9002</span>
       </span>
     </div>
 
@@ -50,7 +50,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Rasterize following crop and reproject</h1>
-    <small class="dont-index">Source: <a href="https://github.com/PredictiveEcology/map/blob/main/R/GIS.R" class="external-link"><code>R/GIS.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/PredictiveEcology/map/blob/development/R/GIS.R" class="external-link"><code>R/GIS.R</code></a></small>
     <div class="hidden name"><code>fasterize2.Rd</code></div>
     </div>
 
@@ -76,7 +76,7 @@ if <code>extent(emptyRaster) &lt; extent(polygonToFasterize)</code>.</p></dd>
 
 
 <dt id="arg-field">field<a class="anchor" aria-label="anchor" href="#arg-field"></a></dt>
-<dd><p>character or numeric. If <code>field</code> is a character, it should a variable name in <code>x</code>. If <code>field</code> is numeric it typically is a single number or a vector of length <code>nrow(x)</code>. The values are recycled to <code>nrow(x)</code></p></dd>
+<dd><p>character or numeric. If <code>field</code> is a character, it should be a variable name in <code>x</code>. If <code>field</code> is numeric it typically is a single number or a vector of length <code>nrow(x)</code>. The values are recycled to <code>nrow(x)</code></p></dd>
 
 </dl></div>
     <div id="value">
@@ -101,7 +101,7 @@ if <code>extent(emptyRaster) &lt; extent(polygonToFasterize)</code>.</p></dd>
 <span class="r-in"><span><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/crs.html" class="external-link">crs</a></span><span class="op">(</span><span class="va">r1</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"epsg:4326"</span></span></span>
 <span class="r-in"><span><span class="va">z1</span> <span class="op">&lt;-</span> <span class="fu">fasterize2</span><span class="op">(</span><span class="va">r1</span>, <span class="va">v1</span>, <span class="st">"NAME_2"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">projecting...</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">done! took:  0.00372 secs</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">done! took:  0.00339 secs</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## using terra</span></span></span>
 <span class="r-in"><span><span class="va">f2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"ex/lux.shp"</span>, package <span class="op">=</span> <span class="st">"terra"</span><span class="op">)</span></span></span>
@@ -109,7 +109,7 @@ if <code>extent(emptyRaster) &lt; extent(polygonToFasterize)</code>.</p></dd>
 <span class="r-in"><span><span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">v2</span>, ncols <span class="op">=</span> <span class="fl">75</span>, nrows <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">z2</span> <span class="op">&lt;-</span> <span class="fu">fasterize2</span><span class="op">(</span><span class="va">r2</span>, <span class="va">v2</span>, <span class="st">"NAME_2"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">projecting...</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">done! took:  0.0149 secs</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">done! took:  0.0119 secs</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/compareGeom.html" class="external-link">compareGeom</a></span><span class="op">(</span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">z1</span><span class="op">)</span>, <span class="va">z2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
