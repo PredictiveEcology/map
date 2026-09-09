@@ -1,51 +1,27 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+## Thin caller -- the runner, dependency resolution, site build and gh-pages
+## deploy all live in PredictiveEcology/actions.
+##
+## Pinned @main deliberately: tags freeze and rot (v0.1/v0.2 kept the ubuntugis
+## PPA for months after the workflows rejected it).
+##
+## The bespoke file this replaces was the stock r-lib/actions example, with no
+## customisation beyond `any::pkgdown` and `local::.` -- both of which the
+## reusable workflow already supplies, so there is nothing to carry over.
+
+name: pkgdown
+
 on:
   push:
-    branches: [main, master]
+    ## Was [main, master]. `git ls-remote --heads` shows only `main` and
+    ## `development`, so `master` was dead; `development` added to match the
+    ## rest of the org.
+    branches: [main, development]
   pull_request:
+    branches: [main, development]
   release:
     types: [published]
   workflow_dispatch:
 
-name: pkgdown.yaml
-
-permissions: read-all
-
 jobs:
   pkgdown:
-    runs-on: ubuntu-latest
-    # Only restrict concurrency for non-PR jobs
-    concurrency:
-      group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
-    env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: r-lib/actions/setup-pandoc@v2
-
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          use-public-rspm: true
-
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: |
-            any::pkgdown
-            local::.
-          needs: website
-
-      - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
-        shell: Rscript {0}
-
-      - name: Deploy to GitHub pages 🚀
-        if: github.event_name != 'pull_request'
-        uses: JamesIves/github-pages-deploy-action@v4.5.0
-        with:
-          clean: false
-          branch: gh-pages
-          folder: docs
+    uses: PredictiveEcology/actions/.github/workflows/pkgdown.yaml@main
