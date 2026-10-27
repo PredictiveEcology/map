@@ -20,7 +20,7 @@ URL: https://predictiveecology.github.io/map/,
     https://github.com/PredictiveEcology/map
 BugReports: https://github.com/PredictiveEcology/map/issues
 Depends:
-    R (>= 4.3)
+    R (>= 4.4)
 Imports:
     data.table (>= 1.10.4),
     digest,
